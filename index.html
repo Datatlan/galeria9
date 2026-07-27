@@ -36,7 +36,9 @@
     -webkit-mask-image:radial-gradient(120% 90% at 50% 0%, #000, transparent 72%);
             mask-image:radial-gradient(120% 90% at 50% 0%, #000, transparent 72%)}
 
-  .brand{display:inline-flex; align-items:center; gap:11px; font-weight:750; letter-spacing:-.02em; font-size:19px}
+  .brand{display:inline-flex; align-items:center; gap:11px; font-weight:750; letter-spacing:-.02em; font-size:19px; color:var(--ink); text-decoration:none; transition:opacity .15s}
+  .brand:hover{opacity:.72}
+  .brand div{color:var(--ink)}
   .brand svg{width:32px; height:32px; flex:none}
   .brand small{display:block; font-weight:500; font-size:11px; letter-spacing:.02em; color:var(--slate); margin-top:1px}
 
@@ -72,8 +74,8 @@
     background:linear-gradient(140deg,var(--azul-wash),color-mix(in srgb,var(--cian) 22%, var(--azul-wash)))}
   .opt.p2 .ico{color:var(--teal-ink); background:linear-gradient(140deg,var(--teal-wash),color-mix(in srgb,var(--teal) 24%, var(--teal-wash)))}
   .opt .ico svg{width:23px; height:23px}
-  .opt .tt{font-weight:750; font-size:16.5px; letter-spacing:-.01em}
-  .opt .dd{font-size:13px; color:var(--slate); margin-top:2px; line-height:1.4}
+  .opt .tt{display:block; font-weight:750; font-size:16.5px; letter-spacing:-.01em}
+  .opt .dd{display:block; font-size:13px; color:var(--slate); margin-top:3px; line-height:1.4}
   .opt .arrow{margin-left:auto; color:var(--slate); flex:none}
   .opt:hover .arrow{color:var(--azul-ink)}
 
@@ -82,7 +84,7 @@
 </style>
 
 <div class="card">
-  <a class="brand" href="#" onclick="return false" aria-label="Datatlan">
+  <a class="brand" href="https://datatlan.tech" target="_blank" rel="noopener" aria-label="Ir a datatlan.tech">
     <svg viewBox="0 0 120 120" fill="none" aria-hidden="true">
       <rect x="54" y="30" width="12" height="82" rx="4" fill="#1f86cf"/>
       <rect x="12" y="93" width="40" height="19" rx="4" fill="#1450ad"/><rect x="68" y="93" width="40" height="19" rx="4" fill="#1450ad"/>
