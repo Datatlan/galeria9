@@ -150,7 +150,7 @@
   const PASS='galeria9';
   const gate=document.getElementById('gate'), menu=document.getElementById('menu');
   const pw=document.getElementById('pw'), err=document.getElementById('errMsg');
-  function unlock(){ gate.style.display='none'; menu.style.display='block'; try{sessionStorage.setItem('g9','1')}catch(e){} }
+  function unlock(){ gate.style.display='none'; menu.style.display='block'; try{localStorage.setItem('g9','1')}catch(e){} }
   function tryEnter(){
     if(pw.value.trim().toLowerCase()===PASS){ err.style.display='none'; pw.classList.remove('err'); unlock(); }
     else{ err.style.display='block'; pw.classList.add('err'); pw.select(); }
@@ -158,7 +158,7 @@
   document.getElementById('enter').addEventListener('click', tryEnter);
   pw.addEventListener('keydown', e=>{ if(e.key==='Enter') tryEnter(); });
   pw.addEventListener('input', ()=>{ pw.classList.remove('err'); err.style.display='none'; });
-  try{ if(sessionStorage.getItem('g9')==='1') unlock(); }catch(e){}
+  try{ if(localStorage.getItem('g9')==='1') unlock(); }catch(e){}
 </script>
 </body>
 </html>
