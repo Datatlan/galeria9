@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datatlan · Propuesta</title>
+<!--
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │  PLANTILLA DE PROPUESTAS · DATATLAN                                   │
+  │                                                                       │
+  │  Cómo usar:                                                           │
+  │   1. Copia este archivo con el nombre del cliente                     │
+  │      (ej. propuesta-estudio-luna.html).                               │
+  │   2. Edita SOLO el bloque DATA de abajo (const DATA = {...}).         │
+  │      Todo el documento se arma solo a partir de ahí.                  │
+  │   3. Abre en el navegador → Imprimir → "Guardar como PDF"             │
+  │      (tamaño Carta o A4, márgenes: Ninguno / Predeterminado).         │
+  │                                                                       │
+  │  El diseño vive en el <style>. Los textos viven en DATA.             │
+  └─────────────────────────────────────────────────────────────────────┘
+-->
+</head>
+<body>
+<style>
+  :root{
+    color-scheme:light;
+    --ink:#0d1b2a;          /* deep navy */
+    --ink-soft:#33475b;
+    --slate:#64748b;
+    --line:#dbe4f0;
+    --niebla:#eef3fa;
+    --papel:#ffffff;
+    --papel-2:#f7fafd;
+    --azul:#2563eb;
+    --azul-ink:#1d4ed8;
+    --cian:#06b6d4;
+    --teal:#00a89e;
+    --teal-ink:#068b83;
+    --azul-wash:#eaf1ff;
+    --teal-wash:#e2f7f4;
+    --amber-wash:#fff7e8;
+    --amber-ink:#b45309;
+    --shadow:0 1px 2px rgba(13,27,42,.05), 0 12px 32px -12px rgba(13,27,42,.18);
+    --shadow-lift:0 2px 6px rgba(13,27,42,.08), 0 30px 60px -24px rgba(37,99,235,.30);
+    --r:16px; --r-sm:11px;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font); color:var(--ink); background:var(--niebla);
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+
+  /* ── screen scaffolding: pages float as sheets on the fog ─────────── */
+  .screen-bg{
+    min-height:100vh; padding:clamp(16px,4vw,44px) 0 60px;
+    background:
+      radial-gradient(1100px 620px at 84% -6%, color-mix(in srgb, var(--cian) 15%, transparent), transparent 60%),
+      radial-gradient(1000px 640px at 6% 106%, color-mix(in srgb, var(--azul) 14%, transparent), transparent 62%),
+      var(--niebla);
+  }
+  .toolbar{
+    max-width:816px; margin:0 auto 22px; padding:0 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .toolbar .hint{font-size:12.5px; color:var(--slate)}
+  .toolbar .hint b{color:var(--ink-soft)}
+  .btn-print{
+    font:inherit; font-weight:700; font-size:14px; cursor:pointer; border:0; border-radius:11px;
+    padding:11px 18px; color:#fff; background:linear-gradient(135deg,var(--azul),var(--cian));
+    box-shadow:0 10px 22px -10px color-mix(in srgb,var(--azul) 75%, transparent);
+    display:inline-flex; align-items:center; gap:8px; transition:.18s var(--ease);
+  }
+  .btn-print:hover{transform:translateY(-2px); box-shadow:0 16px 30px -12px color-mix(in srgb,var(--azul) 80%, transparent)}
+  .btn-print svg{width:16px; height:16px}
+
+  /* ── the page (A4-ish sheet) ──────────────────────────────────────── */
+  .doc{max-width:816px; margin:0 auto; padding:0 16px}
+  .page{
+    position:relative; background:var(--papel); color:var(--ink);
+    width:210mm; min-height:0;                  /* documento en flujo continuo sobre ancho A4 */
+    border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow-lift);
+    padding:14mm 16mm; margin:0 auto 16px; overflow:visible;
+  }
+  .page-pad-lg{padding:20mm 18mm}
+
+  /* faint isometric grid, echoing the logo/hero */
+  .grid-motif::before{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.55;
+    background-image:
+      repeating-linear-gradient(30deg, color-mix(in srgb,var(--azul) 6%, transparent) 0 1px, transparent 1px 46px),
+      repeating-linear-gradient(-30deg, color-mix(in srgb,var(--cian) 6%, transparent) 0 1px, transparent 1px 46px);
+    -webkit-mask-image:radial-gradient(120% 90% at 50% 0%, #000, transparent 72%);
+            mask-image:radial-gradient(120% 90% at 50% 0%, #000, transparent 72%);
+  }
+  .page > *{position:relative; z-index:1}
+
+  /* ── shared type ──────────────────────────────────────────────────── */
+  .eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--azul); font-weight:600; margin:0}
+  .eyebrow.teal{color:var(--teal-ink)}
+  h1.title{font-size:34px; line-height:1.08; letter-spacing:-.025em; font-weight:800; margin:10px 0 0; text-wrap:balance}
+  h2.sec{font-size:23px; line-height:1.15; letter-spacing:-.02em; font-weight:800; margin:8px 0 0}
+  .lead{color:var(--ink-soft); font-size:15.5px; line-height:1.6; margin:14px 0 0; max-width:62ch}
+  p{margin:12px 0 0}
+
+  .gtitle{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--slate); margin:0 0 14px; display:flex; align-items:center; gap:10px}
+  .gtitle::after{content:""; flex:1; height:1px; background:var(--line)}
+
+  /* brand lockup */
+  .brand{display:inline-flex; align-items:center; gap:11px; font-weight:750; letter-spacing:-.02em; font-size:19px; color:var(--ink)}
+  .brand .logo{width:32px; height:32px; flex:none}
+  .brand small{display:block; font-weight:500; font-size:11px; letter-spacing:.02em; color:var(--slate); margin-top:1px}
+
+  /* ── PORTADA ──────────────────────────────────────────────────────── */
+  .cover{display:flex; flex-direction:column; min-height:255mm}
+  .cover-top{display:flex; align-items:flex-start; justify-content:space-between; gap:16px}
+  .cover-badge{font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--azul-ink); background:var(--azul-wash); border:1px solid color-mix(in srgb,var(--azul) 22%, transparent); padding:7px 13px; border-radius:999px; font-weight:600}
+  .cover-mid{margin-top:auto; padding:40px 0}
+  .cover-eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--cian); font-weight:600; margin:0}
+  .cover h1{font-size:52px; line-height:1.04; letter-spacing:-.03em; font-weight:850; margin:14px 0 0; text-wrap:balance}
+  .cover .tagline{font-size:18px; color:var(--ink-soft); margin:18px 0 0; max-width:44ch; line-height:1.5}
+  .cover-hero{position:absolute; right:-40px; top:120px; width:360px; height:360px; opacity:.9; z-index:0}
+  .cover-meta{margin-top:32px; border-top:1px solid var(--line); padding-top:26px; display:grid; grid-template-columns:repeat(2,1fr); gap:20px 40px}
+  .meta-item{display:flex; flex-direction:column; gap:4px}
+  .meta-item .k{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--slate)}
+  .meta-item .v{font-size:15.5px; font-weight:650; color:var(--ink)}
+  .cover-strip{margin-top:26px; display:flex; align-items:center; gap:10px; font-size:13px; color:var(--slate)}
+  .cover-strip .dot{width:7px;height:7px;border-radius:999px;background:var(--teal)}
+
+  /* ── análisis ─────────────────────────────────────────────────────── */
+  .obj-list{list-style:none; margin:20px 0 0; padding:0; display:grid; gap:12px}
+  .obj-list li{position:relative; padding:2px 0 2px 32px; font-size:15px; color:var(--ink-soft); line-height:1.55}
+  .obj-list li::before{
+    content:""; position:absolute; left:0; top:3px; width:19px; height:19px; border-radius:6px;
+    background:linear-gradient(140deg,var(--azul-wash),color-mix(in srgb,var(--cian) 22%, var(--azul-wash)));
+    border:1px solid color-mix(in srgb,var(--azul) 24%, transparent);
+  }
+  .obj-list li::after{content:""; position:absolute; left:6px; top:8px; width:7px; height:4px; border-left:2px solid var(--azul-ink); border-bottom:2px solid var(--azul-ink); transform:rotate(-45deg)}
+
+  .callout{
+    margin-top:26px; display:flex; gap:13px; align-items:flex-start; padding:18px 20px;
+    background:var(--teal-wash); border:1px solid color-mix(in srgb,var(--teal) 30%, transparent);
+    border-radius:14px; font-size:14px; line-height:1.55; color:var(--ink-soft);
+  }
+  .callout svg{width:20px; height:20px; flex:none; color:var(--teal-ink); margin-top:2px}
+  .callout b{color:var(--ink)}
+
+  /* ── desglose de servicios ────────────────────────────────────────── */
+  .svc-group + .svc-group{margin-top:30px}
+  .svc{
+    display:flex; align-items:flex-start; gap:15px; padding:16px 18px; border:1.4px solid var(--line);
+    border-radius:13px; background:var(--papel-2); margin-bottom:11px;
+  }
+  .svc .ico{
+    width:42px; height:42px; flex:none; border-radius:11px; display:grid; place-items:center;
+    background:linear-gradient(140deg,var(--azul-wash),color-mix(in srgb,var(--cian) 22%, var(--azul-wash)));
+    color:var(--azul-ink);
+  }
+  .svc.mejorar .ico{background:linear-gradient(140deg,var(--teal-wash),color-mix(in srgb,var(--teal) 26%, var(--teal-wash))); color:var(--teal-ink)}
+  .svc .ico svg{width:22px; height:22px}
+  .svc .body{flex:1; min-width:0}
+  .svc .name{font-weight:700; font-size:15.5px; letter-spacing:-.01em}
+  .svc .desc{font-size:13.5px; color:var(--slate); margin-top:3px; line-height:1.5}
+  .svc .stack{font-family:var(--mono); font-size:11px; color:var(--slate); margin-top:6px}
+  .svc-items{list-style:none; margin:8px 0 0; padding:0; display:grid; gap:5px}
+  .svc-items li{position:relative; padding-left:17px; font-size:13px; color:var(--ink-soft); line-height:1.45}
+  .svc-items li::before{content:""; position:absolute; left:2px; top:7px; width:5px; height:5px; border-radius:1.5px; background:var(--azul)}
+  .svc.mejorar .svc-items li::before{background:var(--teal)}
+  .mode{font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; padding:5px 11px; border-radius:999px; flex:none; align-self:center}
+  .mode.crear{color:var(--azul-ink); background:var(--azul-wash)}
+  .mode.mejorar{color:var(--teal-ink); background:var(--teal-wash)}
+  .mode.incluido{color:var(--slate); background:var(--niebla)}
+
+  /* ── proceso / timeline ───────────────────────────────────────────── */
+  .steps{list-style:none; margin:22px 0 0; padding:0; counter-reset:s}
+  .steps li{position:relative; padding:0 0 26px 52px; counter-increment:s}
+  .steps li:last-child{padding-bottom:0}
+  .steps li::before{
+    content:counter(s); position:absolute; left:0; top:-2px; width:34px; height:34px; border-radius:10px;
+    display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:14px; color:#fff;
+    background:linear-gradient(135deg,var(--azul),var(--cian)); box-shadow:0 8px 16px -8px color-mix(in srgb,var(--azul) 70%, transparent);
+  }
+  .steps li::after{content:""; position:absolute; left:16px; top:34px; bottom:6px; width:2px; background:linear-gradient(var(--line),transparent)}
+  .steps li:last-child::after{display:none}
+  .steps .st-name{font-weight:700; font-size:15.5px}
+  .steps .st-desc{font-size:13.5px; color:var(--slate); margin-top:3px; line-height:1.5}
+  .steps .st-when{font-family:var(--mono); font-size:11px; color:var(--teal-ink); margin-top:4px; font-weight:600}
+
+  /* ── equipo ───────────────────────────────────────────────────────── */
+  .team{display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:22px}
+  .member{border:1.4px solid var(--line); border-radius:14px; background:var(--papel-2); padding:20px}
+  .member .avatar{
+    width:52px; height:52px; border-radius:13px; display:grid; place-items:center; font-weight:800; font-size:20px; color:#fff;
+    background:linear-gradient(140deg,var(--azul),var(--cian)); letter-spacing:-.02em; margin-bottom:14px;
+  }
+  .member .m-name{font-weight:750; font-size:16px; letter-spacing:-.01em}
+  .member .m-role{font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--azul-ink); margin-top:3px}
+  .member .m-bio{font-size:13px; color:var(--ink-soft); margin-top:10px; line-height:1.55}
+
+  /* ── cotización ───────────────────────────────────────────────────── */
+  .quote-table{width:100%; border-collapse:collapse; margin-top:22px}
+  .quote-table th{
+    text-align:left; font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--slate); font-weight:600; padding:0 0 12px; border-bottom:1.5px solid var(--line);
+  }
+  .quote-table th.num{text-align:right}
+  .quote-table td{padding:15px 0; border-bottom:1px solid var(--line); vertical-align:top}
+  .quote-table .c-name{font-weight:650; font-size:15px}
+  .quote-table .c-note{font-size:12.5px; color:var(--slate); margin-top:3px; line-height:1.45}
+  .quote-table .c-amt{text-align:right; font-weight:700; font-size:15px; font-variant-numeric:tabular-nums; white-space:nowrap; padding-left:16px}
+  .quote-table .c-amt.tbd{font-weight:600; color:var(--slate); font-style:italic}
+  .quote-total{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-top:22px; padding:20px 22px; border-radius:14px; background:linear-gradient(160deg, color-mix(in srgb,var(--azul) 9%, var(--papel)), var(--papel)); border:1px solid color-mix(in srgb,var(--azul) 22%, transparent)}
+  .quote-total .t-label{font-weight:700; font-size:15px}
+  .quote-total .t-label small{display:block; font-weight:500; font-size:12px; color:var(--slate); font-family:var(--mono); letter-spacing:.04em; margin-top:2px}
+  .quote-total .t-amt{font-size:30px; font-weight:850; letter-spacing:-.03em; font-variant-numeric:tabular-nums; color:var(--ink)}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:28px}
+  .infobox{border:1.4px solid var(--line); border-radius:13px; padding:18px 20px; background:var(--papel-2)}
+  .infobox h4{margin:0 0 12px; font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--slate); font-weight:600}
+  .infobox ul{margin:0; padding:0; list-style:none; display:grid; gap:9px}
+  .infobox li{position:relative; padding-left:20px; font-size:13.5px; color:var(--ink-soft); line-height:1.5}
+  .infobox li::before{content:""; position:absolute; left:2px; top:7px; width:7px; height:7px; border-radius:2px; background:var(--azul)}
+  .infobox .kv{display:flex; justify-content:space-between; gap:12px; font-size:13.5px; padding:5px 0; border-bottom:1px dashed var(--line)}
+  .infobox .kv:last-child{border-bottom:0}
+  .infobox .kv .k{color:var(--slate)} .infobox .kv .v{font-weight:650; color:var(--ink); text-align:right}
+
+  .own-note{
+    margin-top:26px; display:flex; gap:13px; align-items:flex-start; padding:18px 20px;
+    background:var(--amber-wash); border:1px solid color-mix(in srgb,var(--amber-ink) 26%, transparent);
+    border-radius:14px; font-size:13.5px; line-height:1.55; color:var(--ink-soft);
+  }
+  .own-note svg{width:20px; height:20px; flex:none; color:var(--amber-ink); margin-top:2px}
+  .own-note b{color:var(--ink)}
+
+  /* ── footer on each page ──────────────────────────────────────────── */
+  .page-foot{
+    position:static; margin-top:20px; z-index:1;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    font-size:11px; color:var(--slate); border-top:1px solid var(--line); padding-top:10px;
+  }
+  .page-foot .l{display:inline-flex; align-items:center; gap:8px; font-weight:600; color:var(--ink-soft)}
+  .page-foot .l svg{width:15px; height:15px}
+
+  /* closing CTA band */
+  .cta-band{
+    margin-top:30px; border-radius:16px; padding:30px 32px; color:#fff;
+    background:linear-gradient(135deg, var(--azul-ink), var(--cian));
+    box-shadow:0 24px 48px -20px color-mix(in srgb,var(--azul) 70%, transparent);
+  }
+  .cta-band h3{margin:0; font-size:22px; letter-spacing:-.02em; font-weight:800}
+  .cta-band p{margin:10px 0 0; font-size:14.5px; opacity:.92; line-height:1.55; max-width:52ch}
+  .cta-band .contacts{margin-top:20px; display:flex; flex-wrap:wrap; gap:10px}
+  .cta-band .contacts a{color:#fff; text-decoration:none; font-weight:650; font-size:13.5px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28); padding:9px 15px; border-radius:999px; display:inline-flex; align-items:center; gap:8px}
+  .cta-band .contacts a svg{width:15px; height:15px}
+
+  /* ── print ────────────────────────────────────────────────────────── */
+  @page{ size:A4; margin:0 }
+  @media print{
+    /* fuerza a imprimir TODOS los colores/fondos (gradientes, washes, badges, retícula) sin depender del check "Gráficos de fondo" */
+    *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important }
+    .screen-bg{background:#fff; padding:0}
+    .toolbar{display:none}
+    .doc{max-width:none; padding:0}
+    .page{
+      box-shadow:none; border:0; border-radius:0; margin:0;
+      width:210mm; min-height:0; overflow:visible;      /* flujo continuo: llena cada A4 sin dejar hojas sueltas */
+      break-after:auto; padding:12mm 16mm;
+    }
+    #doc > .page:first-child{ break-after:page }         /* la portada ocupa su propia hoja */
+    .grid-motif::before{opacity:.4}
+    /* que nada se parta a la mitad entre páginas */
+    h2.sec, .gtitle, .eyebrow, .cover-eyebrow{break-after:avoid}
+    .svc, .member, .infobox, .quote-total, .callout, .cta-band, .maprow, .tier, .obj-list li, .steps li, .svc-items, .two-col, .page-foot{break-inside:avoid}
+  }
+  @media (max-width:680px){
+    .page{width:100%; padding:34px 24px; min-height:auto}
+    .cover h1{font-size:38px}
+    .cover-meta,.two-col,.team{grid-template-columns:1fr; gap:16px}
+    .cover-hero{display:none}
+    .page-foot{position:static; left:auto; right:auto; bottom:auto; margin-top:32px}
+  }
+</style>
+
+<div class="screen-bg">
+  <div class="doc" id="doc"><!-- render target --></div>
+</div>
+
+<script>
+const DATA = {
+  // ── portada ──
+  paquete:   "Reservas, Cobros y Operación",
+  variante:  "Arranque a la medida",          // eligió 4 módulos, sin núcleo web/marca
+  tagline:   "Que reservar, cobrar y llevar el control de tus tres frentes deje de vivir en WhatsApp — en un sistema que es 100% tuyo.",
+  cliente:   "Galería 9",
+  giro:      "Cabinas de bienestar, talleres y Market para marcas · Guadalajara",
+  proyecto:  "Setup de digitalización — Reservas, cobros, base operativa",
+  preparadoPor: "Luis Franco",
+  fechaEmision: "25 de julio de 2026",
+  vigencia:     "24 de agosto de 2026",
+  duracion:     "1 mes",
+
+  // ── análisis del proyecto ──
+  contexto: "Galería 9 vive de tres frentes: las cabinas para sus servicios de bienestar (sound healing, nutrición, terapias, psicología), los espacios para talleres y experiencias grupales, y el Market, donde marcas emprendedoras mueven sus productos. Hoy todo se reserva por WhatsApp: el cliente escribe, le muestran las opciones a mano y hasta el final le mandan los datos de pago. Funciona por el encanto del lugar, pero cada reserva se arma una por una y no queda registro que deje ver qué frente llena más. Esta propuesta convierte ese flujo —para los tres frentes— en un sistema de reservas, cobros y operación, montado sobre cuentas 100% tuyas.",
+  objetivos: [
+    "Que reserven cabinas, talleres y lugares del Market en línea, con un link que compartes por Instagram o WhatsApp.",
+    "Cobrar en línea —depósitos, sesiones y lugares del Market— sin mandar los datos de pago a mano.",
+    "Centralizar en una sola base tus tres frentes, tus aliados (marcas y especialistas) y tus clientes.",
+    "Medir qué frente —cabinas, talleres o Market— llena y conviene impulsar, con datos en vez de intuición."
+  ],
+
+  // ── desglose de servicios ──
+  // group: "nucleo" | "modulo"  ·  mode: "incluido" | "crear" | "mejorar"
+  servicios: [
+    { id:"handover", group:"nucleo", mode:"incluido", name:"Cuenta madre + puesta en marcha", items:["Cuenta de negocio principal","Listado de apps y servicios contratados","Sesión de capacitación","Siguientes pasos recomendados"] },
+
+    { id:"sitio",    group:"modulo", mode:"crear", name:"Landing page (link-tree)", desc:"Una página-hub simple estilo link-tree para tu bio de Instagram: enruta reservas, catálogo y contacto.", stack:"Webflow / Carrd" },
+    { id:"form",     group:"modulo", mode:"crear", name:"Form de contacto general", desc:"Formulario de contacto y solicitudes; cada envío cae como lead en tu base.", stack:"Airtable / Tally" },
+    { id:"espacios", group:"modulo", mode:"crear", name:"Catálogo y reserva de espacios", desc:"Tus espacios presentados y reservables en línea (renta y lugares del Market).", stack:"Webflow + Cal.com" },
+    { id:"reservas", group:"modulo", mode:"crear", name:"Reserva de citas / visitas / meets", desc:"Agenda de visitas y reuniones 1:1 en línea, sincronizada con tu calendario.", stack:"Cal.com" },
+    { id:"orden",    group:"modulo", mode:"crear", name:"Formato de orden de compra", desc:"Plantilla que genera órdenes de compra y cotizaciones para eventos y Market.", stack:"Airtable / plantilla" },
+    { id:"pagos",    group:"modulo", mode:"crear", name:"Cobros y depósitos", desc:"Links de pago para depósitos, rentas y lugares del Market. Se acabó mandar los datos a mano.", stack:"Stripe / Mercado Pago" },
+    { id:"clientes", group:"modulo", mode:"crear", name:"CRM setup", desc:"Base de clientes, aliados y contactos, con seguimiento.", stack:"Airtable" },
+    { id:"operacion",group:"modulo", mode:"crear", name:"Base operativa setup", desc:"Tu base de eventos, espacios y agenda: el centro de la operación.", stack:"Airtable" }
+  ],
+
+  // ── proceso y tiempos ──
+  proceso: [
+    { name:"Diagnóstico", desc:"Ya nos contaste tus frentes en el formulario. De ahí sale esta propuesta.", when:"Hecho — gratis" },
+    { name:"Mapa de tu operación", desc:"Definimos tus tres frentes (cabinas, talleres, Market) y cómo se agenda y cobra cada uno." },
+    { name:"Montaje de reservas y cobros", desc:"Agenda en línea + links de pago listos para tu bio de Instagram o WhatsApp." },
+    { name:"Base de operación + medición", desc:"Tu base de frentes y clientes y el panel de métricas, conectados." },
+    { name:"Handover + capacitación", desc:"Accesos, guía y sesión 1:1. Quedas dueña y autosuficiente.", when:"Cierre" }
+  ],
+
+  // ── equipo ──
+  equipo: [
+    { name:"Luis Franco", role:"Estrategia y entrega", bio:"Licenciado en Comunicación con experiencia en gestión de proyectos tecnológicos y diseño de entornos digitales. Traduce la operación de tu negocio en herramientas que sí usas." }
+    // agrega más miembros aquí si aplica
+  ],
+
+  // ── cotización ──
+  moneda: "MXN",
+  conceptos: [
+    { name:"Paquete de Arranque · Galería 9", note:"Los 9 entregables del desglose, montados sobre cuentas a tu nombre. Precio cerrado, sin sorpresas.", amount:"$14,500" },
+    { name:"Suscripciones SaaS", note:"A nombre de Galería 9. Costo directo con cada proveedor.", amount:null }  // null = "Según plan"
+  ],
+  total: "$14,500",
+  totalNota: "Pago único.",
+
+  requisitos: [
+    "En caso de aplicar, acceso a las cuentas admin de servicios que ya tengas contratados (redes, correo del negocio, etc.), para conectarlos y compartir accesos.",
+    "Tu branding kit y assets de marca: logo, colores, tipografías y fotos, para aplicarlos en la landing y el catálogo.",
+    "Datos bancarios y fiscales del negocio para configurar el procesador de pagos (Stripe / Mercado Pago) y que los cobros lleguen a tu cuenta.",
+    "Tu lista actual de frentes, aliados y contactos, en el formato que la tengas."
+  ],
+  condiciones: [
+    { k:"Duración estimada", v:"≈ 1 mes (sujeto a tu disponibilidad para requisitos y revisiones)" },
+    { k:"Forma de pago", v:"50% inicio · 50% entrega" },
+    { k:"Vigencia de la oferta", v:"30 días" },
+    { k:"Soporte", v:"Sesiones gratuitas el 1er mes (bajo disponibilidad de agenda)" }
+  ],
+
+  // ── contacto de cierre ──
+  contacto: { correo:"datatlan@datatlan.tech", sitio:"datatlan.tech" }
+};
+/* ═══════════════════════════════════════════════════════════════════════
+   ▲▲▲  FIN DEL BLOQUE EDITABLE — no necesitas tocar nada debajo  ▲▲▲
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ---- iconos por frente (mismos del configurador) ---- */
+const ICONS = {
+  sitio:'<path d="M3 5h18v14H3z"/><path d="M3 9h18"/><circle cx="6" cy="7" r=".6" fill="currentColor"/>',
+  marca:'<path d="M12 3l2.4 5 5.6.6-4.2 3.8 1.2 5.6L12 20l-5 3 1.2-5.6L4 13.6l5.6-.6z"/>',
+  presencia:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>',
+  handover:'<path d="M4 12a8 8 0 1 1 8 8"/><path d="M4 12v5h5"/><path d="M9 12l2 2 4-4"/>',
+  reservas:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8 14l2.5 2.5L16 12"/>',
+  pagos:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/>',
+  catalogo:'<path d="M4 7l1-3h14l1 3"/><path d="M4 7h16v13H4z"/><path d="M9 11a3 3 0 0 0 6 0"/>',
+  clientes:'<path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="8" r="3.2"/><path d="M17 11l2 2 3-3.5"/>',
+  operacion:'<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M9 5V3.5h6V5"/><path d="M8 11l1.4 1.4L12 10"/><path d="M8 16l1.4 1.4L12 15"/>',
+  medicion:'<path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
+  form:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  espacios:'<path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>',
+  orden:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6"/><path d="M9 16.4l1.3 1.3 2.7-2.7"/>'
+};
+const svg = p => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(p||ICONS.sitio)+'</svg>';
+const esc = s => (s==null?'':String(s)).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+/* logo Datatlan (isométrico) */
+const LOGO = `<svg class="logo" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+  <rect x="54" y="30" width="12" height="82" rx="4" fill="#1f86cf"/>
+  <rect x="12" y="93" width="40" height="19" rx="4" fill="#1450ad"/><rect x="68" y="93" width="40" height="19" rx="4" fill="#1450ad"/>
+  <rect x="18" y="72" width="34" height="17" rx="4" fill="#1663bd"/><rect x="68" y="72" width="34" height="17" rx="4" fill="#1663bd"/>
+  <rect x="24" y="51" width="28" height="17" rx="4" fill="#1c7dc6"/><rect x="68" y="51" width="28" height="17" rx="4" fill="#1c7dc6"/>
+  <rect x="30" y="30" width="22" height="17" rx="4" fill="#1f93cf"/><rect x="68" y="30" width="22" height="17" rx="4" fill="#1f93cf"/>
+  <rect x="34" y="8" width="52" height="18" rx="5" fill="#12b0d6"/>
+  <circle cx="43" cy="17" r="1.9" fill="#fff"/><circle cx="49.5" cy="17" r="1.9" fill="#fff"/><circle cx="56" cy="17" r="1.9" fill="#fff"/>
+  <rect x="64" y="14.4" width="16" height="5.2" rx="2.6" fill="#fff"/>
+</svg>`;
+
+/* hero isométrico grande para la portada (pila de tiers) */
+function heroStack(){
+  const cx=180, baseY=250, tierH=26, gap=5, topW=230, n=5;
+  const tops=['#12b0d6','#1f93cf','#1c7dc6','#1663bd','#1450ad'];
+  let g='';
+  for(let i=0;i<n;i++){
+    const scale=1-(i*0.12), w=topW*scale, h=w*0.42, y=baseY-i*(tierH+gap), x=cx;
+    g+=`<polygon points="${x},${y-h/2} ${x+w/2},${y} ${x},${y+h/2} ${x-w/2},${y}" fill="${tops[i]}" opacity="0.95"/>`
+     + `<polygon points="${x-w/2},${y} ${x},${y+h/2} ${x},${y+h/2+tierH} ${x-w/2},${y+tierH}" fill="#0f3f88"/>`
+     + `<polygon points="${x+w/2},${y} ${x},${y+h/2} ${x},${y+h/2+tierH} ${x+w/2},${y+tierH}" fill="#0a9bc0"/>`;
+  }
+  return `<svg class="cover-hero" viewBox="0 0 360 360" fill="none" aria-hidden="true">${g}</svg>`;
+}
+
+const foot = (label) => `<div class="page-foot">
+  <span class="l">${LOGO.replace('class="logo"','width="15" height="15"')} Datatlan</span>
+  <span>${esc(label)}</span>
+  <span>${esc(DATA.cliente)} · ${esc(DATA.fechaEmision)}</span>
+</div>`;
+
+/* ---- render ---- */
+function render(){
+  const S = DATA.servicios;
+  const nucleo = S.filter(s=>s.group==='nucleo');
+  const modulos = S.filter(s=>s.group==='modulo');
+
+  const svcRow = s => `<div class="svc ${s.mode}">
+    <div class="ico">${svg(ICONS[s.id])}</div>
+    <div class="body">
+      <div class="name">${esc(s.name)}</div>
+      ${s.desc?`<div class="desc">${esc(s.desc)}</div>`:''}
+      ${s.items&&s.items.length?`<ul class="svc-items">${s.items.map(it=>`<li>${esc(it)}</li>`).join('')}</ul>`:''}
+      ${s.stack?`<div class="stack">Sobre ${esc(s.stack)}</div>`:''}
+    </div>
+    <span class="mode ${s.mode}">${s.mode==='incluido'?'Incluido':s.mode==='mejorar'?'Mejorar':'Crear'}</span>
+  </div>`;
+
+  const conceptoRow = c => `<tr>
+    <td><div class="c-name">${esc(c.name)}</div>${c.note?`<div class="c-note">${esc(c.note)}</div>`:''}</td>
+    <td class="c-amt ${c.amount==null?'tbd':''}">${c.amount==null?'Según plan':esc(c.amount)}</td>
+  </tr>`;
+
+  const doc = document.getElementById('doc');
+  doc.innerHTML = `
+
+  <!-- ══ PÁGINA 1 · PORTADA ══ -->
+  <section class="page page-pad-lg grid-motif">
+    ${heroStack()}
+    <div class="cover">
+      <div class="cover-top">
+        <div class="brand">${LOGO}<div>Datatlan<small>Ecosistema digital para tu empresa</small></div></div>
+        <span class="cover-badge">Propuesta ${esc(DATA.variante)}</span>
+      </div>
+
+      <div class="cover-mid">
+        <p class="cover-eyebrow">Propuesta personalizada</p>
+        <h1>${esc(DATA.paquete)}</h1>
+        <p class="tagline">${esc(DATA.tagline)}</p>
+      </div>
+
+      <div class="cover-meta">
+        <div class="meta-item"><span class="k">Cliente</span><span class="v">${esc(DATA.cliente)}</span></div>
+        <div class="meta-item"><span class="k">Giro</span><span class="v">${esc(DATA.giro)}</span></div>
+        <div class="meta-item"><span class="k">Proyecto</span><span class="v">${esc(DATA.proyecto)}</span></div>
+        <div class="meta-item"><span class="k">Preparado por</span><span class="v">${esc(DATA.preparadoPor)}</span></div>
+        <div class="meta-item"><span class="k">Fecha de emisión</span><span class="v">${esc(DATA.fechaEmision)}</span></div>
+        <div class="meta-item"><span class="k">Vigencia</span><span class="v">${esc(DATA.vigencia)}</span></div>
+      </div>
+      <div class="cover-strip"><span class="dot"></span> Todo montado sobre cuentas que son 100% tuyas — cero dependencia de Datatlan.</div>
+    </div>
+  </section>
+
+  <!-- ══ PÁGINA 2 · ANÁLISIS ══ -->
+  <section class="page grid-motif">
+    <p class="eyebrow">El proyecto</p>
+    <h2 class="sec">Contexto y objetivo</h2>
+    <p class="lead">${esc(DATA.contexto)}</p>
+
+    <div style="margin-top:34px">
+      <p class="gtitle">Qué buscamos lograr</p>
+      <ul class="obj-list">${DATA.objetivos.map(o=>`<li>${esc(o)}</li>`).join('')}</ul>
+    </div>
+
+    ${foot('El proyecto')}
+  </section>
+
+  <!-- ══ PÁGINA 3 · DESGLOSE DE SERVICIOS ══ -->
+  <section class="page grid-motif">
+    <p class="eyebrow">Desglose de servicios</p>
+    <h2 class="sec">Lo que ponemos en marcha</h2>
+    <p class="lead">Un núcleo fijo que siempre entregamos, más los módulos que elegiste en tu diagnóstico.</p>
+
+    <div class="svc-group" style="margin-top:26px">
+      <p class="gtitle">Núcleo · siempre incluido</p>
+      ${nucleo.map(svcRow).join('')}
+    </div>
+
+    ${modulos.length?`<div class="svc-group">
+      <p class="gtitle">Módulos elegidos</p>
+      ${modulos.map(svcRow).join('')}
+    </div>`:''}
+    ${foot('Desglose de servicios')}
+  </section>
+
+  <!-- ══ PÁGINA 4 · PROCESO ══ -->
+  <section class="page grid-motif">
+    <p class="eyebrow">Cómo trabajamos</p>
+    <h2 class="sec">Proceso y tiempos</h2>
+    <p class="lead">Del diagnóstico a la entrega en ${esc(DATA.duracion)}. Quedas dueña y autosuficiente al cierre.</p>
+    <ol class="steps">
+      ${DATA.proceso.map(p=>`<li>
+        <div class="st-name">${esc(p.name)}</div>
+        <div class="st-desc">${esc(p.desc)}</div>
+        ${p.when?`<div class="st-when">${esc(p.when)}</div>`:''}
+      </li>`).join('')}
+    </ol>
+    ${foot('Proceso y tiempos')}
+  </section>
+
+  ${(DATA.equipo && DATA.equipo.length > 1) ? `
+  <!-- ══ PÁGINA · EQUIPO (se muestra solo con 2+ personas) ══ -->
+  <section class="page grid-motif">
+    <p class="eyebrow">Quién lo hace</p>
+    <h2 class="sec">El equipo</h2>
+    <p class="lead">Un equipo pequeño y directo. Hablas con quien hace el trabajo.</p>
+    <div class="team">
+      ${DATA.equipo.map(m=>`<div class="member">
+        <div class="avatar">${esc((m.name||'?').trim().charAt(0))}</div>
+        <div class="m-name">${esc(m.name)}</div>
+        <div class="m-role">${esc(m.role)}</div>
+        <div class="m-bio">${esc(m.bio)}</div>
+      </div>`).join('')}
+    </div>
+    ${foot('El equipo')}
+  </section>` : ''}
+
+  <!-- ══ PÁGINA 6 · COTIZACIÓN ══ -->
+  <section class="page grid-motif">
+    <p class="eyebrow teal">Inversión</p>
+    <h2 class="sec">Cotización</h2>
+    <p class="lead">Precio cerrado, sin sorpresas. Montos en ${esc(DATA.moneda)}.</p>
+
+    <table class="quote-table">
+      <thead><tr><th>Concepto</th><th class="num">Monto</th></tr></thead>
+      <tbody>${DATA.conceptos.map(conceptoRow).join('')}</tbody>
+    </table>
+
+    <div class="quote-total">
+      <div class="t-label">Total<small>${esc(DATA.totalNota||'')}</small></div>
+      <div class="t-amt">${esc(DATA.total)} <span style="font-size:14px;font-weight:600;color:var(--slate)">${esc(DATA.moneda)}</span></div>
+    </div>
+
+    <div class="two-col">
+      <div class="infobox">
+        <h4>Requisitos de tu parte</h4>
+        <ul>${DATA.requisitos.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>
+      </div>
+      <div class="infobox">
+        <h4>Condiciones</h4>
+        ${DATA.condiciones.map(c=>`<div class="kv"><span class="k">${esc(c.k)}</span><span class="v">${esc(c.v)}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="cta-band">
+      <h3>¿Le damos arranque?</h3>
+      <p>Con tu visto bueno agendamos el kickoff y en ${esc(DATA.duracion)} tienes tu ecosistema corriendo. Cualquier ajuste al alcance, lo vemos antes de empezar.</p>
+      <div class="contacts">
+        <a href="mailto:${esc(DATA.contacto.correo)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>${esc(DATA.contacto.correo)}</a>
+        <a href="https://${esc(DATA.contacto.sitio)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>${esc(DATA.contacto.sitio)}</a>
+      </div>
+    </div>
+    ${foot('Cotización')}
+  </section>
+  `;
+  document.title = `Datatlan · Propuesta — ${DATA.cliente}`;
+}
+render();
+</script>
+</body>
+</html>

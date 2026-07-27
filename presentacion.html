@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datatlan · La Ruta Digital</title>
+<!--
+  PITCH DECK · LA RUTA DATATLAN (5 peldaños) — ~5 min, 9 slides.
+  Navegación: ← → (o espacio) · clic en los bordes · teclas 1-9 · F = pantalla completa.
+  PDF: tecla P (o Imprimir) → Guardar como PDF, horizontal, márgenes Ninguno.
+  Personalización por cliente: solo el SLIDE 7 ("Estás aquí"). Hoy: Galería 9.
+-->
+</head>
+<body>
+<style>
+  :root{
+    color-scheme:light;
+    --ink:#0d1b2a; --ink-soft:#33475b; --slate:#64748b; --line:#dbe4f0;
+    --niebla:#eef3fa; --papel:#ffffff; --papel-2:#f7fafd;
+    --azul:#2563eb; --azul-ink:#1d4ed8; --cian:#06b6d4; --teal:#00a89e; --teal-ink:#068b83;
+    --azul-wash:#eaf1ff; --teal-wash:#e2f7f4; --amber-wash:#fff7e8; --amber-ink:#b45309;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    --ease:cubic-bezier(.2,.7,.2,1);
+    --shadow:0 1px 2px rgba(13,27,42,.05), 0 18px 40px -18px rgba(13,27,42,.22);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--font); color:var(--ink); overflow:hidden;
+    background:
+      radial-gradient(1200px 700px at 84% -8%, color-mix(in srgb, var(--cian) 15%, transparent), transparent 60%),
+      radial-gradient(1100px 720px at 6% 108%, color-mix(in srgb, var(--azul) 14%, transparent), transparent 62%),
+      var(--niebla);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ── deck frame ─────────────────────────────────────────── */
+  .deck{position:fixed; inset:0}
+  .slide{
+    position:absolute; inset:0; display:none;
+    padding:clamp(28px,5vw,84px) clamp(30px,6vw,110px);
+    flex-direction:column; opacity:0; transition:opacity .35s var(--ease);
+  }
+  .slide.on{display:flex; opacity:1; animation:rise .45s var(--ease) both}
+  @keyframes rise{from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:none}}
+
+  /* faint isometric grid */
+  .deck::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+    background-image:
+      repeating-linear-gradient(30deg, color-mix(in srgb,var(--azul) 6%, transparent) 0 1px, transparent 1px 52px),
+      repeating-linear-gradient(-30deg, color-mix(in srgb,var(--cian) 6%, transparent) 0 1px, transparent 1px 52px);
+    -webkit-mask-image:radial-gradient(120% 90% at 50% 0%, #000, transparent 74%);
+            mask-image:radial-gradient(120% 90% at 50% 0%, #000, transparent 74%);
+  }
+  .slide > *{position:relative; z-index:1}
+
+  /* ── chrome: top brand, progress, counter, nav zones ─────── */
+  .chrome{position:fixed; z-index:20; pointer-events:none}
+  .top{top:clamp(18px,3vw,30px); left:clamp(24px,5vw,56px); right:clamp(24px,5vw,56px);
+       display:flex; align-items:center; justify-content:space-between}
+  .brand{display:inline-flex; align-items:center; gap:9px; font-weight:750; letter-spacing:-.02em; font-size:15px; color:var(--ink)}
+  .brand .logo{width:24px; height:24px; flex:none}
+  .counter{font-family:var(--mono); font-size:12px; color:var(--slate); letter-spacing:.05em}
+  .counter b{color:var(--ink)}
+  .progress{position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--azul),var(--cian)); z-index:30; transition:width .35s var(--ease)}
+  .dots{position:fixed; bottom:clamp(16px,3vw,26px); left:50%; transform:translateX(-50%); z-index:20; display:flex; gap:8px}
+  .dots i{width:8px; height:8px; border-radius:999px; background:var(--line); cursor:pointer; transition:.25s var(--ease)}
+  .dots i.on{background:linear-gradient(90deg,var(--azul),var(--cian)); width:22px}
+  .dots i.done{background:var(--teal)}
+  .navzone{position:fixed; top:0; bottom:0; width:16%; z-index:15; cursor:pointer}
+  .navzone.prev{left:0} .navzone.next{right:0}
+  .hint{position:fixed; bottom:clamp(16px,3vw,26px); right:clamp(24px,5vw,56px); z-index:20; font-family:var(--mono); font-size:11px; color:var(--slate); pointer-events:none}
+
+  /* ── shared type ────────────────────────────────────────── */
+  .eyebrow{font-family:var(--mono); font-size:clamp(11px,1.2vw,13px); letter-spacing:.2em; text-transform:uppercase; color:var(--azul); font-weight:600}
+  .eyebrow.teal{color:var(--teal-ink)}
+  .eyebrow.amber{color:var(--amber-ink)}
+  h1{font-size:clamp(30px,5.4vw,62px); line-height:1.04; letter-spacing:-.03em; font-weight:850; margin-top:16px; text-wrap:balance}
+  h2{font-size:clamp(26px,4.2vw,46px); line-height:1.08; letter-spacing:-.025em; font-weight:820; margin-top:14px; text-wrap:balance}
+  .lead{font-size:clamp(16px,1.9vw,23px); line-height:1.5; color:var(--ink-soft); margin-top:clamp(16px,2vw,26px); max-width:30ch; font-weight:400}
+  .lead.wide{max-width:44ch}
+  .lead b{color:var(--ink); font-weight:700}
+  .center{align-items:center; text-align:center; justify-content:center}
+  .center .lead{margin-left:auto; margin-right:auto}
+  .grow{flex:1}
+  .vcenter{justify-content:center}
+
+  /* keyword chips */
+  .keys{display:flex; gap:12px; flex-wrap:wrap; margin-top:clamp(20px,3vw,34px)}
+  .key{font-family:var(--mono); font-size:clamp(12px,1.4vw,15px); font-weight:600; letter-spacing:.04em; padding:10px 18px; border-radius:999px; border:1.5px solid var(--line); background:var(--papel); color:var(--ink-soft)}
+  .key b{color:var(--azul-ink)}
+
+  /* two-column contrast (problem slide) */
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:clamp(16px,2.5vw,28px); margin-top:clamp(22px,3vw,38px)}
+  .card{background:var(--papel); border:1.5px solid var(--line); border-radius:18px; padding:clamp(20px,2.6vw,30px); box-shadow:var(--shadow)}
+  .card .ct{font-weight:750; font-size:clamp(17px,1.9vw,22px); letter-spacing:-.01em; display:flex; align-items:center; gap:11px}
+  .card .cd{font-size:clamp(14px,1.5vw,17px); color:var(--slate); line-height:1.5; margin-top:10px}
+  .card .cx{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#fef2f2;color:#dc2626;flex:none}
+  .card .cx svg{width:19px;height:19px}
+  .verdict{margin-top:clamp(18px,2.4vw,28px); font-size:clamp(15px,1.7vw,20px); color:var(--ink-soft)}
+  .verdict b{color:var(--ink)}
+
+  /* ── the ladder ─────────────────────────────────────────── */
+  .ladder{display:flex; flex-direction:column-reverse; gap:9px; margin-top:clamp(14px,2vw,22px); position:relative}
+  .rung{
+    display:flex; align-items:center; gap:clamp(12px,1.6vw,18px);
+    background:var(--papel); border:1.5px solid var(--line); border-radius:14px;
+    padding:clamp(10px,1.4vw,15px) clamp(14px,1.8vw,20px); box-shadow:var(--shadow);
+    transition:.3s var(--ease);
+  }
+  /* pirámide (visual ancla de marca) + lista de niveles */
+  .pyrgrid{display:grid; grid-template-columns:.92fr 1.08fr; gap:clamp(20px,3.5vw,52px); align-items:center; margin-top:clamp(6px,1.2vw,14px)}
+  .pyr{display:flex; justify-content:center}
+  .pyr svg{width:100%; height:auto; max-height:58vh; display:block; overflow:visible; filter:drop-shadow(0 24px 40px rgba(13,27,42,.18))}
+  /* sangría ascendente SOLO para la lista con estados del slide "Estás aquí" */
+  .ladder.stepped .rung[data-n="1"]{margin-left:3%}
+  .ladder.stepped .rung[data-n="2"]{margin-left:6%}
+  .ladder.stepped .rung[data-n="3"]{margin-left:9%}
+  .ladder.stepped .rung[data-n="4"]{margin-left:12%}
+  .ladder.stepped .rung[data-n="5"]{margin-left:15%}
+  .rung .num{
+    width:clamp(34px,3.4vw,44px); height:clamp(34px,3.4vw,44px); flex:none; border-radius:11px; display:grid; place-items:center;
+    font-family:var(--mono); font-weight:700; font-size:clamp(14px,1.6vw,18px); color:#fff;
+  }
+  .rung .rbody{flex:1; min-width:0}
+  .rung .rname{font-weight:750; font-size:clamp(15px,1.7vw,20px); letter-spacing:-.01em}
+  .rung .rq{font-size:clamp(12.5px,1.35vw,15.5px); color:var(--slate); margin-top:2px}
+  .rung .rtag{font-family:var(--mono); font-size:clamp(9px,1vw,11px); letter-spacing:.08em; text-transform:uppercase; font-weight:600; padding:5px 11px; border-radius:999px; flex:none; white-space:nowrap}
+  .rtag.nucleo{color:var(--azul-ink); background:var(--azul-wash)}
+  .rtag.modulo{color:var(--teal-ink); background:var(--teal-wash)}
+  .rtag.evol{color:var(--amber-ink); background:var(--amber-wash)}
+  .rtag.diag{color:var(--slate); background:var(--niebla)}
+  /* state variants for "estás aquí" */
+  .rung.dim{opacity:.44; box-shadow:none; background:var(--papel-2)}
+  .rung.now{border-color:var(--teal); box-shadow:0 2px 6px rgba(13,27,42,.08), 0 20px 44px -18px color-mix(in srgb,var(--teal) 55%, transparent)}
+  .rung.now::after{content:"Activamos ahora"; position:absolute; right:14px; top:-11px; font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; font-weight:700; color:#fff; background:var(--teal); padding:4px 10px; border-radius:999px}
+  .rung.here{border-color:var(--azul); box-shadow:0 2px 6px rgba(13,27,42,.08), 0 20px 44px -18px color-mix(in srgb,var(--azul) 50%, transparent)}
+  .rung{position:relative}
+
+  /* map table (slide 5) */
+  .maprow{display:grid; grid-template-columns:auto 1fr auto; gap:clamp(12px,1.8vw,20px); align-items:center; padding:clamp(12px,1.5vw,17px) 0; border-bottom:1px solid var(--line)}
+  .maprow:last-child{border-bottom:0}
+  .maprow .mn{font-family:var(--mono); font-weight:700; font-size:clamp(15px,1.7vw,20px); color:#fff; width:clamp(32px,3.2vw,42px); height:clamp(32px,3.2vw,42px); border-radius:10px; display:grid; place-items:center}
+  .maprow .mmid .mname{font-weight:750; font-size:clamp(15px,1.6vw,19px)}
+  .maprow .mmid .mfr{font-size:clamp(12.5px,1.35vw,15.5px); color:var(--slate); margin-top:2px}
+  .maprow .mtag{font-family:var(--mono); font-size:clamp(9px,1vw,11px); letter-spacing:.08em; text-transform:uppercase; font-weight:600; padding:5px 11px; border-radius:999px; white-space:nowrap}
+
+  /* cost chart (slide 6) */
+  .costwrap{display:grid; grid-template-columns:1.15fr .85fr; gap:clamp(20px,3vw,40px); align-items:center; margin-top:clamp(16px,2vw,26px)}
+  .chartcard{background:var(--papel); border:1.5px solid var(--line); border-radius:18px; padding:clamp(18px,2.2vw,26px); box-shadow:var(--shadow)}
+  .chartcard svg{width:100%; height:auto; display:block}
+  .legend{display:flex; flex-direction:column; gap:14px; margin-top:6px}
+  .legend .li{display:flex; gap:11px; align-items:flex-start; font-size:clamp(14px,1.5vw,18px); color:var(--ink-soft); line-height:1.45}
+  .legend .sw{width:16px; height:16px; border-radius:5px; flex:none; margin-top:2px}
+  .legend b{color:var(--ink)}
+  .bignote{margin-top:clamp(16px,2vw,24px); font-size:clamp(15px,1.7vw,21px); color:var(--ink-soft)}
+  .bignote b{color:var(--ink)}
+
+  /* here-context (slide 7) */
+  .heregrid{display:grid; grid-template-columns:1fr 1fr; gap:clamp(20px,3vw,40px); align-items:center; margin-top:clamp(14px,2vw,22px)}
+  .herecopy p{font-size:clamp(15px,1.7vw,21px); line-height:1.5; color:var(--ink-soft); margin-top:14px}
+  .herecopy p:first-child{margin-top:0}
+  .herecopy b{color:var(--ink)}
+
+  /* closing */
+  .contacts{display:flex; gap:12px; flex-wrap:wrap; margin-top:clamp(22px,3vw,34px); justify-content:center}
+  .contacts a{color:var(--azul-ink); text-decoration:none; font-weight:650; font-size:clamp(13px,1.5vw,16px); background:var(--papel); border:1.5px solid var(--line); padding:11px 18px; border-radius:999px; display:inline-flex; align-items:center; gap:9px; box-shadow:var(--shadow)}
+  .contacts a svg{width:16px;height:16px}
+  .cover-badge{font-family:var(--mono); font-size:clamp(10px,1.1vw,12px); letter-spacing:.16em; text-transform:uppercase; color:var(--azul-ink); background:var(--azul-wash); border:1px solid color-mix(in srgb,var(--azul) 22%, transparent); padding:7px 14px; border-radius:999px; font-weight:600; display:inline-block; margin-bottom:6px; align-self:flex-start}
+
+  /* ── responsive ─────────────────────────────────────────── */
+  @media (max-width:820px){
+    .cols,.costwrap,.heregrid,.pyrgrid{grid-template-columns:1fr}
+    .navzone{width:20%}
+  }
+
+  /* ── print → PDF (landscape, one slide per page) ─────────── */
+  @page{ size:landscape; margin:0 }
+  @media print{
+    body{overflow:visible; background:#fff}
+    .chrome,.dots,.navzone,.hint,.progress{display:none !important}
+    .deck::before{opacity:.5}
+    .slide{position:relative; inset:auto; display:flex !important; opacity:1 !important;
+           height:100vh; width:100vw; page-break-after:always; break-after:page; animation:none}
+    .slide:last-child{page-break-after:auto}
+  }
+</style>
+
+<div class="progress" id="prog"></div>
+
+<div class="chrome top">
+  <span class="brand" id="brandLockup"></span>
+  <span class="counter"><b id="cnum">1</b> / <span id="ctot">10</span></span>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · PORTADA -->
+  <section class="slide center vcenter">
+    <span class="cover-badge" style="align-self:center">Antes de tu propuesta · 5 minutos</span>
+    <p class="eyebrow">La Ruta Digital</p>
+    <h1>¿Dónde está tu negocio,<br>y hacia dónde va?</h1>
+    <p class="lead wide">Un mapa de <b>5 peldaños</b> para digitalizar sin perderte — ni gastar de más.</p>
+  </section>
+
+  <!-- 2 · LA IDEA -->
+  <section class="slide vcenter">
+    <p class="eyebrow">La idea</p>
+    <h1>Digitalizar no es<br>“tener una página”.</h1>
+    <p class="lead wide">Es que tu negocio <b>corra</b> sobre herramientas <b>que son tuyas</b> — en un orden donde <b>cada paso se paga solo</b> antes de subir al siguiente.</p>
+    <div class="keys">
+      <span class="key"><b>Tuyo</b> · cero dependencia</span>
+      <span class="key"><b>Ordenado</b> · paso a paso</span>
+      <span class="key"><b>Rentable</b> · se paga solo</span>
+    </div>
+  </section>
+
+  <!-- 3 · EL PROBLEMA -->
+  <section class="slide vcenter">
+    <p class="eyebrow">El problema</p>
+    <h2>Casi todos digitalizan al revés.</h2>
+    <div class="cols">
+      <div class="card">
+        <div class="ct"><span class="cx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span>Piezas sueltas sin orden</div>
+        <div class="cd">Compran apps que no se hablan entre sí. Cada cambio se pelea a mano, herramienta por herramienta.</div>
+      </div>
+      <div class="card">
+        <div class="ct"><span class="cx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span>Todo a mano</div>
+        <div class="cd">WhatsApp, DM, libretas y transferencias perseguidas. El negocio depende de que alguien recuerde cada paso.</div>
+      </div>
+    </div>
+    <p class="verdict">El resultado es <b>caos, no un sistema</b>: se pierde tiempo, dinero y clientes.</p>
+  </section>
+
+  <!-- 4 · LA PIRÁMIDE -->
+  <section class="slide vcenter">
+    <p class="eyebrow">La ruta</p>
+    <h2 style="margin-bottom:2px">Una pirámide. Un peldaño, una pregunta.</h2>
+    <div class="pyrgrid">
+      <div class="pyr" id="pyrFull"></div>
+      <div class="ladder" id="rungList"></div>
+    </div>
+  </section>
+
+  <!-- 5 · QUÉ HAY EN CADA PELDAÑO -->
+  <section class="slide vcenter">
+    <p class="eyebrow">Qué incluye</p>
+    <h2>Lo que montamos en cada paso.</h2>
+    <p class="lead wide" style="margin-top:12px">Esto ya vive en tu diagnóstico: <b>Núcleo</b> y <b>Módulos</b> son los peldaños con otro nombre.</p>
+    <div id="mapTable" style="margin-top:clamp(10px,1.5vw,18px)"></div>
+  </section>
+
+  <!-- 6 · LA REGLA DE ORO -->
+  <section class="slide vcenter">
+    <p class="eyebrow amber">La regla de oro</p>
+    <h2>Cada peldaño se paga solo.</h2>
+    <div class="costwrap">
+      <div class="chartcard">
+        <svg id="costChart" viewBox="0 0 440 250" aria-label="Gráfica de cruce de costos">
+          <!-- ejes -->
+          <line x1="56" y1="44" x2="56" y2="222" stroke="#dbe4f0" stroke-width="1.5"/>
+          <line x1="56" y1="222" x2="404" y2="222" stroke="#dbe4f0" stroke-width="1.5"/>
+          <!-- gridlines suaves -->
+          <line x1="56" y1="177.5" x2="404" y2="177.5" stroke="#eef3fa" stroke-width="1"/>
+          <line x1="56" y1="133" x2="404" y2="133" stroke="#eef3fa" stroke-width="1"/>
+          <line x1="56" y1="88.5" x2="404" y2="88.5" stroke="#eef3fa" stroke-width="1"/>
+          <!-- sistema propio (teal): alto inicial, casi plano -->
+          <polyline points="56,140.1 404,108.1" fill="none" stroke="#00a89e" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- rentas (azul): sube fuerte con el uso -->
+          <polyline points="56,211.3 404,54.7" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- guía + punto de cruce (intersección exacta calculada) -->
+          <line x1="254.9" y1="121.8" x2="254.9" y2="222" stroke="#b45309" stroke-width="1.3" stroke-dasharray="4 4" opacity="0.6"/>
+          <rect x="190.9" y="79.8" width="128" height="26" rx="8" fill="#fff7e8" stroke="#e7c9a0"/>
+          <text x="254.9" y="97.8" text-anchor="middle" fill="#b45309" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700">punto de cruce</text>
+          <circle cx="254.9" cy="121.8" r="6.5" fill="#fff" stroke="#b45309" stroke-width="3"/>
+          <!-- etiquetas de eje -->
+          <text x="52" y="34" fill="#64748b" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10">costo acumulado ↑</text>
+          <text x="404" y="242" text-anchor="end" fill="#64748b" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10">tiempo →</text>
+          <!-- etiquetas de línea, ancladas a su extremo -->
+          <text x="398" y="48.7" text-anchor="end" fill="#1d4ed8" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700">rentas</text>
+          <text x="398" y="124.1" text-anchor="end" fill="#068b83" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700">sistema propio</text>
+        </svg>
+      </div>
+      <div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:var(--azul)"></span><span><b>Rentas sueltas.</b> Suben con el uso: más clientes, más planes, más herramientas.</span></div>
+          <div class="li"><span class="sw" style="background:var(--teal)"></span><span><b>Sistema propio.</b> Inversión inicial y de ahí, costo plano.</span></div>
+        </div>
+        <p class="bignote">No inviertes en lo propio hasta que la suma de tus rentas <b>cruza</b> su costo. Antes de ese punto, rentar es lo inteligente.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · ESTÁS AQUÍ (personalizable — hoy: Galería 9) -->
+  <section class="slide">
+    <p class="eyebrow teal">Estás aquí</p>
+    <h2 style="margin-bottom:2px">Galería 9, hoy.</h2>
+    <div class="heregrid">
+      <div class="ladder stepped" id="ladderHere"></div>
+      <div class="herecopy">
+        <p>Tienes una <b>marca y una comunidad fuertes</b> en Instagram — Presencia, pero a medias: sin correo propio ni un sistema detrás.</p>
+        <p>Todo se opera <b>a mano por WhatsApp</b>: reservas, cobros y seguimiento, uno por uno.</p>
+        <p>Esta propuesta activa el peldaño de <b>Operación</b> (reservas, cobros y tu base) y enciende <b>Datos</b>. Ese es el salto de hoy.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · PUENTE A LA HERRAMIENTA (Árbol Digital) -->
+  <section class="slide center vcenter">
+    <span class="cover-badge" style="align-self:center">Herramienta en vivo</span>
+    <p class="eyebrow">Tu mapa, a detalle</p>
+    <h1>Abramos tu Árbol Digital.</h1>
+    <p class="lead wide">La pirámide es el mapa. Ahora veámoslo <b>en vivo y pieza por pieza</b>: qué ya tienes, qué está en marcha y qué se desbloquea después — y trazamos tu ruta juntos.</p>
+  </section>
+
+  <!-- 9 · QUÉ SIGUE -->
+  <section class="slide vcenter">
+    <p class="eyebrow">El horizonte</p>
+    <h2>Y después, sin prisa.</h2>
+    <p class="lead wide">Cuando la operación fluya y el volumen crezca, <b>automatizamos</b> —que las piezas se hablen solas— y, en su momento, tu <b>sistema propio</b>: más potente y más barato que la suma de rentas.</p>
+    <p class="lead wide" style="margin-top:14px">Subes de peldaño <b>cuando las cuentas lo pidan</b>. Ni antes, ni por moda.</p>
+  </section>
+
+  <!-- 10 · CIERRE -->
+  <section class="slide center vcenter">
+    <p class="eyebrow teal">Ahora sí</p>
+    <h1>Veamos tu propuesta.</h1>
+    <p class="lead wide">Ya sabes dónde estás y hacia dónde vas. Lo que sigue es el <b>siguiente peldaño</b>, con número y fecha.</p>
+    <div class="contacts">
+      <a href="mailto:datatlan@datatlan.tech"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>datatlan@datatlan.tech</a>
+      <a href="https://datatlan.tech"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>datatlan.tech</a>
+    </div>
+  </section>
+
+</div>
+
+<div class="dots" id="dots"></div>
+<div class="navzone prev" id="navPrev" aria-label="Anterior"></div>
+<div class="navzone next" id="navNext" aria-label="Siguiente"></div>
+<div class="hint">← →  ·  P para PDF</div>
+
+<script>
+  const LOGO = `<svg class="logo" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+    <rect x="54" y="30" width="12" height="82" rx="4" fill="#1f86cf"/>
+    <rect x="12" y="93" width="40" height="19" rx="4" fill="#1450ad"/><rect x="68" y="93" width="40" height="19" rx="4" fill="#1450ad"/>
+    <rect x="18" y="72" width="34" height="17" rx="4" fill="#1663bd"/><rect x="68" y="72" width="34" height="17" rx="4" fill="#1663bd"/>
+    <rect x="24" y="51" width="28" height="17" rx="4" fill="#1c7dc6"/><rect x="68" y="51" width="28" height="17" rx="4" fill="#1c7dc6"/>
+    <rect x="30" y="30" width="22" height="17" rx="4" fill="#1f93cf"/><rect x="68" y="30" width="22" height="17" rx="4" fill="#1f93cf"/>
+    <rect x="34" y="8" width="52" height="18" rx="5" fill="#12b0d6"/>
+    <circle cx="43" cy="17" r="1.9" fill="#fff"/><circle cx="49.5" cy="17" r="1.9" fill="#fff"/><circle cx="56" cy="17" r="1.9" fill="#fff"/>
+    <rect x="64" y="14.4" width="16" height="5.2" rx="2.6" fill="#fff"/>
+  </svg>`;
+  document.getElementById('brandLockup').innerHTML = LOGO + '<span>Datatlan</span>';
+
+  // color por peldaño: azul (núcleo) → cian → teal (módulos) → ámbar (evolución)
+  const COLORS = {0:'#94a3b8', 1:'#1d4ed8', 2:'#1c7dc6', 3:'#0891b2', 4:'#068b83', 5:'#b45309'};
+  const RUNGS = [
+    {n:0, name:'Diagnóstico',    q:'¿Dónde estás hoy?',                    tag:'diag',   tagt:'Gratis'},
+    {n:1, name:'Presencia',      q:'¿Te encuentran y te ven profesional?', tag:'nucleo', tagt:'Núcleo'},
+    {n:2, name:'Datos',          q:'¿Hay una base donde vive todo tu negocio?', tag:'modulo', tagt:'Módulos'},
+    {n:3, name:'Operación',      q:'¿Funciona sin ti haciéndolo a mano?',  tag:'modulo', tagt:'Módulos'},
+    {n:4, name:'Automatización', q:'¿Las piezas se hablan solas?',         tag:'evol',   tagt:'Evolución'},
+    {n:5, name:'Sistema propio', q:'¿Ya te quedó chico lo rentado?',       tag:'evol',   tagt:'Evolución'}
+  ];
+  const MAP = [
+    {n:1, name:'Presencia', fr:'Sitio o link, marca-lista, cuenta madre / correo, Google Business', tag:'nucleo', tagt:'Núcleo'},
+    {n:2, name:'Datos', fr:'La base central —clientes, reservas, catálogo— donde vive todo tu negocio.', tag:'modulo', tagt:'Módulos'},
+    {n:3, name:'Operación', fr:'Reservas · Cobros · Órdenes · seguimiento, corriendo sobre tu base.', tag:'modulo', tagt:'Módulos'},
+    {n:4, name:'Automatización', fr:'Flujos que conectan reservas → cobros → base → panel', tag:'evol', tagt:'Evolución'},
+    {n:5, name:'Sistema propio', fr:'Un sistema a la medida, tuyo, que Datatlan mantiene', tag:'evol', tagt:'Evolución'}
+  ];
+
+  function rungHTML(r, state){
+    const cls = state && state[r.n] ? ' '+state[r.n] : '';
+    return `<div class="rung${cls}" data-n="${r.n}">
+      <div class="num" style="background:${COLORS[r.n]}">${r.n}</div>
+      <div class="rbody"><div class="rname">${r.name}</div><div class="rq">${r.q}</div></div>
+      <div class="rtag ${r.tag}">${r.tagt}</div>
+    </div>`;
+  }
+  // pirámide isométrica de 6 niveles (0=base ancha → 5=cima), estilo del logo Datatlan
+  const MONO = 'ui-monospace, Menlo, Consolas, monospace';
+  function pyramidSVG(state){
+    const cx=200, baseY=298, tierH=26, gap=16, topW=252, step=42;
+    let g='';
+    for(let i=0;i<6;i++){
+      const scale=1-i*0.135, w=topW*scale, h=w*0.42, y=baseY - i*step;
+      const col=COLORS[i];
+      const left =`color-mix(in srgb, ${col} 72%, #04122b)`;
+      const right=`color-mix(in srgb, ${col} 86%, #ffffff)`;
+      const st=state&&state[i], dim=st==='dim';
+      const outline = st==='now' ? '#00a89e' : st==='here' ? '#1d4ed8' : null;
+      const nx=cx + w/4, ny=y + h/4 + tierH/2 + 2;
+      g += `<g${dim?' opacity="0.36"':''}>`
+        + `<polygon points="${cx-w/2},${y} ${cx},${y+h/2} ${cx},${y+h/2+tierH} ${cx-w/2},${y+tierH}" fill="${left}"/>`
+        + `<polygon points="${cx+w/2},${y} ${cx},${y+h/2} ${cx},${y+h/2+tierH} ${cx+w/2},${y+tierH}" fill="${right}"/>`
+        + `<polygon points="${cx},${y-h/2} ${cx+w/2},${y} ${cx},${y+h/2} ${cx-w/2},${y}" fill="${col}"${outline?` stroke="${outline}" stroke-width="5"`:''}/>`
+        + `<text x="${nx}" y="${ny}" text-anchor="middle" fill="#fff" font-family="${MONO}" font-size="15" font-weight="700" opacity=".92">${i}</text>`
+        + `</g>`;
+    }
+    return `<svg viewBox="0 0 400 384" role="img" aria-label="Pirámide Datatlan de 6 niveles">${g}</svg>`;
+  }
+  // slide 4 — pirámide completa + lista de niveles (5 arriba → 0 abajo, por column-reverse)
+  document.getElementById('pyrFull').innerHTML = pyramidSVG();
+  document.getElementById('rungList').innerHTML = RUNGS.map(r=>rungHTML(r)).join('');
+  // slide 7 — "estás aquí": Presencia a medias, Operación+Datos activándose, el resto atenuado
+  const HERE = {0:'dim', 1:'here', 2:'now', 3:'now', 4:'dim', 5:'dim'};
+  document.getElementById('ladderHere').innerHTML = RUNGS.map(r=>rungHTML(r, HERE)).join('');
+
+  // slide 5 — tabla de mapeo
+  document.getElementById('mapTable').innerHTML = MAP.map(m=>`
+    <div class="maprow">
+      <div class="mn" style="background:${COLORS[m.n]}">${m.n}</div>
+      <div class="mmid"><div class="mname">${m.name}</div><div class="mfr">${m.fr}</div></div>
+      <div class="mtag ${m.tag==='nucleo'?'rtag nucleo':m.tag==='modulo'?'rtag modulo':'rtag evol'}" style="font-family:var(--mono)">${m.tagt}</div>
+    </div>`).join('');
+
+  // ── navegación ──
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const N = slides.length;
+  let i = 0;
+  const dotsWrap = document.getElementById('dots');
+  slides.forEach((_,k)=>{ const d=document.createElement('i'); d.onclick=()=>go(k); dotsWrap.appendChild(d); });
+  const dots = Array.from(dotsWrap.children);
+  document.getElementById('ctot').textContent = N;
+
+  function go(n){
+    i = Math.max(0, Math.min(N-1, n));
+    slides.forEach((s,k)=> s.classList.toggle('on', k===i));
+    dots.forEach((d,k)=>{ d.classList.toggle('on', k===i); d.classList.toggle('done', k<i); });
+    document.getElementById('cnum').textContent = i+1;
+    document.getElementById('prog').style.width = ((i)/(N-1)*100)+'%';
+  }
+  const next=()=>go(i+1), prev=()=>go(i-1);
+  document.getElementById('navNext').onclick = next;
+  document.getElementById('navPrev').onclick = prev;
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ go(0); } else if(e.key==='End'){ go(N-1); }
+    else if(e.key>='1'&&e.key<='9'){ go(parseInt(e.key,10)-1); }
+    else if(e.key.toLowerCase()==='p'){ e.preventDefault(); window.print(); }
+    else if(e.key.toLowerCase()==='f'){ if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+  });
+  go(0);
+</script>
+</body>
+</html>
