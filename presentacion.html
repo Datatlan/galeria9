@@ -181,6 +181,7 @@
   @media print{
     body{overflow:visible; background:#fff}
     .chrome,.dots,.navzone,.hint,.progress{display:none !important}
+    .deck{position:static; inset:auto}   /* clave: si queda fixed, solo imprime la 1a página */
     .deck::before{opacity:.5}
     .slide{position:relative; inset:auto; display:flex !important; opacity:1 !important;
            height:100vh; width:100vw; page-break-after:always; break-after:page; animation:none}
