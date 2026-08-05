@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galería 9 · Demo del sistema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bone:#F7F3EC; --bone2:#EFE8DC; --card:#FFFDF9; --ink:#211D17; --ink2:#5C554A; --muted:#8B8271;
+    --terra:#B85C38; --terradk:#96431F; --sage:#6E7A63; --sagedk:#515C46; --slate:#5B7080; --gold:#C9A24B; --line:#E4DBCB; --ok:#4F7A52;
+    --serif:"Fraunces",Georgia,serif; --sans:"Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bone);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:-.01em;line-height:1.1}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--terra)}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:40;background:rgba(247,243,236,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:1.2rem;cursor:pointer}
+  .brand .m{width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 32% 30%,var(--gold),var(--terra) 78%);display:grid;place-items:center;color:#fff;font-weight:600;font-size:.9rem;font-family:var(--sans)}
+  .nlinks{display:flex;gap:6px;align-items:center}
+  .nlink{font-size:.86rem;font-weight:500;color:var(--ink2);padding:7px 13px;border-radius:99px;cursor:pointer;transition:.15s;background:none;border:none;font-family:var(--sans)}
+  .nlink:hover{color:var(--terra);background:var(--bone2)}
+  .nlink.at{background:var(--ink);color:var(--bone)}
+  .nlink.at:hover{background:var(--terra);color:#fff}
+  @media(max-width:720px){.nlinks .nlink:not(.at){display:none}}
+
+  section{display:none;animation:fade .4s ease}
+  section.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* landing */
+  .hero{padding:80px 0 60px;text-align:center;position:relative}
+  .hero .aff{font-family:var(--serif);font-style:italic;color:var(--gold);font-size:18px;margin-bottom:14px}
+  .hero h1{font-size:clamp(2.6rem,6vw,4.4rem);letter-spacing:-.03em}
+  .hero p{font-size:1.15rem;color:var(--ink2);max-width:520px;margin:18px auto 0}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+  @media(max-width:760px){.cards{grid-template-columns:1fr}}
+  .lc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;text-align:left;cursor:pointer;transition:.28s;box-shadow:0 12px 30px -18px rgba(33,29,23,.22)}
+  .lc:hover{transform:translateY(-6px);box-shadow:0 26px 50px -22px rgba(33,29,23,.32);border-color:var(--terra)}
+  .lc .i{width:52px;height:52px;border-radius:13px;display:grid;place-items:center;color:#fff;margin-bottom:16px}
+  .lc h3{font-size:1.5rem;margin-bottom:6px}
+  .lc p{font-size:.92rem;color:var(--ink2)}
+  .lc .go{margin-top:16px;font-size:.85rem;font-weight:600;color:var(--terra)}
+  .b-sage{background:linear-gradient(140deg,var(--sage),var(--sagedk))}
+  .b-slate{background:linear-gradient(140deg,var(--slate),#3f5461)}
+  .b-terra{background:linear-gradient(140deg,var(--terra),var(--terradk))}
+  .ic{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+  /* flow shell */
+  .flow{max-width:720px;margin:0 auto;padding:44px 0 80px}
+  .flow .back{background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;font-family:var(--sans);margin-bottom:14px}
+  .flow .back:hover{color:var(--terra)}
+  .flow h2{font-size:2.1rem;margin:6px 0 8px}
+  .flow .lead{color:var(--ink2);margin-bottom:26px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:0 14px 34px -22px rgba(33,29,23,.26)}
+  .field{margin-bottom:18px}
+  .field>label{display:block;font-size:.8rem;font-weight:600;letter-spacing:.03em;color:var(--ink2);margin-bottom:8px}
+  input,textarea,select{width:100%;font-family:var(--sans);font-size:.95rem;color:var(--ink);background:var(--bone);border:1px solid var(--line);border-radius:11px;padding:12px 14px;transition:.15s}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--terra);box-shadow:0 0 0 3px rgba(184,92,56,.12)}
+  textarea{resize:vertical;min-height:80px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:520px){.two{grid-template-columns:1fr}}
+
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1.5px solid var(--line);background:var(--bone);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.15s}
+  .opt:hover{border-color:var(--terra)}
+  .opt.sel{border-color:var(--terra);background:rgba(184,92,56,.07)}
+  .opt .on{font-weight:600;font-size:.96rem}
+  .opt .od{font-size:.82rem;color:var(--muted)}
+  .opt .op{font-family:var(--serif);font-size:1.1rem;color:var(--terradk);white-space:nowrap}
+
+  .slots{display:flex;flex-wrap:wrap;gap:8px}
+  .slot{border:1.5px solid var(--line);background:var(--bone);border-radius:9px;padding:8px 14px;font-size:.86rem;cursor:pointer;transition:.15s}
+  .slot:hover{border-color:var(--terra)}
+  .slot.sel{border-color:var(--terra);background:rgba(184,92,56,.1);color:var(--terradk);font-weight:600}
+
+  .row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .row .emj{font-size:1.4rem;width:32px;text-align:center}
+  .row .info{flex:1}
+  .row .info h4{font-family:var(--sans);font-size:.94rem;font-weight:600}
+  .row .info p{font-size:.8rem;color:var(--muted)}
+  .qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .qty button{width:32px;height:32px;border:none;background:var(--bone);cursor:pointer;font-size:1rem;color:var(--ink)}
+  .qty button:hover{background:var(--terra);color:#fff}
+  .qty span{width:34px;text-align:center;font-weight:600;font-size:.9rem}
+
+  .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px;padding-top:16px;border-top:2px solid var(--ink)}
+  .total .v{font-family:var(--serif);font-size:1.9rem;color:var(--terra)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 26px;border-radius:99px;font-weight:500;font-size:.95rem;cursor:pointer;border:none;font-family:var(--sans);transition:.2s;width:100%;margin-top:22px}
+  .btn-primary{background:var(--terra);color:#fff;box-shadow:0 10px 24px -8px rgba(184,92,56,.6)}
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* success */
+  .done{text-align:center;padding:30px 10px}
+  .done .big{width:70px;height:70px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:2rem;margin:0 auto 18px}
+  .done h3{font-size:1.7rem;margin-bottom:8px}
+  .done p{color:var(--ink2)}
+  .done .land{margin-top:18px;font-size:.84rem;color:var(--muted);background:var(--bone2);border-radius:10px;padding:12px;display:inline-flex;gap:8px;align-items:center}
+  .done .land b{color:var(--terradk)}
+
+  /* airtable view */
+  .atwrap{padding:36px 0 80px}
+  .atbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+  .attabs{display:flex;gap:6px;flex-wrap:wrap}
+  .attab{font-size:.85rem;font-weight:500;padding:8px 15px;border-radius:9px;cursor:pointer;background:var(--card);border:1px solid var(--line);color:var(--ink2);display:flex;align-items:center;gap:8px}
+  .attab.on{background:var(--ink);color:var(--bone);border-color:var(--ink)}
+  .attab .cnt{font-size:.72rem;background:var(--terra);color:#fff;border-radius:99px;padding:1px 7px}
+  .attab.on .cnt{background:var(--gold)}
+  .atclear{font-size:.8rem;color:var(--muted);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;font-family:var(--sans)}
+  .atclear:hover{color:var(--terra);border-color:var(--terra)}
+  .atgrid{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto;box-shadow:0 12px 30px -20px rgba(33,29,23,.22)}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:640px}
+  th{text-align:left;padding:11px 14px;background:var(--bone2);border-bottom:1px solid var(--line);border-right:1px solid var(--line);font-weight:600;color:var(--ink2);font-size:.74rem;letter-spacing:.03em;white-space:nowrap}
+  th .fd{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+  td{padding:10px 14px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);color:var(--ink);vertical-align:top}
+  tr:hover td{background:#fbf7ef}
+  .pill{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 9px;border-radius:99px}
+  .pill.pagado{background:rgba(79,122,82,.15);color:var(--ok)} .pill.sol{background:rgba(201,162,75,.18);color:#8a6f22}
+  .pill.tent{background:rgba(91,112,128,.15);color:var(--slate)} .pill.nuevo{background:rgba(184,92,56,.12);color:var(--terradk)}
+  .empty{padding:40px;text-align:center;color:var(--muted);font-size:.9rem}
+  .demoflag{position:fixed;bottom:12px;left:12px;font-size:.7rem;color:var(--muted);background:rgba(247,243,236,.9);border:1px solid var(--line);border-radius:8px;padding:5px 10px;z-index:50}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <div class="brand" onclick="go('landing')"><span class="m">9</span>Galería 9</div>
+    <div class="nlinks">
+      <button class="nlink" onclick="go('fer')">Reserva con Fer</button>
+      <button class="nlink" onclick="go('evento')">Cotiza tu evento</button>
+      <button class="nlink" onclick="go('contacto')">Contacto</button>
+      <button class="nlink at" onclick="go('airtable')">▦ Airtable</button>
+    </div>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<section id="landing" class="on">
+  <div class="wrap hero">
+    <div class="aff">yo soy amable · te agradezco</div>
+    <h1>Bienvenida a<br>Galería 9</h1>
+    <p>Reserva, cotiza y conecta — todo en un solo lugar. Y mira cómo cae en tu sistema en tiempo real.</p>
+    <div class="cards">
+      <div class="lc" onclick="go('fer')">
+        <div class="i b-sage"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3c2 3 2 5 0 7-2-2-2-4 0-7Z"/><path d="M5 21c0-4 3-7 7-7s7 3 7 7"/></svg></div>
+        <h3>Reserva con Fer</h3>
+        <p>Agenda tu clase o sesión de soundhealing y respiración. Paga en línea.</p>
+        <div class="go">Reservar →</div>
+      </div>
+      <div class="lc" onclick="go('evento')">
+        <div class="i b-slate"><svg class="ic" viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
+        <h3>Cotiza tu evento</h3>
+        <p>Terraza o Roof, con extras a tu medida. Recibe tu cotización al momento.</p>
+        <div class="go">Cotizar →</div>
+      </div>
+      <div class="lc" onclick="go('contacto')">
+        <div class="i b-terra"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="m4 6 8 6 8-6"/></svg></div>
+        <h3>Contáctanos</h3>
+        <p>¿Tienes una idea o una marca? Cuéntanos y te buscamos.</p>
+        <div class="go">Escribir →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FER -->
+<section id="fer">
+  <div class="wrap flow">
+    <button class="back" onclick="go('landing')">← Inicio</button>
+    <div class="eyebrow">ferdelamonja</div>
+    <h2>Reserva con Fer</h2>
+    <p class="lead">Soundhealing, respiración y mindfulness. Elige tu experiencia, tu día y hora.</p>
+    <div class="panel" id="ferForm">
+      <div class="field"><label>¿Qué te gustaría?</label><div class="opts" id="ferSvc"></div></div>
+      <div class="two">
+        <div class="field"><label>Día</label><input type="date" id="ferDate"></div>
+        <div class="field"><label>Horario</label><div class="slots" id="ferSlots"></div></div>
+      </div>
+      <div class="two">
+        <div class="field"><label>Tu nombre</label><input id="ferName" placeholder="Nombre completo"></div>
+        <div class="field"><label>WhatsApp o correo</label><input id="ferContact" placeholder="33 0000 0000"></div>
+      </div>
+      <button class="btn btn-primary" id="ferBtn" onclick="submitFer()">Pagar y reservar · <span id="ferTot">$0</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- EVENTO -->
+<section id="evento">
+  <div class="wrap flow">
+    <button class="back" onclick="go('landing')">← Inicio</button>
+    <div class="eyebrow">Eventos</div>
+    <h2>Cotiza tu evento</h2>
+    <p class="lead">Arma tu evento y recibe la cotización al momento. El total se calcula en vivo.</p>
+    <div class="panel" id="evForm">
+      <div class="field"><label>¿Dónde?</label><div class="opts" id="evSpace"></div></div>
+      <div class="two">
+        <div class="field"><label>Fecha</label><input type="date" id="evDate"></div>
+        <div class="field"><label>Horario</label><select id="evTime"><option>Matutino (10–15h)</option><option>Vespertino (15–20h)</option><option>Nocturno (19–24h)</option></select></div>
+      </div>
+      <div class="field"><label>Upgrades (opcional)</label><div id="evProps"></div></div>
+      <div class="field"><label>Difusión (opcional)</label><div class="opts" id="evDif"></div></div>
+      <div class="two">
+        <div class="field"><label>Tu nombre</label><input id="evName" placeholder="Nombre completo"></div>
+        <div class="field"><label>WhatsApp o correo</label><input id="evContact" placeholder="33 0000 0000"></div>
+      </div>
+      <div class="total"><span>Total estimado</span><span class="v" id="evTot">$0</span></div>
+      <button class="btn btn-primary" onclick="submitEv()">Solicitar cotización</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="wrap flow">
+    <button class="back" onclick="go('landing')">← Inicio</button>
+    <div class="eyebrow">Hablemos</div>
+    <h2>Contáctanos</h2>
+    <p class="lead">Cuéntanos qué traes en mente y te buscamos.</p>
+    <div class="panel">
+      <div class="two">
+        <div class="field"><label>Tu nombre</label><input id="coName" placeholder="Nombre"></div>
+        <div class="field"><label>WhatsApp o correo</label><input id="coContact" placeholder="33 0000 0000"></div>
+      </div>
+      <div class="field"><label>¿Qué te interesa?</label><select id="coInt"><option>Rentar un spot en el Market</option><option>Hacer un evento</option><option>Tomar clases / servicios</option><option>Ser aliado (cabina)</option><option>Otro</option></select></div>
+      <div class="field"><label>Mensaje</label><textarea id="coMsg" placeholder="Cuéntanos…"></textarea></div>
+      <button class="btn btn-primary" onclick="submitCo()">Enviar solicitud</button>
+    </div>
+  </div>
+</section>
+
+<!-- AIRTABLE VIEW -->
+<section id="airtable">
+  <div class="wrap atwrap">
+    <div class="eyebrow">Detrás de cámaras · el sistema</div>
+    <h2 style="font-family:var(--serif);font-size:2rem;margin:6px 0 4px">Base de Airtable <span style="font-size:.85rem;font-family:var(--sans);color:var(--muted)">— simulada en este demo</span></h2>
+    <p class="lead" style="color:var(--ink2);margin-bottom:22px">Cada cosa que envías arriba cae aquí, en su tabla. Así se verá tu base real.</p>
+    <div class="atbar">
+      <div class="attabs" id="atTabs"></div>
+      <button class="atclear" onclick="clearDemo()">Limpiar demo</button>
+    </div>
+    <div class="atgrid" id="atGrid"></div>
+  </div>
+</section>
+
+<div class="demoflag">Demo · datos guardados solo en este navegador</div>
+
+<script>
+/* ============ catálogos ============ */
+const FER_SVC = [
+  {id:'grupal', name:'Clase de soundhealing (grupal)', desc:'60 min · sesión abierta', price:350},
+  {id:'uno', name:'Sesión 1:1 de soundhealing', desc:'60 min · privada', price:650},
+  {id:'resp', name:'Respiración & mindfulness', desc:'45 min · grupal', price:450},
+];
+const FER_SLOTS = ['08:00','10:00','12:00','17:00','19:00'];
+const EV_SPACE = [
+  {id:'terraza', name:'Terraza', desc:'Patio íntimo · planta baja', price:4500},
+  {id:'roof', name:'Roof', desc:'Azotea · 3 zonas', price:6500},
+  {id:'ambos', name:'Terraza + Roof', desc:'La casa completa para tu evento', price:9500},
+];
+const EV_PROPS = [
+  {id:'crist', emj:'🥂', name:'Cristalería mimosas', unit:'set 12 · día', price:200},
+  {id:'sillas', emj:'🪑', name:'Sillas', unit:'pza · día', price:35},
+  {id:'mesas', emj:'🟫', name:'Mesas', unit:'pza · día', price:120},
+  {id:'av', emj:'📽️', name:'Proyección & AV', unit:'evento', price:1600},
+];
+const EV_DIF = [
+  {id:'no', name:'Sin difusión', price:0},
+  {id:'presencia', name:'Presencia · 1 post + 2 historias', price:1200},
+  {id:'impulso', name:'Impulso · reel + historias + post', price:2900},
+];
+
+/* ============ store (hoy localStorage · mañana Airtable) ============ */
+const KEY='g9demo_v1';
+const WORKER='https://galeria9-airtable.datatlan.workers.dev';
+const store = {
+  data(){ try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}} },
+  all(t){ return this.data()[t]||[] },
+  add(t,rec){
+    // 1) espejo local (para la vista "Airtable" del demo)
+    const d=this.data(); d[t]=d[t]||[];
+    d[t].unshift({...rec, _at:new Date().toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})});
+    localStorage.setItem(KEY,JSON.stringify(d));
+    // 2) Airtable REAL vía Cloudflare Worker
+    const tid = TABLES[t] && TABLES[t].tid;
+    if(tid){
+      const f={...rec};
+      ['Monto','Total'].forEach(k=>{ if(f[k]!=null) f[k]=Number(String(f[k]).replace(/[^0-9.]/g,''))||0; });
+      fetch(`${WORKER}?t=${tid}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:f, typecast:true})})
+        .then(r=>r.json())
+        .then(j=>{ if(j&&j.error) console.warn('⚠ Airtable', j.error); else console.log('✓ cayó en Airtable:', t, j&&j.id); })
+        .catch(e=>console.warn('⚠ Worker', e));
+    }
+  },
+  clear(){ localStorage.removeItem(KEY); }
+};
+
+/* ============ tablas Airtable (schema demo) ============ */
+const TABLES = {
+  agendaFer:   {tid:'tblVKnNaa33lo9dmR', label:'Agenda de Fer', color:'#6E7A63', cols:['Cliente','Servicio','Fecha','Hora','Monto','Estado','Creado']},
+  cotizaciones:{tid:'tbl96TO4Cu5JNBMIa', label:'Cotizaciones', color:'#B85C38', cols:['Cliente','Espacio','Fecha','Extras','Total','Estado','Creado']},
+  agendaEventos:{tid:'tblfFLGgQ3iyKXviS', label:'Agenda de eventos', color:'#5B7080', cols:['Cliente','Espacio','Fecha','Horario','Estado','Creado']},
+  contacto:    {tid:'tblYCX29AQO4nhTNo', label:'Solicitudes de contacto', color:'#C9A24B', cols:['Nombre','Contacto','Interés','Mensaje','Estado','Creado']},
+};
+let curTab='agendaFer';
+
+/* ============ nav ============ */
+function go(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===id));
+  if(id==='airtable') renderAirtable();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ FER ============ */
+let ferState={svc:null,slot:null};
+function renderFer(){
+  document.getElementById('ferSvc').innerHTML = FER_SVC.map(s=>`
+    <div class="opt ${ferState.svc===s.id?'sel':''}" onclick="pickFer('${s.id}')">
+      <div><div class="on">${s.name}</div><div class="od">${s.desc}</div></div>
+      <div class="op">$${s.price}</div></div>`).join('');
+  document.getElementById('ferSlots').innerHTML = FER_SLOTS.map(t=>`<div class="slot ${ferState.slot===t?'sel':''}" onclick="pickSlot('${t}')">${t}</div>`).join('');
+  const s=FER_SVC.find(x=>x.id===ferState.svc);
+  document.getElementById('ferTot').textContent = s?('$'+s.price):'$0';
+}
+function pickFer(id){ ferState.svc=id; renderFer(); }
+function pickSlot(t){ ferState.slot=t; renderFer(); }
+function submitFer(){
+  const s=FER_SVC.find(x=>x.id===ferState.svc);
+  const name=val('ferName'), contact=val('ferContact'), date=val('ferDate');
+  if(!s||!ferState.slot||!date||!name){ alert('Completa servicio, día, horario y tu nombre.'); return; }
+  store.add('agendaFer',{Cliente:name, Contacto:contact, Servicio:s.name, Fecha:date, Hora:ferState.slot, Monto:'$'+s.price, Estado:'Pagado'});
+  successFlow('fer','¡Reservado y pagado!','Tu lugar con Fer está confirmado. (Pago simulado.)','Agenda de Fer');
+  ferState={svc:null,slot:null};
+}
+
+/* ============ EVENTO ============ */
+let evState={space:null, props:{}, dif:'no'};
+function renderEv(){
+  document.getElementById('evSpace').innerHTML = EV_SPACE.map(s=>`
+    <div class="opt ${evState.space===s.id?'sel':''}" onclick="pickSpace('${s.id}')">
+      <div><div class="on">${s.name}</div><div class="od">${s.desc}</div></div>
+      <div class="op">$${s.price.toLocaleString('es-MX')}</div></div>`).join('');
+  document.getElementById('evProps').innerHTML = EV_PROPS.map(p=>`
+    <div class="row"><span class="emj">${p.emj}</span>
+      <div class="info"><h4>${p.name}</h4><p>$${p.price} · ${p.unit}</p></div>
+      <div class="qty"><button onclick="qty('${p.id}',-1)">−</button><span>${evState.props[p.id]||0}</span><button onclick="qty('${p.id}',1)">+</button></div>
+    </div>`).join('');
+  document.getElementById('evDif').innerHTML = EV_DIF.map(d=>`
+    <div class="opt ${evState.dif===d.id?'sel':''}" onclick="pickDif('${d.id}')" style="padding:11px 15px">
+      <div class="on" style="font-size:.9rem">${d.name}</div><div class="op" style="font-size:1rem">${d.price?('$'+d.price.toLocaleString('es-MX')):'Incluido'}</div></div>`).join('');
+  document.getElementById('evTot').textContent = '$'+evTotal().toLocaleString('es-MX');
+}
+function pickSpace(id){ evState.space=id; renderEv(); }
+function pickDif(id){ evState.dif=id; renderEv(); }
+function qty(id,d){ evState.props[id]=Math.max(0,(evState.props[id]||0)+d); renderEv(); }
+function evTotal(){
+  let t=0; const s=EV_SPACE.find(x=>x.id===evState.space); if(s)t+=s.price;
+  EV_PROPS.forEach(p=>t+=(evState.props[p.id]||0)*p.price);
+  const d=EV_DIF.find(x=>x.id===evState.dif); if(d)t+=d.price;
+  return t;
+}
+function evExtrasStr(){
+  const parts=[]; EV_PROPS.forEach(p=>{ if(evState.props[p.id]) parts.push(`${p.name}×${evState.props[p.id]}`); });
+  const d=EV_DIF.find(x=>x.id===evState.dif); if(d&&d.price) parts.push(d.name.split(' ·')[0]);
+  return parts.length?parts.join(', '):'—';
+}
+function submitEv(){
+  const s=EV_SPACE.find(x=>x.id===evState.space);
+  const name=val('evName'), contact=val('evContact'), date=val('evDate'), time=val('evTime');
+  if(!s||!date||!name){ alert('Elige espacio, fecha y tu nombre.'); return; }
+  const total='$'+evTotal().toLocaleString('es-MX');
+  store.add('cotizaciones',{Cliente:name, Contacto:contact, Espacio:s.name, Fecha:date, Extras:evExtrasStr(), Total:total, Estado:'Solicitada'});
+  store.add('agendaEventos',{Cliente:name, Espacio:s.name, Fecha:date, Horario:time, Estado:'Tentativo'});
+  successFlow('evento','¡Cotización lista!','Tu evento por '+total+' quedó registrado. Te contactamos para confirmar.','Cotizaciones + Agenda de eventos');
+  evState={space:null,props:{},dif:'no'};
+}
+
+/* ============ CONTACTO ============ */
+function submitCo(){
+  const name=val('coName'), contact=val('coContact'), intr=val('coInt'), msg=val('coMsg');
+  if(!name||!contact){ alert('Déjanos tu nombre y un contacto.'); return; }
+  store.add('contacto',{Nombre:name, Contacto:contact, 'Interés':intr, Mensaje:msg||'—', Estado:'Nuevo'});
+  successFlow('contacto','¡Recibido!','Gracias, '+name.split(' ')[0]+'. Te buscamos pronto.','Solicitudes de contacto');
+}
+
+/* ============ success ============ */
+function successFlow(section,title,msg,table){
+  const sec=document.getElementById(section);
+  sec.querySelector('.panel').innerHTML = `
+    <div class="done"><div class="big">✓</div><h3>${title}</h3><p>${msg}</p>
+      <div class="land">▦ Cayó en <b>${table}</b> — <span style="cursor:pointer;text-decoration:underline" onclick="go('airtable')">ver en Airtable</span></div>
+      <div><button class="btn btn-primary" style="max-width:260px;margin:22px auto 0" onclick="location.reload()">Hacer otra prueba</button></div>
+    </div>`;
+}
+
+/* ============ AIRTABLE VIEW ============ */
+function renderAirtable(){
+  document.getElementById('atTabs').innerHTML = Object.entries(TABLES).map(([k,t])=>{
+    const n=store.all(k).length;
+    return `<div class="attab ${curTab===k?'on':''}" onclick="setTab('${k}')"><span class="fd" style="background:${t.color};width:8px;height:8px;border-radius:2px;display:inline-block"></span>${t.label}${n?`<span class="cnt">${n}</span>`:''}</div>`;
+  }).join('');
+  const t=TABLES[curTab], rows=store.all(curTab);
+  let html=`<table><thead><tr>${t.cols.map(c=>`<th><span class="fd" style="background:${t.color}"></span>${c}</th>`).join('')}</tr></thead><tbody>`;
+  if(!rows.length){ html+=`</tbody></table><div class="empty">Aún no hay registros. Envía algo desde los flujos y aparecerá aquí. ✨</div>`; }
+  else{
+    html+=rows.map(r=>`<tr>${t.cols.map(c=>{
+      let v = c==='Creado'? r._at : (r[c]!==undefined?r[c]:'—');
+      if(c==='Estado') v=`<span class="pill ${pillClass(r[c])}">${r[c]}</span>`;
+      return `<td>${v}</td>`;
+    }).join('')}</tr>`).join('')+'</tbody></table>';
+  }
+  document.getElementById('atGrid').innerHTML = html;
+}
+function pillClass(s){ return ({'Pagado':'pagado','Solicitada':'sol','Tentativo':'tent','Nuevo':'nuevo'})[s]||'nuevo'; }
+function setTab(k){ curTab=k; renderAirtable(); }
+function clearDemo(){ if(confirm('¿Borrar todos los registros del demo?')){ store.clear(); renderAirtable(); } }
+
+/* ============ util ============ */
+function val(id){ return document.getElementById(id).value.trim(); }
+renderFer(); renderEv();
+</script>
+</body>
+</html>
