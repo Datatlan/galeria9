@@ -139,7 +139,6 @@
       <button class="nlink" onclick="go('fer')">Reserva con Fer</button>
       <button class="nlink" onclick="go('evento')">Cotiza tu evento</button>
       <button class="nlink" onclick="go('contacto')">Contacto</button>
-      <button class="nlink at" onclick="go('airtable')">▦ Airtable</button>
     </div>
   </div>
 </nav>
@@ -239,21 +238,7 @@
   </div>
 </section>
 
-<!-- AIRTABLE VIEW -->
-<section id="airtable">
-  <div class="wrap atwrap">
-    <div class="eyebrow">Detrás de cámaras · el sistema</div>
-    <h2 style="font-family:var(--serif);font-size:2rem;margin:6px 0 4px">Base de Airtable <span style="font-size:.85rem;font-family:var(--sans);color:var(--muted)">— simulada en este demo</span></h2>
-    <p class="lead" style="color:var(--ink2);margin-bottom:22px">Cada cosa que envías arriba cae aquí, en su tabla. Así se verá tu base real.</p>
-    <div class="atbar">
-      <div class="attabs" id="atTabs"></div>
-      <button class="atclear" onclick="clearDemo()">Limpiar demo</button>
-    </div>
-    <div class="atgrid" id="atGrid"></div>
-  </div>
-</section>
-
-<div class="demoflag">Demo · datos guardados solo en este navegador</div>
+<div class="demoflag">Demo · conectado a Airtable en vivo</div>
 
 <script>
 /* ============ catálogos ============ */
@@ -280,44 +265,29 @@ const EV_DIF = [
   {id:'impulso', name:'Impulso · reel + historias + post', price:2900},
 ];
 
-/* ============ store (hoy localStorage · mañana Airtable) ============ */
-const KEY='g9demo_v1';
+/* ============ store → Airtable vía Cloudflare Worker ============ */
 const WORKER='https://galeria9-airtable.datatlan.workers.dev';
+const TID = {
+  agendaFer:'tblVKnNaa33lo9dmR',
+  cotizaciones:'tbl96TO4Cu5JNBMIa',
+  agendaEventos:'tblfFLGgQ3iyKXviS',
+  contacto:'tblYCX29AQO4nhTNo',
+};
 const store = {
-  data(){ try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}} },
-  all(t){ return this.data()[t]||[] },
   add(t,rec){
-    // 1) espejo local (para la vista "Airtable" del demo)
-    const d=this.data(); d[t]=d[t]||[];
-    d[t].unshift({...rec, _at:new Date().toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})});
-    localStorage.setItem(KEY,JSON.stringify(d));
-    // 2) Airtable REAL vía Cloudflare Worker
-    const tid = TABLES[t] && TABLES[t].tid;
-    if(tid){
-      const f={...rec};
-      ['Monto','Total'].forEach(k=>{ if(f[k]!=null) f[k]=Number(String(f[k]).replace(/[^0-9.]/g,''))||0; });
-      fetch(`${WORKER}?t=${tid}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:f, typecast:true})})
-        .then(r=>r.json())
-        .then(j=>{ if(j&&j.error) console.warn('⚠ Airtable', j.error); else console.log('✓ cayó en Airtable:', t, j&&j.id); })
-        .catch(e=>console.warn('⚠ Worker', e));
-    }
-  },
-  clear(){ localStorage.removeItem(KEY); }
+    const tid = TID[t]; if(!tid) return;
+    const f={...rec};
+    ['Monto','Total'].forEach(k=>{ if(f[k]!=null) f[k]=Number(String(f[k]).replace(/[^0-9.]/g,''))||0; });
+    return fetch(`${WORKER}?t=${tid}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:f, typecast:true})})
+      .then(r=>r.json())
+      .then(j=>{ if(j&&j.error) console.warn('⚠ Airtable', j.error); else console.log('✓ cayó en Airtable:', t, j&&j.id); })
+      .catch(e=>console.warn('⚠ Worker', e));
+  }
 };
-
-/* ============ tablas Airtable (schema demo) ============ */
-const TABLES = {
-  agendaFer:   {tid:'tblVKnNaa33lo9dmR', label:'Agenda de Fer', color:'#6E7A63', cols:['Cliente','Servicio','Fecha','Hora','Monto','Estado','Creado']},
-  cotizaciones:{tid:'tbl96TO4Cu5JNBMIa', label:'Cotizaciones', color:'#B85C38', cols:['Cliente','Espacio','Fecha','Extras','Total','Estado','Creado']},
-  agendaEventos:{tid:'tblfFLGgQ3iyKXviS', label:'Agenda de eventos', color:'#5B7080', cols:['Cliente','Espacio','Fecha','Horario','Estado','Creado']},
-  contacto:    {tid:'tblYCX29AQO4nhTNo', label:'Solicitudes de contacto', color:'#C9A24B', cols:['Nombre','Contacto','Interés','Mensaje','Estado','Creado']},
-};
-let curTab='agendaFer';
 
 /* ============ nav ============ */
 function go(id){
   document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===id));
-  if(id==='airtable') renderAirtable();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -398,32 +368,10 @@ function successFlow(section,title,msg,table){
   const sec=document.getElementById(section);
   sec.querySelector('.panel').innerHTML = `
     <div class="done"><div class="big">✓</div><h3>${title}</h3><p>${msg}</p>
-      <div class="land">▦ Cayó en <b>${table}</b> — <span style="cursor:pointer;text-decoration:underline" onclick="go('airtable')">ver en Airtable</span></div>
+      <div class="land">▦ Registrado en <b>${table}</b> ✓</div>
       <div><button class="btn btn-primary" style="max-width:260px;margin:22px auto 0" onclick="location.reload()">Hacer otra prueba</button></div>
     </div>`;
 }
-
-/* ============ AIRTABLE VIEW ============ */
-function renderAirtable(){
-  document.getElementById('atTabs').innerHTML = Object.entries(TABLES).map(([k,t])=>{
-    const n=store.all(k).length;
-    return `<div class="attab ${curTab===k?'on':''}" onclick="setTab('${k}')"><span class="fd" style="background:${t.color};width:8px;height:8px;border-radius:2px;display:inline-block"></span>${t.label}${n?`<span class="cnt">${n}</span>`:''}</div>`;
-  }).join('');
-  const t=TABLES[curTab], rows=store.all(curTab);
-  let html=`<table><thead><tr>${t.cols.map(c=>`<th><span class="fd" style="background:${t.color}"></span>${c}</th>`).join('')}</tr></thead><tbody>`;
-  if(!rows.length){ html+=`</tbody></table><div class="empty">Aún no hay registros. Envía algo desde los flujos y aparecerá aquí. ✨</div>`; }
-  else{
-    html+=rows.map(r=>`<tr>${t.cols.map(c=>{
-      let v = c==='Creado'? r._at : (r[c]!==undefined?r[c]:'—');
-      if(c==='Estado') v=`<span class="pill ${pillClass(r[c])}">${r[c]}</span>`;
-      return `<td>${v}</td>`;
-    }).join('')}</tr>`).join('')+'</tbody></table>';
-  }
-  document.getElementById('atGrid').innerHTML = html;
-}
-function pillClass(s){ return ({'Pagado':'pagado','Solicitada':'sol','Tentativo':'tent','Nuevo':'nuevo'})[s]||'nuevo'; }
-function setTab(k){ curTab=k; renderAirtable(); }
-function clearDemo(){ if(confirm('¿Borrar todos los registros del demo?')){ store.clear(); renderAirtable(); } }
 
 /* ============ util ============ */
 function val(id){ return document.getElementById(id).value.trim(); }
