@@ -51,6 +51,21 @@
   .b-sage{background:linear-gradient(140deg,var(--sage),var(--sagedk))}
   .b-slate{background:linear-gradient(140deg,var(--slate),#3f5461)}
   .b-terra{background:linear-gradient(140deg,var(--terra),var(--terradk))}
+  /* cabinas */
+  .cabgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+  @media(max-width:760px){.cabgrid{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.cabgrid{grid-template-columns:1fr}}
+  .cab{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;position:relative;transition:transform .25s,box-shadow .25s,border-color .25s;box-shadow:0 10px 26px -20px rgba(33,29,23,.22)}
+  .cab .cabtag{font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .cab h3{font-size:1.35rem;margin-bottom:4px}
+  .cab .cabsvc{font-size:.85rem;color:var(--ink2);min-height:36px}
+  .cab .go{margin-top:12px;font-size:.85rem;font-weight:600;color:var(--terra);display:inline-flex;gap:6px;transition:gap .2s}
+  .cab .soon{margin-top:12px;display:inline-block;font-size:.72rem;color:var(--muted);background:var(--bone2);border-radius:99px;padding:4px 11px}
+  .cab.active{cursor:pointer;border-color:var(--sage)}
+  .cab.active::before{content:"● Disponible";position:absolute;top:16px;right:16px;font-size:.66rem;font-weight:600;color:var(--sage)}
+  .cab.active:hover{transform:translateY(-5px);box-shadow:0 22px 44px -22px rgba(33,29,23,.32);border-color:var(--terra)}
+  .cab.active:hover .go{gap:11px}
+  .cab:not(.active){opacity:.72}
   .ic{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 
   /* flow shell */
@@ -136,7 +151,7 @@
   <div class="wrap nav-in">
     <div class="brand" onclick="go('landing')"><span class="m">9</span>Galería 9</div>
     <div class="nlinks">
-      <button class="nlink" onclick="go('fer')">Reserva con Fer</button>
+      <button class="nlink" onclick="go('cabinas')">Cabinas</button>
       <button class="nlink" onclick="go('evento')">Cotiza tu evento</button>
       <button class="nlink" onclick="go('contacto')">Contacto</button>
     </div>
@@ -150,11 +165,11 @@
     <h1>Bienvenida a<br>Galería 9</h1>
     <p>Reserva, cotiza y conecta — todo en un solo lugar. Y mira cómo cae en tu sistema en tiempo real.</p>
     <div class="cards">
-      <div class="lc" onclick="go('fer')">
+      <div class="lc" onclick="go('cabinas')">
         <div class="i b-sage"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3c2 3 2 5 0 7-2-2-2-4 0-7Z"/><path d="M5 21c0-4 3-7 7-7s7 3 7 7"/></svg></div>
-        <h3>Reserva con Fer</h3>
-        <p>Agenda tu clase o sesión de soundhealing y respiración. Paga en línea.</p>
-        <div class="go">Reservar →</div>
+        <h3>Cabinas de bienestar</h3>
+        <p>Terapia, masajes, nutrición, soundhealing y más. Reserva con Fer en línea.</p>
+        <div class="go">Ver cabinas →</div>
       </div>
       <div class="lc" onclick="go('evento')">
         <div class="i b-slate"><svg class="ic" viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
@@ -172,10 +187,52 @@
   </div>
 </section>
 
+<!-- CABINAS -->
+<section id="cabinas">
+  <div class="wrap flow" style="max-width:940px">
+    <button class="back" onclick="go('landing')">← Inicio</button>
+    <div class="eyebrow">Bienestar · Planta alta</div>
+    <h2>Nuestras cabinas</h2>
+    <p class="lead">Marcas residentes de bienestar. Hoy reservas en línea con Fer; las demás, muy pronto.</p>
+    <div class="cabgrid">
+      <div class="cab active" onclick="go('fer')">
+        <div class="cabtag">Cabina · ferdelamonja</div>
+        <h3>Fer</h3>
+        <div class="cabsvc">Soundhealing · respiración · mindfulness</div>
+        <div class="go">Reservar →</div>
+      </div>
+      <div class="cab">
+        <div class="cabtag">Cabina · Terapia</div>
+        <h3>Terapia</h3>
+        <div class="cabsvc">Inconsciente y reprogramación</div>
+        <span class="soon">Próximamente en línea</span>
+      </div>
+      <div class="cab">
+        <div class="cabtag">Cabina · Arigato 88</div>
+        <h3>Arigato 88</h3>
+        <div class="cabsvc">Masajes terapéuticos</div>
+        <span class="soon">Próximamente en línea</span>
+      </div>
+      <div class="cab">
+        <div class="cabtag">Cabina · Jar Almodovar</div>
+        <h3>Jar Almodovar</h3>
+        <div class="cabsvc">Regeneración nutricional</div>
+        <span class="soon">Próximamente en línea</span>
+      </div>
+      <div class="cab">
+        <div class="cabtag">Cabina</div>
+        <h3>Ceja &amp; depilación</h3>
+        <div class="cabsvc">Diseño en depilación y ceja</div>
+        <span class="soon">Próximamente en línea</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FER -->
 <section id="fer">
   <div class="wrap flow">
-    <button class="back" onclick="go('landing')">← Inicio</button>
+    <button class="back" onclick="go('cabinas')">← Cabinas</button>
     <div class="eyebrow">ferdelamonja</div>
     <h2>Reserva con Fer</h2>
     <p class="lead">Soundhealing, respiración y mindfulness. Elige tu experiencia, tu día y hora.</p>
