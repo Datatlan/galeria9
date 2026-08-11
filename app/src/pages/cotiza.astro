@@ -1,0 +1,274 @@
+---
+import Base from '../layouts/Base.astro';
+import { espacios, extras, categorias } from '../data/catalogo.js';
+
+const pasos = ['Proyecto', 'Espacio', 'Detalles', 'Extras', 'Contacto'];
+const dataForClient = { espacios, extras };
+---
+<Base title="Cotiza tu evento — Galería 9" description="Arma tu cotización de evento en Galería 9 en un par de minutos.">
+  <section class="cotiza section">
+    <div class="wrap">
+      <header class="cotiza__head reveal">
+        <span class="eyebrow">Activa tu marca</span>
+        <h1 class="h2" style="margin-top:1rem">Diseñemos tu experiencia.</h1>
+        <p class="lead" style="max-width:52ch">Comparte lo que sabes, reúne a tu comunidad, haz crecer tu proyecto. Elige espacio, duración y extras — recibe un estimado al instante. Nosotros te contactamos para afinar los detalles.</p>
+      </header>
+
+      <ol class="steps" id="steps" aria-label="Progreso">
+        {pasos.map((p, i) => (
+          <li class="step" data-step={i}>
+            <span class="step__dot">{i + 1}</span>
+            <span class="step__label">{p}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div class="cotiza__grid">
+        <form id="quoteForm" class="panels" novalidate>
+          <!-- 1 · Proyecto -->
+          <fieldset class="panel is-active" data-panel="0">
+            <legend class="panel__title">Cuéntanos de tu proyecto</legend>
+            <div class="fields">
+              <label class="field field--wide">
+                <span>Nombre de la marca o proyecto</span>
+                <input type="text" name="proyecto" placeholder="Tu marca / proyecto" required />
+              </label>
+              <label class="field field--wide">
+                <span>Tipo de evento, taller o experiencia</span>
+                <input type="text" name="tipoEvento" placeholder="Ej. taller de cerámica, lanzamiento, cata..." required />
+              </label>
+              <label class="field field--wide">
+                <span>Objetivo principal del evento</span>
+                <textarea name="objetivo" rows="2" placeholder="¿Qué quieres lograr?" required></textarea>
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- 2 · Espacio -->
+          <fieldset class="panel" data-panel="1">
+            <legend class="panel__title">¿Dónde lo celebramos?</legend>
+            <div class="cards">
+              {espacios.map((e) => (
+                <label class="card" data-price={e.precioHora}>
+                  <input type="radio" name="espacio" value={e.id} required />
+                  <span class="card__body">
+                    <span class="card__name">{e.nombre}</span>
+                    <span class="card__desc muted">{e.desc}</span>
+                    <span class="card__price">{e.precioHora.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 })} / hora · {e.cap}</span>
+                  </span>
+                  <span class="card__tick" aria-hidden="true"></span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <!-- 3 · Detalles -->
+          <fieldset class="panel" data-panel="2">
+            <legend class="panel__title">Fecha y aforo</legend>
+            <div class="fields">
+              <label class="field">
+                <span>Fecha contemplada</span>
+                <input type="date" name="fecha" required />
+              </label>
+              <label class="field">
+                <span>Segunda opción de fecha</span>
+                <input type="date" name="fecha2" />
+              </label>
+              <label class="field">
+                <span>Horario aproximado</span>
+                <input type="text" name="horario" placeholder="Ej. 18:00 – 22:00" />
+              </label>
+              <label class="field">
+                <span>Duración (horas)</span>
+                <input type="number" name="horas" min="1" max="12" value="4" required />
+              </label>
+              <label class="field">
+                <span>Personas esperadas</span>
+                <input type="number" name="personas" min="1" max="120" placeholder="Ej. 30" required />
+              </label>
+              <label class="field">
+                <span>Público al que va dirigido</span>
+                <input type="text" name="publico" placeholder="Ej. mujeres 25-40, comunidad wellness..." />
+              </label>
+            </div>
+            <p class="hint muted">El estimado del espacio se calcula por hora. Los extras se suman en el siguiente paso.</p>
+          </fieldset>
+
+          <!-- 4 · Extras -->
+          <fieldset class="panel" data-panel="3">
+            <legend class="panel__title">Necesidades y extras <span class="muted" style="font-weight:300">(opcional)</span></legend>
+            {categorias.map((cat) => (
+              <div class="extra-group">
+                <span class="eyebrow">{cat}</span>
+                <div class="rows">
+                  {extras.filter((x) => x.cat === cat).map((x) => (
+                    <div class="xrow" data-id={x.id} data-price={x.precio}>
+                      <div class="xrow__info">
+                        <span class="xrow__name">{x.nombre}{x.unidad ? <span class="muted"> · {x.unidad}</span> : null}</span>
+                        {x.desc ? <span class="xrow__desc muted">{x.desc}</span> : null}
+                      </div>
+                      <span class="xrow__price">{x.precio.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 })}</span>
+                      <div class="stepper">
+                        <button type="button" class="stepper__btn" data-dec aria-label="Quitar">−</button>
+                        <input type="number" class="stepper__val" name={`x_${x.id}`} value="0" min="0" max="99" inputmode="numeric" aria-label={`Cantidad de ${x.nombre}`} />
+                        <button type="button" class="stepper__btn" data-inc aria-label="Agregar">+</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </fieldset>
+
+          <!-- 5 · Contacto -->
+          <fieldset class="panel" data-panel="4">
+            <legend class="panel__title">¿A dónde te contactamos?</legend>
+            <div class="fields">
+              <label class="field field--wide">
+                <span>Persona responsable</span>
+                <input type="text" name="nombre" placeholder="Tu nombre" required />
+              </label>
+              <label class="field">
+                <span>Celular / WhatsApp</span>
+                <input type="tel" name="telefono" placeholder="33 0000 0000" required />
+              </label>
+              <label class="field">
+                <span>Correo <span class="muted">(opcional)</span></span>
+                <input type="email" name="correo" placeholder="tu@correo.com" />
+              </label>
+              <label class="field field--wide">
+                <span>Actividades que se realizarán <span class="muted">/ algo más que debamos saber</span></span>
+                <textarea name="mensaje" rows="3" placeholder="Cuéntanos el plan..."></textarea>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="panel-nav">
+            <button type="button" class="btn btn--ghost" id="btnBack" hidden>← Atrás</button>
+            <button type="button" class="btn" id="btnNext">Continuar →</button>
+            <button type="submit" class="btn" id="btnSend" hidden>Enviar solicitud</button>
+          </div>
+        </form>
+
+        <aside class="summary" id="summary" aria-live="polite">
+          <span class="eyebrow">Tu cotización</span>
+          <dl class="summary__list" id="summaryList">
+            <div class="summary__empty muted">Ve armando tu evento y aquí verás el estimado.</div>
+          </dl>
+          <div class="summary__total">
+            <span>Estimado</span>
+            <strong id="totalOut">$0</strong>
+          </div>
+          <p class="summary__note muted">Estimado inicial. El precio final se confirma al afinar detalles contigo.</p>
+        </aside>
+      </div>
+
+      <div class="done" id="done" hidden>
+        <div class="done__mark">✓</div>
+        <h2 class="h2">¡Recibimos tu solicitud!</h2>
+        <p class="lead">Guardamos tu cotización como borrador y te contactaremos muy pronto para afinar los detalles.</p>
+        <a href="/" class="btn btn--ghost">Volver al inicio</a>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/json" id="catData" set:html={JSON.stringify(dataForClient)}></script>
+  <script src="../scripts/cotiza.js"></script>
+</Base>
+
+<style>
+  .cotiza__head { max-width: 660px; margin-bottom: clamp(2.5rem, 6vw, 4rem); }
+
+  .steps { list-style: none; display: flex; gap: .4rem; padding: 0; margin: 0 0 clamp(2rem,5vw,3rem); flex-wrap: wrap; }
+  .step { display: flex; align-items: center; gap: .6rem; padding-right: .8rem; opacity: .4; transition: opacity .4s var(--ease); }
+  .step.is-active, .step.is-done { opacity: 1; }
+  .step__dot {
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--ink);
+    display: grid; place-items: center; font-size: .82rem; font-weight: 500;
+    transition: background .4s var(--ease), color .4s var(--ease);
+  }
+  .step.is-active .step__dot { background: var(--ink); color: var(--paper); }
+  .step.is-done .step__dot { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+  .step__label { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+  @media (max-width: 680px) { .step__label { display: none; } }
+
+  .cotiza__grid { display: grid; grid-template-columns: 1fr 340px; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+
+  .panels { min-height: 340px; }
+  .panel { border: 0; padding: 0; margin: 0; display: none; }
+  .panel.is-active { display: block; animation: fade .5s var(--ease); }
+  @keyframes fade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .panel__title { font-size: clamp(1.3rem, 2.5vw, 1.9rem); font-weight: 200; padding: 0; margin-bottom: 1.8rem; }
+  .hint { font-size: .85rem; margin-top: 1.2rem; }
+
+  .cards { display: grid; gap: .9rem; }
+  .card {
+    position: relative; display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1.4rem 1.6rem; border: 1px solid var(--ink-12); border-radius: var(--radius);
+    background: var(--white); cursor: pointer; transition: border-color .3s var(--ease), background .3s var(--ease);
+  }
+  .card:hover { border-color: var(--ink-45); }
+  .card input { position: absolute; opacity: 0; }
+  .card__body { display: flex; flex-direction: column; gap: .3rem; }
+  .card__name { font-size: 1.08rem; font-weight: 400; }
+  .card__desc { font-size: .92rem; }
+  .card__price { font-size: .82rem; letter-spacing: .04em; color: var(--gold-ink); margin-top: .3rem; }
+  .card__tick { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--ink-12); flex: none; transition: all .3s var(--ease); position: relative; align-self: center; }
+  .card:has(input:checked) { border-color: var(--ink); background: var(--sand); }
+  .card:has(input:checked) .card__tick { background: var(--ink); border-color: var(--ink); }
+  .card:has(input:checked) .card__tick::after { content: ''; position: absolute; inset: 0; margin: auto; width: 6px; height: 10px; border: solid var(--paper); border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .field { display: flex; flex-direction: column; gap: .5rem; }
+  .field--wide { grid-column: 1 / -1; }
+  .field span { font-size: .82rem; letter-spacing: .04em; color: var(--ink-70); }
+  .field input, .field textarea {
+    font-family: var(--sans); font-size: 1rem; color: var(--ink);
+    padding: .9em 1em; border: 1px solid var(--ink-12); border-radius: var(--radius);
+    background: var(--white); transition: border-color .3s var(--ease); resize: vertical;
+  }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--ink); }
+
+  .extra-group { margin-bottom: 2rem; }
+  .extra-group .eyebrow { display: block; margin-bottom: 1rem; }
+  .rows { display: grid; gap: .5rem; }
+  .xrow {
+    display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 1.2rem;
+    padding: .9rem 1.1rem; border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white);
+    transition: border-color .3s var(--ease), background .3s var(--ease);
+  }
+  .xrow.is-on { border-color: var(--ink); background: var(--sand); }
+  .xrow__info { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+  .xrow__name { font-size: .98rem; }
+  .xrow__desc { font-size: .82rem; }
+  .xrow__price { font-size: .85rem; color: var(--gold-ink); white-space: nowrap; }
+  .stepper { display: inline-flex; align-items: center; border: 1px solid var(--ink-12); border-radius: 100px; background: var(--paper); }
+  .stepper__btn { width: 30px; height: 30px; border: 0; background: transparent; cursor: pointer; font-size: 1.15rem; line-height: 1; color: var(--ink); border-radius: 50%; transition: background .2s var(--ease); }
+  .stepper__btn:hover { background: var(--ink-12); }
+  .stepper__val { width: 34px; text-align: center; border: 0; background: transparent; font-family: var(--sans); font-size: .95rem; color: var(--ink); -moz-appearance: textfield; }
+  .stepper__val::-webkit-outer-spin-button, .stepper__val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .panel-nav { display: flex; gap: 1rem; margin-top: 2.5rem; align-items: center; }
+  #btnNext, #btnSend { margin-left: auto; }
+  .field.invalid input, .field.invalid textarea, .card.invalid { border-color: #b4523f; }
+
+  .summary { position: sticky; top: 100px; background: var(--sand); border: 1px solid var(--ink-12); border-radius: var(--radius); padding: 1.8rem; }
+  .summary > .eyebrow { display: block; margin-bottom: 1.2rem; }
+  .summary__list { margin: 0; display: grid; gap: .7rem; }
+  :global(.summary__row) { display: flex; justify-content: space-between; gap: 1rem; font-size: .92rem; }
+  :global(.summary__row span:first-child) { color: var(--ink-70); }
+  :global(.summary__row.is-sub span:first-child) { padding-left: .8rem; color: var(--ink-45); font-size: .86rem; }
+  .summary__total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid var(--ink); }
+  .summary__total strong { font-size: 1.7rem; font-weight: 300; }
+  .summary__note { font-size: .78rem; margin: 1rem 0 0; }
+
+  .done { text-align: center; max-width: 480px; margin: 2rem auto; padding: 3rem 0; }
+  .done__mark { width: 64px; height: 64px; border-radius: 50%; background: var(--gold); color: var(--ink); display: grid; place-items: center; font-size: 1.8rem; margin: 0 auto 1.6rem; }
+  .done .lead { margin: 1rem 0 2rem; }
+
+  @media (max-width: 900px) {
+    .cotiza__grid { grid-template-columns: 1fr; }
+    .summary { position: static; order: -1; }
+    .fields { grid-template-columns: 1fr; }
+  }
+</style>

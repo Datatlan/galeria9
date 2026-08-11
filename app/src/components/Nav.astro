@@ -1,0 +1,45 @@
+---
+const links = [
+  { href: '/#espacios', label: 'Espacios' },
+  { href: '/#experiencia', label: 'Experiencia' },
+  { href: '/cotiza', label: 'Cotiza tu evento' },
+];
+---
+<header class="nav" id="nav">
+  <div class="wrap nav__inner">
+    <a class="nav__brand" href="/" aria-label="Galería 9 — inicio">
+      <img src="/logo.png" alt="Galería 9" />
+    </a>
+    <nav class="nav__links">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+    <a href="/cotiza" class="btn nav__cta">Cotizar</a>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--paper) 82%, transparent);
+    backdrop-filter: saturate(140%) blur(12px);
+    border-bottom: 1px solid var(--ink-12);
+  }
+  .nav__inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 76px; gap: 2rem;
+  }
+  .nav__brand img { height: 42px; width: auto; }
+  .nav__links { display: flex; gap: 2.4rem; }
+  .nav__links a {
+    font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 400;
+    color: var(--ink-70); transition: color .3s var(--ease);
+  }
+  .nav__links a:hover { color: var(--ink); }
+  .nav__cta { padding: .7em 1.5em; font-size: .74rem; }
+
+  @media (max-width: 760px) {
+    .nav__links { display: none; }
+    .nav__inner { height: 64px; }
+    .nav__brand img { height: 34px; }
+  }
+</style>

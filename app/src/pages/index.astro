@@ -1,0 +1,130 @@
+---
+import Base from '../layouts/Base.astro';
+
+const espacios = [
+  { n: 'Terraza', d: 'Un patio verde en planta baja. Íntimo, cálido, ideal para reuniones y talleres.', cap: 'Hasta 40' },
+  { n: 'Roof', d: 'Azotea con zona techada y cielo abierto. Para activaciones y celebraciones.', cap: 'Hasta 60' },
+  { n: 'Punto Market', d: 'El corazón del showcase de marcas. La primera vista al entrar.', cap: 'Showcase' },
+  { n: 'Tu Talento, Tu Arte', d: 'Pedestales para exhibir a artistas y creadores locales.', cap: 'Exhibición' },
+];
+
+const pilares = [
+  { t: 'Bienestar', d: 'Cabinas de psicología, masaje, sound healing y más. Citas con especialistas residentes.' },
+  { t: 'Market', d: 'Marcas y talento local en exhibición. Un espacio curado que descubres al visitarnos.' },
+  { t: 'Eventos', d: 'Terraza y roof para tus celebraciones, talleres y activaciones de marca.' },
+];
+---
+<Base>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero__inner">
+      <span class="eyebrow reveal">Guadalajara · Market de Talentos</span>
+      <h1 class="display reveal">Una casa para<br/>el bienestar,<br/>el arte y la<br/>comunidad.</h1>
+      <p class="lead hero__lead reveal">Galería 9 reúne cabinas de bienestar, un market de marcas locales y espacios para tus eventos — todo bajo un mismo techo con alma.</p>
+      <div class="hero__cta reveal">
+        <a href="/cotiza" class="btn">Cotiza tu evento</a>
+        <a href="/#experiencia" class="link-arrow">Conoce la casa →</a>
+      </div>
+    </div>
+    <div class="hero__mark" aria-hidden="true">
+      <img src="/logo.png" alt="" />
+    </div>
+  </section>
+
+  <hr class="hairline" />
+
+  <!-- EXPERIENCIA -->
+  <section class="section" id="experiencia">
+    <div class="wrap">
+      <div class="two">
+        <div class="reveal">
+          <span class="eyebrow">La experiencia</span>
+          <h2 class="h2" style="margin-top:1.2rem">Tres mundos, un mismo lugar.</h2>
+        </div>
+        <p class="lead reveal">No somos una tienda ni un salón de eventos. Somos una casa curada donde el bienestar, las marcas locales y las celebraciones conviven — y se potencian entre sí.</p>
+      </div>
+
+      <div class="pilares">
+        {pilares.map((p, i) => (
+          <article class="pilar reveal" style={`transition-delay:${i * 90}ms`}>
+            <span class="pilar__num">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="h3">{p.t}</h3>
+            <p class="muted">{p.d}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ESPACIOS -->
+  <section class="section espacios" id="espacios">
+    <div class="wrap">
+      <div class="two">
+        <div class="reveal">
+          <span class="eyebrow">Los espacios</span>
+          <h2 class="h2" style="margin-top:1.2rem">Cada rincón,<br/>una posibilidad.</h2>
+        </div>
+        <p class="lead reveal">Desde un patio íntimo hasta una azotea abierta al cielo. Elige el escenario para tu próxima experiencia.</p>
+      </div>
+
+      <div class="grid-esp">
+        {espacios.map((e, i) => (
+          <article class="esp reveal" style={`transition-delay:${i * 80}ms`}>
+            <div class="esp__top">
+              <h3 class="h3">{e.n}</h3>
+              <span class="esp__cap">{e.cap}</span>
+            </div>
+            <p class="muted">{e.d}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-band">
+    <div class="wrap cta-band__inner reveal">
+      <h2 class="h2">¿Tienes un evento en mente?</h2>
+      <p class="lead">Cuéntanos qué imaginas y arma tu cotización en un par de minutos.</p>
+      <a href="/cotiza" class="btn btn--invert">Cotiza tu evento</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { position: relative; overflow: clip; padding-block: clamp(3.5rem, 9vw, 7rem) clamp(4rem, 10vw, 8rem); }
+  .hero__inner { position: relative; z-index: 2; }
+  .hero .display { margin-top: 1.6rem; }
+  .hero__lead { max-width: 34ch; margin-top: 2rem; }
+  .hero__cta { display: flex; align-items: center; gap: 2rem; margin-top: 2.8rem; flex-wrap: wrap; }
+  .hero__mark {
+    position: absolute; z-index: 1; top: 50%; right: -6%; transform: translateY(-50%);
+    width: min(46vw, 560px); opacity: .07; pointer-events: none;
+  }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: end; margin-bottom: clamp(3rem, 6vw, 5rem); }
+
+  .pilares { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); }
+  .pilar { border-top: 1px solid var(--ink); padding-top: 1.4rem; }
+  .pilar__num { font-size: .8rem; letter-spacing: .2em; color: var(--gold-ink); }
+  .pilar h3 { margin: 1.2rem 0 .8rem; }
+
+  .espacios { background: var(--sand); }
+  .grid-esp { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--ink-12); border: 1px solid var(--ink-12); }
+  .esp { background: var(--sand); padding: clamp(1.6rem, 3vw, 2.6rem); }
+  .esp__top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: .8rem; }
+  .esp__cap { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-ink); white-space: nowrap; }
+
+  .cta-band { background: var(--ink); color: var(--paper); padding-block: clamp(4rem, 9vw, 7rem); text-align: center; }
+  .cta-band .h2 { color: var(--paper); }
+  .cta-band .lead { color: rgba(242,242,242,.7); margin: 1.2rem auto 2.4rem; max-width: 42ch; }
+  .btn--invert { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+  .btn--invert:hover { background: transparent; color: var(--paper); }
+
+  @media (max-width: 760px) {
+    .two { grid-template-columns: 1fr; align-items: start; }
+    .pilares { grid-template-columns: 1fr; }
+    .grid-esp { grid-template-columns: 1fr; }
+    .hero__mark { opacity: .05; right: -20%; }
+  }
+</style>

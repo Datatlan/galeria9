@@ -1,0 +1,43 @@
+---
+const year = 2026;
+---
+<footer class="ft">
+  <div class="wrap ft__inner">
+    <div class="ft__brand">
+      <img src="/logo.png" alt="Galería 9" />
+      <p class="muted">Casa de bienestar, eventos y comunidad.<br/>Guadalajara, Jalisco.</p>
+    </div>
+    <div class="ft__cols">
+      <div>
+        <span class="eyebrow">Visítanos</span>
+        <a href="/cotiza">Cotiza tu evento</a>
+        <a href="/#espacios">Nuestros espacios</a>
+      </div>
+      <div>
+        <span class="eyebrow">Síguenos</span>
+        <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>
+        <a href="/cotiza">Agenda una visita</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap ft__base">
+    <span class="muted">© {year} Galería 9 · Market de Talentos</span>
+    <span class="muted">Hecho por Datatlan</span>
+  </div>
+</footer>
+
+<style>
+  .ft { border-top: 1px solid var(--ink-12); padding-top: clamp(3rem, 7vw, 5rem); background: var(--sand); }
+  .ft__inner { display: flex; justify-content: space-between; gap: 3rem; flex-wrap: wrap; padding-bottom: 3rem; }
+  .ft__brand img { height: 56px; margin-bottom: 1.1rem; }
+  .ft__brand p { margin: 0; font-size: .92rem; }
+  .ft__cols { display: flex; gap: 4rem; flex-wrap: wrap; }
+  .ft__cols .eyebrow { display: block; margin-bottom: 1rem; }
+  .ft__cols a { display: block; font-size: .95rem; color: var(--ink-70); padding: .28em 0; transition: color .3s var(--ease); }
+  .ft__cols a:hover { color: var(--ink); }
+  .ft__base {
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    padding-block: 1.6rem; border-top: 1px solid var(--ink-12); margin-top: 1rem;
+    font-size: .8rem; letter-spacing: .04em;
+  }
+</style>
