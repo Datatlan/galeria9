@@ -16,10 +16,10 @@ const pilares = [
 
 const cabinas = [
   { n: 'Fer', marca: 'ferdelamonja', svc: 'Soundhealing · respiración · mindfulness', featured: true },
-  { n: 'Terapia', marca: 'Terapia', svc: 'Inconsciente y reprogramación' },
-  { n: 'Arigato 88', marca: 'Arigato 88', svc: 'Masajes terapéuticos' },
-  { n: 'Jar Almodovar', marca: 'Jar Almodovar', svc: 'Regeneración nutricional' },
-  { n: 'Ceja & depilación', marca: 'Cabina', svc: 'Diseño en depilación y ceja' },
+  { n: 'Terapia', marca: 'Terapia', svc: 'Inconsciente y reprogramación', wa: '33 1000 0001', ig: '@terapia.g9' },
+  { n: 'Arigato 88', marca: 'Arigato 88', svc: 'Masajes terapéuticos', wa: '33 1000 0002', ig: '@arigato88' },
+  { n: 'Jar Almodovar', marca: 'Jar Almodovar', svc: 'Regeneración nutricional', wa: '33 1000 0003', ig: '@jaralmodovar' },
+  { n: 'Ceja & depilación', marca: 'Cabina', svc: 'Diseño en depilación y ceja', wa: '33 1000 0004', ig: '@ceja.g9' },
 ];
 ---
 <Base>
@@ -83,7 +83,7 @@ const cabinas = [
             <p class="cab__svc">{c.svc}</p>
             {c.featured
               ? <span class="cab__cta">Reserva en línea · muy pronto</span>
-              : <span class="cab__soon">Próximamente</span>}
+              : <div class="cab__contact"><span>WhatsApp · {c.wa}</span><span class="cab__ig">{c.ig}</span></div>}
           </article>
         ))}
       </div>
@@ -154,7 +154,8 @@ const cabinas = [
   .cab__tag { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
   .cab__name { font-size: 1.4rem; font-weight: 300; margin: .2rem 0; }
   .cab__svc { font-size: .88rem; color: var(--ink-70); line-height: 1.4; }
-  .cab__soon { margin-top: auto; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-45); }
+  .cab__contact { margin-top: auto; display: flex; flex-direction: column; gap: .2rem; font-size: .78rem; color: var(--ink-70); letter-spacing: .01em; }
+  .cab__ig { color: var(--gold-ink); }
   .cab__cta { margin-top: auto; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
   .cab--fer { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .cab--fer .cab__tag { color: var(--gold); }
