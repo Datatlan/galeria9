@@ -122,7 +122,9 @@ btnNext.addEventListener('click', () => { if (validateStep(step)) showStep(step 
 btnBack.addEventListener('click', () => showStep(step - 1));
 stepsEls.forEach((s, i) => s.addEventListener('click', () => { if (i <= step) showStep(i); }));
 
-// ---- Envío: Cliente → Contacto → Orden (Borrador) → Line_Items ----
+// ---- Envío: Orden (Borrador, con datos del solicitante) → Line_Items ----
+// No se crea Cliente ni Contacto: los datos quedan en la Orden y Fer asigna/crea
+// el Cliente manualmente desde su panel (evita duplicados en el CRM).
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!validateStep(step)) return;
@@ -144,27 +146,18 @@ form.addEventListener('submit', async (e) => {
   btnSend.disabled = true;
   btnSend.textContent = 'Enviando…';
   try {
-    // 1) Cliente (marca / proyecto)
-    const cliente = await crear(T.clientes, { Nombre: g('proyecto') || g('nombre') });
-
-    // 2) Contacto (persona responsable)
-    await crear(T.contactos, {
-      Nombre: g('nombre'),
-      'Teléfono': g('telefono'),
-      'Correo electrónico': g('correo') || undefined,
-      Contacto_Principal: true,
-      Cliente: [cliente.id],
-    });
-
-    // 3) Orden borrador
+    // 1) Orden borrador — con los datos del solicitante (Cliente queda vacío para Fer)
     const orden = await crear(T.ordenes, {
       Nombre: `Cotización — ${g('proyecto')} · ${g('fecha')}`,
-      Cliente: [cliente.id],
       Estatus: 'Borrador',
+      Marca: g('proyecto'),
+      Solicitante: g('nombre'),
+      WhatsApp: g('telefono'),
+      Correo: g('correo') || undefined,
       Notas: notas,
     });
 
-    // 4) Line_Items (base por horas + extras)
+    // 2) Line_Items (base por horas + extras)
     const items = [];
     if (espacio && horas) {
       items.push({

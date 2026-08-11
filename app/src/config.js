@@ -8,10 +8,9 @@ export const WORKER = 'https://galeria9-airtable.datatlan.workers.dev';
 // Base de PRODUCCIÓN "Galeria9 - Admin"
 export const BASE = 'appSkdHwrlulZ2iJc';
 
-// Tablas destino del flujo de cotización
+// Tablas destino del flujo de cotización.
+// El envío solo crea Orden + Line_Items; el Cliente lo asigna Fer manualmente.
 export const T = {
-  clientes:  'tblmPecJQZxArzWJV',
-  contactos: 'tblju1OLYmhR5441S',
   ordenes:   'tbl4RvFWf9fMzQUTz',
   lineItems: 'tblRZmcGK720YClo5',
 };
