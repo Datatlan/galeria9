@@ -13,6 +13,7 @@ export const BASE = 'appSkdHwrlulZ2iJc';
 export const T = {
   ordenes:   'tbl4RvFWf9fMzQUTz',
   lineItems: 'tblRZmcGK720YClo5',
+  leads:     'tbl6G049MoOGABA50', // contacto general (no transaccional)
 };
 
 // Registros del Catalogo (para ligar el Line_Item de cada solicitud).

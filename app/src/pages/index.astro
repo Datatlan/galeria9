@@ -1,11 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
 
+// Espacios rentables para EVENTOS (el showcase de marcas vive en "Para marcas")
 const espacios = [
-  { n: 'Terraza', d: 'Un patio verde en planta baja. Íntimo, cálido, ideal para reuniones y talleres.', cap: 'Hasta 40' },
-  { n: 'Roof', d: 'Azotea con zona techada y cielo abierto. Para activaciones y celebraciones.', cap: 'Hasta 60' },
-  { n: 'Punto Presencia', d: 'El corazón del showcase de marcas. La primera vista al entrar.', cap: 'Showcase' },
-  { n: 'Tu Talento, Tu Arte', d: 'Pedestales para exhibir a artistas y creadores locales.', cap: 'Exhibición' },
+  { n: 'Terraza', d: 'Un patio verde en planta baja. Íntimo, cálido, ideal para reuniones y talleres.', cap: 'Hasta 40', foto: '/fotos/evento-terraza.jpg' },
+  { n: 'Roof', d: 'Azotea con zona techada y cielo abierto. Para activaciones y celebraciones.', cap: 'Hasta 60', foto: '/fotos/evento-roof.jpg' },
 ];
 
 const pilares = [
@@ -14,28 +13,49 @@ const pilares = [
   { t: 'Eventos', d: 'Terraza y roof para tus celebraciones, talleres y activaciones de marca.' },
 ];
 
+// Producto estrella del Market — card destacada de ancho completo.
+// Por ahora todos los CTA de marcas llevan al form de contacto (pre-llenando
+// el interés); los forms dedicados (/pop-up, /tu-talento, /tester-day) se
+// irán habilitando poco a poco.
+const puntoPresencia = {
+  n: 'Punto Presencia',
+  d: 'Tu marca exhibida en el corazón del Market durante 6 meses. Displays individuales, tráfico constante de la comunidad de bienestar, y presencia todos los días.',
+  meta: 'Mensual · 6 meses',
+  foto: '/fotos/punto-presencia.jpg',
+};
+
+// Formatos de showcase para MARCAS
+const marcas = [
+  { n: 'Pop Up', d: '6 días de showroom con exhibición propia y campaña de promoción incluida. Una sola marca por mes.', meta: 'Mensual', foto: '/fotos/popup.jpg' },
+  { n: 'Tu Talento es un Arte', d: 'Una semana de presencia física y digital para tu marca, taller o talento. Que te conozcan, que te sigan.', meta: 'Semanal', foto: '/fotos/tu-talento.png' },
+  { n: 'Tester Day', d: 'Da a probar tu producto gratis los miércoles y crea conexiones reales con nuevas personas.', meta: 'Miércoles', foto: '/fotos/tester-day.jpg' },
+  { n: 'Invitado Especial', d: 'La sección estelar del Market con 5 pedestales incluidos, tuya por 6 días.', meta: '6 días', foto: '/fotos/invitado.jpg' },
+];
+
 const cabinas = [
-  { n: 'Fer', marca: 'ferdelamonja', svc: 'Soundhealing · respiración · mindfulness', featured: true },
-  { n: 'Terapia', marca: 'Terapia', svc: 'Inconsciente y reprogramación', wa: '33 1000 0001', ig: '@terapia.g9' },
-  { n: 'Arigato 88', marca: 'Arigato 88', svc: 'Masajes terapéuticos', wa: '33 1000 0002', ig: '@arigato88' },
-  { n: 'Jar Almodovar', marca: 'Jar Almodovar', svc: 'Regeneración nutricional', wa: '33 1000 0003', ig: '@jaralmodovar' },
-  { n: 'Ceja & depilación', marca: 'Cabina', svc: 'Diseño en depilación y ceja', wa: '33 1000 0004', ig: '@ceja.g9' },
+  { n: 'Fer', marca: 'ferdelamonja', svc: 'Soundhealing · respiración · mindfulness', ic: 'self_improvement', featured: true },
+  { n: 'Terapia', marca: 'Terapia', svc: 'Inconsciente y reprogramación', ic: 'psychology', wa: '33 1000 0001', ig: '@terapia.g9' },
+  { n: 'Arigato 88', marca: 'Arigato 88', svc: 'Masajes terapéuticos', ic: 'spa', wa: '33 1000 0002', ig: '@arigato88' },
+  { n: 'Jar Almodovar', marca: 'Jar Almodovar', svc: 'Regeneración nutricional', ic: 'nutrition', wa: '33 1000 0003', ig: '@jaralmodovar' },
+  { n: 'Ceja & depilación', marca: 'Cabina', svc: 'Diseño en depilación y ceja', ic: 'face_retouching_natural', wa: '33 1000 0004', ig: '@ceja.g9' },
 ];
 ---
 <Base>
   <!-- HERO -->
   <section class="hero">
     <div class="wrap hero__inner">
-      <span class="eyebrow reveal">Guadalajara · Market de Talentos</span>
-      <h1 class="display reveal">Una casa para<br/>el bienestar,<br/>el arte y la<br/>comunidad.</h1>
-      <p class="lead hero__lead reveal">Galería 9 reúne cabinas de bienestar, un market de marcas locales y espacios para tus eventos — todo bajo un mismo techo con alma.</p>
-      <div class="hero__cta reveal">
-        <a href="/cotiza" class="btn">Cotiza tu evento</a>
-        <a href="/#experiencia" class="link-arrow">Conoce la casa →</a>
+      <div class="hero__copy">
+        <span class="eyebrow reveal">Guadalajara · Market de Talentos</span>
+        <h1 class="display reveal">Una casa para<br/>el bienestar,<br/>el arte y la<br/>comunidad.</h1>
+        <p class="lead hero__lead reveal">Galería 9 reúne cabinas de bienestar, un market de marcas locales y espacios para tus eventos — todo bajo un mismo techo con alma.</p>
+        <div class="hero__cta reveal">
+          <a href="/cotiza" class="btn">Cotiza tu evento</a>
+          <a href="/#experiencia" class="link-arrow">Conoce la casa →</a>
+        </div>
       </div>
-    </div>
-    <div class="hero__mark" aria-hidden="true">
-      <img src="/logo.png" alt="" />
+      <figure class="hero__photo reveal">
+        <img src="/fotos/punto-presencia-2.jpg" alt="El Market de Galería 9" />
+      </figure>
     </div>
   </section>
 
@@ -52,37 +72,31 @@ const cabinas = [
         <p class="lead reveal">No somos una tienda ni un salón de eventos. Somos una casa curada donde el bienestar, las marcas locales y las celebraciones conviven — y se potencian entre sí.</p>
       </div>
 
-      <div class="pilares">
-        {pilares.map((p, i) => (
-          <article class="pilar reveal" style={`transition-delay:${i * 90}ms`}>
-            <span class="pilar__num">{String(i + 1).padStart(2, '0')}</span>
-            <h3 class="h3">{p.t}</h3>
-            <p class="muted">{p.d}</p>
-          </article>
-        ))}
+      <div class="exp-body">
+        <figure class="exp-photo reveal">
+          <img src="/fotos/cabina-arigato.png" alt="Cabina Arigato 88 en Galería 9" loading="lazy" />
+          <figcaption>Cabina Arigato 88 · Masajes terapéuticos</figcaption>
+        </figure>
+        <div class="pilares">
+          {pilares.map((p, i) => (
+            <article class="pilar reveal" style={`transition-delay:${i * 90}ms`}>
+              <span class="pilar__num">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="h3">{p.t}</h3>
+              <p class="muted">{p.d}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- GALERÍA / EL LUGAR -->
-  <section class="section galeria" id="lugar">
-    <div class="wrap">
-      <div class="two">
-        <div class="reveal">
-          <span class="eyebrow">El lugar</span>
-          <h2 class="h2" style="margin-top:1.2rem">Un espacio<br/>con alma.</h2>
-        </div>
-        <p class="lead reveal">Madera, luz cálida y verde. Terraza en planta baja, roof abierto al cielo y rincones curados para exhibir. Así se siente Galería 9 por dentro.</p>
-      </div>
-    </div>
-    <div class="galeria__grid reveal">
-      <figure><img src="/fotos/roof-1.jpg" alt="Roof de Galería 9" loading="lazy" /></figure>
-      <figure><img src="/fotos/terraza-1.jpg" alt="Terraza de Galería 9" loading="lazy" /></figure>
-      <figure><img src="/fotos/popup.jpg" alt="Zona Pop Up" loading="lazy" /></figure>
-      <figure><img src="/fotos/terraza-2.jpg" alt="Terraza · detalle" loading="lazy" /></figure>
-      <figure><img src="/fotos/invitado.jpg" alt="Invitado Especial" loading="lazy" /></figure>
-      <figure><img src="/fotos/roof-2.jpg" alt="Roof · vista" loading="lazy" /></figure>
-      <figure><img src="/fotos/terraza-3.jpg" alt="Terraza · rincón" loading="lazy" /></figure>
+  <!-- EL LUGAR · interludio full-bleed -->
+  <section class="lugar" id="lugar">
+    <img src="/fotos/roof-2.jpg" alt="El roof de Galería 9" loading="lazy" />
+    <div class="lugar__overlay reveal">
+      <span class="eyebrow lugar__eyebrow">El lugar</span>
+      <p class="lugar__addr">Bogotá 3025 · Providencia<br/>Guadalajara, Jalisco</p>
+      <a class="lugar__link" href="https://maps.google.com/?q=Bogot%C3%A1+3025+Providencia+Guadalajara" target="_blank" rel="noopener">Cómo llegar →</a>
     </div>
   </section>
 
@@ -100,6 +114,7 @@ const cabinas = [
       <div class="cabgrid">
         {cabinas.map((c, i) => (
           <article class={`cab reveal ${c.featured ? 'cab--fer' : ''}`} style={`transition-delay:${i * 70}ms`}>
+            <span class="cab__ic"><span class="material-symbols-outlined">{c.ic}</span></span>
             <span class="cab__tag">Cabina · {c.marca}</span>
             <h3 class="cab__name">{c.n}</h3>
             <p class="cab__svc">{c.svc}</p>
@@ -117,50 +132,179 @@ const cabinas = [
     <div class="wrap">
       <div class="two">
         <div class="reveal">
-          <span class="eyebrow">Los espacios</span>
-          <h2 class="h2" style="margin-top:1.2rem">Cada rincón,<br/>una posibilidad.</h2>
+          <span class="eyebrow">Espacios para tu evento</span>
+          <h2 class="h2" style="margin-top:1.2rem">Dos escenarios,<br/>una casa.</h2>
         </div>
-        <p class="lead reveal">Desde un patio íntimo hasta una azotea abierta al cielo. Elige el escenario para tu próxima experiencia.</p>
+        <p class="lead reveal">Un patio íntimo o una azotea abierta al cielo — renta por hora el escenario de tu celebración, taller o activación.</p>
       </div>
 
       <div class="grid-esp">
         {espacios.map((e, i) => (
           <article class="esp reveal" style={`transition-delay:${i * 80}ms`}>
-            <div class="esp__top">
-              <h3 class="h3">{e.n}</h3>
-              <span class="esp__cap">{e.cap}</span>
+            <figure class="esp__photo">
+              <img src={e.foto} alt={`${e.n} · Galería 9`} loading="lazy" />
+            </figure>
+            <div class="esp__body">
+              <div class="esp__top">
+                <h3 class="h3">{e.n}</h3>
+                <span class="esp__cap">{e.cap}</span>
+              </div>
+              <p class="muted">{e.d}</p>
             </div>
-            <p class="muted">{e.d}</p>
           </article>
+        ))}
+      </div>
+      <div class="esp-cta reveal">
+        <a href="/cotiza" class="btn">Cotiza tu evento</a>
+        <span class="muted">Estimado al instante, sin compromiso.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARCAS -->
+  <section class="section marcas" id="marcas">
+    <div class="wrap">
+      <div class="two">
+        <div class="reveal">
+          <span class="eyebrow">Para marcas</span>
+          <h2 class="h2" style="margin-top:1.2rem">Muéstrate en<br/>Galería 9.</h2>
+        </div>
+        <p class="lead reveal">Formatos para dar a conocer tu marca, taller o talento — de un día a una temporada. Elige el tuyo y mándanos tu solicitud.</p>
+      </div>
+
+      <a class="pp-card reveal" href="/#contacto" data-interes="Punto Presencia">
+        <figure class="pp-card__media">
+          <img src={puntoPresencia.foto} alt="Punto Presencia · el Market de Galería 9" loading="lazy" />
+        </figure>
+        <div class="pp-card__body">
+          <span class="marca__meta">{puntoPresencia.meta}</span>
+          <h3 class="h2" style="font-size:clamp(1.6rem,3vw,2.2rem)">{puntoPresencia.n}</h3>
+          <p class="muted">{puntoPresencia.d}</p>
+          <span class="marca__cta">Me interesa →</span>
+        </div>
+      </a>
+
+      <div class="grid-marcas">
+        {marcas.map((m, i) => (
+          <a class="marca reveal" href="/#contacto" data-interes={m.n} style={`transition-delay:${i * 80}ms`}>
+            {m.foto && (
+              <figure class="marca__media">
+                <img src={m.foto} alt={`${m.n} · Galería 9`} loading="lazy" />
+              </figure>
+            )}
+            <div class="marca__body">
+              <div class="marca__top">
+                <h3 class="h3">{m.n}</h3>
+                <span class="marca__meta">{m.meta}</span>
+              </div>
+              <p class="muted">{m.d}</p>
+              <span class="marca__cta">Me interesa →</span>
+            </div>
+          </a>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="cta-band">
-    <div class="wrap cta-band__inner reveal">
-      <h2 class="h2">¿Tienes un evento en mente?</h2>
-      <p class="lead">Cuéntanos qué imaginas y arma tu cotización en un par de minutos.</p>
-      <a href="/cotiza" class="btn btn--invert">Cotiza tu evento</a>
+  <!-- CONTACTO -->
+  <section class="cta-band" id="contacto">
+    <div class="wrap contacto__grid">
+      <div class="contacto__copy reveal">
+        <span class="eyebrow" style="color:var(--gold)">Contacto</span>
+        <h2 class="h2" style="margin-top:1rem">Platiquemos.</h2>
+        <p class="lead">¿Una duda, una idea, una colaboración? Escríbenos y te respondemos muy pronto.</p>
+        <p class="contacto__alt">¿Ya sabes qué quieres? <a href="/cotiza" class="link-arrow contacto__alt-link">Cotiza tu evento →</a></p>
+      </div>
+
+      <form id="leadForm" class="contacto__form reveal" novalidate>
+        <div class="cfields">
+          <label class="cfield"><span>Tu nombre</span><input type="text" name="nombre" placeholder="Nombre" required /></label>
+          <label class="cfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+          <label class="cfield"><span>Correo <i>(opcional)</i></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
+          <label class="cfield"><span>Me interesa</span>
+            <select name="interes" required>
+              <option value="">Elige…</option>
+              <option>Evento</option>
+              <option>Punto Presencia</option>
+              <option>Pop Up</option>
+              <option>Tu Talento es un Arte</option>
+              <option>Tester Day</option>
+              <option>Invitado Especial</option>
+              <option>Cabinas · Bienestar</option>
+              <option>Otro</option>
+            </select>
+          </label>
+          <label class="cfield cfield--wide"><span>Tu mensaje</span><textarea name="mensaje" rows="3" placeholder="Cuéntanos…" required></textarea></label>
+        </div>
+        <button type="submit" class="btn btn--invert">Enviar mensaje</button>
+      </form>
+
+      <div class="contacto__done reveal" id="leadDone" hidden>
+        <div class="contacto__mark">✓</div>
+        <h2 class="h2">¡Recibido!</h2>
+        <p class="lead">Te contactamos muy pronto por WhatsApp.</p>
+      </div>
     </div>
   </section>
+
+  <script>
+    import { T, crear } from '../config.js';
+    const lf = document.getElementById('leadForm');
+
+    // Cards de marcas → llevan al form con el interés pre-seleccionado
+    document.querySelectorAll('[data-interes]').forEach((el) =>
+      el.addEventListener('click', () => {
+        const sel = lf?.elements['interes'];
+        if (sel) sel.value = el.dataset.interes;
+      })
+    );
+    lf?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!lf.reportValidity()) return;
+      const fd = new FormData(lf);
+      const g = (k) => (fd.get(k) || '').toString().trim();
+      const btn = lf.querySelector('[type=submit]');
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      try {
+        await crear(T.leads, {
+          Nombre: g('nombre'),
+          WhatsApp: g('telefono'),
+          Correo: g('correo') || undefined,
+          Interes: g('interes'),
+          Mensaje: g('mensaje'),
+          Estatus: 'Nuevo',
+        });
+        lf.hidden = true;
+        document.querySelector('.contacto__copy').hidden = true;
+        document.getElementById('leadDone').hidden = false;
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'Enviar mensaje';
+        alert('No pudimos enviar tu mensaje. Escríbenos por WhatsApp.');
+        console.error(err);
+      }
+    });
+  </script>
 </Base>
 
 <style>
-  .hero { position: relative; overflow: clip; padding-block: clamp(3.5rem, 9vw, 7rem) clamp(4rem, 10vw, 8rem); }
-  .hero__inner { position: relative; z-index: 2; }
+  .hero { position: relative; overflow: clip; padding-block: clamp(3rem, 7vw, 5.5rem) clamp(3.5rem, 8vw, 6.5rem); }
+  .hero__inner { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
   .hero .display { margin-top: 1.6rem; }
   .hero__lead { max-width: 34ch; margin-top: 2rem; }
   .hero__cta { display: flex; align-items: center; gap: 2rem; margin-top: 2.8rem; flex-wrap: wrap; }
-  .hero__mark {
-    position: absolute; z-index: 1; top: 50%; right: -6%; transform: translateY(-50%);
-    width: min(46vw, 560px); opacity: .07; pointer-events: none;
-  }
+  .hero__photo { margin: 0; overflow: hidden; border-radius: var(--radius); max-height: min(72vh, 620px); }
+  .hero__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: end; margin-bottom: clamp(3rem, 6vw, 5rem); }
 
-  .pilares { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); }
+  .exp-body { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+  .exp-photo { margin: 0; }
+  .exp-photo img { width: 100%; max-height: 520px; object-fit: cover; display: block; border-radius: var(--radius); }
+  .exp-photo figcaption {
+    margin-top: .7rem; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-45);
+  }
+  .pilares { display: grid; grid-template-columns: 1fr; gap: clamp(1.5rem, 3vw, 2.4rem); }
   .pilar { border-top: 1px solid var(--ink); padding-top: 1.4rem; }
   .pilar__num { font-size: .8rem; letter-spacing: .2em; color: var(--gold-ink); }
   .pilar h3 { margin: 1.2rem 0 .8rem; }
@@ -173,6 +317,12 @@ const cabinas = [
     transition: border-color .3s var(--ease), transform .3s var(--ease);
   }
   .cab:hover { border-color: var(--ink-45); transform: translateY(-3px); }
+  .cab__ic {
+    width: 42px; height: 42px; border-radius: 11px; background: var(--sand);
+    display: grid; place-items: center; color: var(--gold-ink); margin-bottom: .5rem;
+  }
+  .cab__ic .material-symbols-outlined { font-size: 22px; }
+  .cab--fer .cab__ic { background: rgba(255, 255, 255, .09); color: var(--gold); }
   .cab__tag { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
   .cab__name { font-size: 1.4rem; font-weight: 300; margin: .2rem 0; }
   .cab__svc { font-size: .88rem; color: var(--ink-70); line-height: 1.4; }
@@ -183,39 +333,101 @@ const cabinas = [
   .cab--fer .cab__tag { color: var(--gold); }
   .cab--fer .cab__svc { color: rgba(242,242,242,.72); }
 
-  .grid-marcas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-  .marca { display: flex; flex-direction: column; gap: .6rem; padding: 1.8rem 1.6rem; border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white); transition: border-color .3s var(--ease), transform .3s var(--ease); }
+  /* Punto Presencia — card destacada de ancho completo */
+  .pp-card {
+    display: grid; grid-template-columns: 1.15fr .85fr; margin-bottom: 1rem;
+    border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white);
+    overflow: hidden; transition: border-color .3s var(--ease), transform .3s var(--ease);
+  }
+  .pp-card:hover { border-color: var(--ink); transform: translateY(-3px); }
+  .pp-card__media { margin: 0; overflow: hidden; min-height: 300px; }
+  .pp-card__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
+  .pp-card:hover .pp-card__media img { transform: scale(1.04); }
+  .pp-card__body { display: flex; flex-direction: column; gap: .8rem; padding: clamp(1.6rem, 3vw, 2.6rem); justify-content: center; }
+  .pp-card__body .muted { font-size: .95rem; max-width: 44ch; }
+
+  .grid-marcas { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 1rem; }
+  .marca { display: flex; flex-direction: column; border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white); overflow: hidden; transition: border-color .3s var(--ease), transform .3s var(--ease); }
   .marca:hover { border-color: var(--ink); transform: translateY(-3px); }
+  .marca__media { margin: 0; aspect-ratio: 16 / 8; overflow: hidden; }
+  .marca__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
+  .marca:hover .marca__media img { transform: scale(1.04); }
+  .marca__body { display: flex; flex-direction: column; gap: .6rem; padding: 1.6rem; flex: 1; }
   .marca__top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
   .marca__meta { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); white-space: nowrap; }
   .marca .muted { flex: 1; font-size: .92rem; }
   .marca__cta { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--ink); margin-top: .3rem; }
 
-  .galeria__grid { columns: 3; column-gap: 10px; padding-inline: clamp(1.25rem, 5vw, 4rem); margin-top: clamp(2rem, 5vw, 3rem); }
-  .galeria__grid figure { margin: 0 0 10px; break-inside: avoid; overflow: hidden; border-radius: var(--radius); background: var(--sand); }
-  .galeria__grid img { width: 100%; display: block; transition: transform .8s var(--ease); }
-  .galeria__grid figure:hover img { transform: scale(1.04); }
+  /* Interludio full-bleed "El lugar" — velo uniforme + contenido centrado */
+  .lugar { position: relative; height: clamp(300px, 44vh, 440px); overflow: hidden; background: var(--ink); }
+  .lugar > img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .55; }
+  .lugar__overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .9rem; text-align: center; padding: 2rem var(--gutter);
+    color: var(--paper);
+  }
+  .lugar__eyebrow { color: var(--gold); }
+  .lugar__addr { font-size: clamp(1.3rem, 2.8vw, 2rem); font-weight: 200; line-height: 1.35; letter-spacing: .01em; }
+  .lugar__link {
+    font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 500;
+    color: var(--paper); border-bottom: 1px solid rgba(242,242,242,.35); padding-bottom: .35em;
+    transition: border-color .3s var(--ease);
+  }
+  .lugar__link:hover { border-color: var(--paper); }
 
   .espacios { background: var(--sand); }
   .grid-esp { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--ink-12); border: 1px solid var(--ink-12); }
-  .esp { background: var(--sand); padding: clamp(1.6rem, 3vw, 2.6rem); }
+  .esp { background: var(--sand); display: flex; flex-direction: column; }
+  .esp__photo { margin: 0; overflow: hidden; aspect-ratio: 16 / 9; }
+  .esp__photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
+  .esp:hover .esp__photo img { transform: scale(1.04); }
+  .esp__body { padding: clamp(1.4rem, 2.6vw, 2.2rem); }
   .esp__top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: .8rem; }
   .esp__cap { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-ink); white-space: nowrap; }
+  .esp-cta { display: flex; align-items: center; gap: 1.4rem; margin-top: clamp(1.8rem, 4vw, 2.6rem); flex-wrap: wrap; }
+  .esp-cta .muted { font-size: .88rem; }
 
-  .cta-band { background: var(--ink); color: var(--paper); padding-block: clamp(4rem, 9vw, 7rem); text-align: center; }
+  .cta-band { background: var(--ink); color: var(--paper); padding-block: clamp(4rem, 8vw, 6.5rem); }
   .cta-band .h2 { color: var(--paper); }
-  .cta-band .lead { color: rgba(242,242,242,.7); margin: 1.2rem auto 2.4rem; max-width: 42ch; }
+  .cta-band .lead { color: rgba(242,242,242,.7); margin-top: 1.2rem; max-width: 40ch; }
   .btn--invert { background: var(--paper); color: var(--ink); border-color: var(--paper); }
   .btn--invert:hover { background: transparent; color: var(--paper); }
+
+  .contacto__grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(2.5rem, 6vw, 5rem); align-items: start; }
+  .contacto__alt { margin-top: 2.2rem; font-size: .95rem; color: rgba(242,242,242,.55); }
+  .contacto__alt-link { color: var(--paper); border-color: rgba(242,242,242,.3); margin-left: .5rem; font-size: .78rem; }
+  .cfields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.2rem; margin-bottom: 1.6rem; }
+  .cfield { display: flex; flex-direction: column; gap: .45rem; }
+  .cfield--wide { grid-column: 1 / -1; }
+  .cfield > span { font-size: .78rem; letter-spacing: .06em; color: rgba(242,242,242,.6); }
+  .cfield i { font-style: normal; opacity: .6; }
+  .cfield input, .cfield select, .cfield textarea {
+    font-family: var(--sans); font-size: 1rem; color: var(--paper);
+    padding: .85em 1em; border: 1px solid rgba(242,242,242,.18); border-radius: var(--radius);
+    background: rgba(255,255,255,.06); transition: border-color .3s var(--ease); resize: vertical;
+  }
+  .cfield input::placeholder, .cfield textarea::placeholder { color: rgba(242,242,242,.35); }
+  .cfield select { color: var(--paper); }
+  .cfield select option { color: var(--ink); background: var(--paper); }
+  .cfield input:focus, .cfield select:focus, .cfield textarea:focus { outline: none; border-color: var(--gold); }
+  .contacto__done { grid-column: 1 / -1; text-align: center; padding-block: 2rem; }
+  .contacto__mark { width: 64px; height: 64px; border-radius: 50%; background: var(--gold); color: var(--ink); display: grid; place-items: center; font-size: 1.8rem; margin: 0 auto 1.4rem; }
+  .contacto__done .lead { margin-inline: auto; }
 
   @media (max-width: 980px) { .cabgrid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 760px) {
     .two { grid-template-columns: 1fr; align-items: start; }
-    .pilares { grid-template-columns: 1fr; }
+    .hero__inner { grid-template-columns: 1fr; }
+    .hero__photo { max-height: 340px; order: -1; }
+    .exp-body { grid-template-columns: 1fr; }
+    .exp-photo { max-height: 380px; }
     .grid-esp { grid-template-columns: 1fr; }
+    .pp-card { grid-template-columns: 1fr; }
+    .pp-card__media { min-height: 220px; }
     .grid-marcas { grid-template-columns: 1fr; }
-    .galeria__grid { columns: 2; }
+    .contacto__grid { grid-template-columns: 1fr; }
+    .cfields { grid-template-columns: 1fr; }
     .cabgrid { grid-template-columns: 1fr; }
-    .hero__mark { opacity: .05; right: -20%; }
   }
 </style>

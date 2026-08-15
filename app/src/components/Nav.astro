@@ -2,6 +2,7 @@
 const links = [
   { href: '/#cabinas', label: 'Cabinas' },
   { href: '/#lugar', label: 'El lugar' },
+  { href: '/#marcas', label: 'Para marcas' },
   { href: '/cotiza', label: 'Cotiza tu evento' },
 ];
 ---
@@ -13,9 +14,35 @@ const links = [
     <nav class="nav__links">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
     </nav>
-    <a href="/cotiza" class="btn nav__cta">Cotizar</a>
+    <a href="/#contacto" class="btn nav__cta">Contacto</a>
+    <button class="nav__burger" id="navBurger" aria-label="Abrir menú" aria-expanded="false" aria-controls="navPanel">
+      <span></span><span></span>
+    </button>
   </div>
+  <nav class="nav__panel" id="navPanel" hidden>
+    {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    <a href="/#contacto" class="nav__panel-cta">Contacto</a>
+  </nav>
 </header>
+
+<script>
+  const burger = document.getElementById('navBurger');
+  const panel = document.getElementById('navPanel');
+  burger?.addEventListener('click', () => {
+    const open = panel.hidden;
+    panel.hidden = !open;
+    burger.setAttribute('aria-expanded', String(open));
+    burger.classList.toggle('is-open', open);
+  });
+  // cerrar al elegir una opción
+  panel?.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => {
+      panel.hidden = true;
+      burger.setAttribute('aria-expanded', 'false');
+      burger.classList.remove('is-open');
+    })
+  );
+</script>
 
 <style>
   .nav {
@@ -29,7 +56,7 @@ const links = [
     height: 76px; gap: 2rem;
   }
   .nav__brand img { height: 42px; width: auto; }
-  .nav__links { display: flex; gap: 2.4rem; }
+  .nav__links { display: flex; gap: 2.2rem; }
   .nav__links a {
     font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 400;
     color: var(--ink-70); transition: color .3s var(--ease);
@@ -37,9 +64,37 @@ const links = [
   .nav__links a:hover { color: var(--ink); }
   .nav__cta { padding: .7em 1.5em; font-size: .74rem; }
 
+  /* Hamburguesa */
+  .nav__burger {
+    display: none; flex-direction: column; justify-content: center; gap: 6px;
+    width: 44px; height: 44px; padding: 10px;
+    background: transparent; border: 1px solid var(--ink-12); border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .nav__burger span { display: block; height: 1.5px; background: var(--ink); transition: transform .3s var(--ease); }
+  .nav__burger.is-open span:first-child { transform: translateY(3.75px) rotate(45deg); }
+  .nav__burger.is-open span:last-child { transform: translateY(-3.75px) rotate(-45deg); }
+
+  .nav__panel {
+    display: flex; flex-direction: column;
+    border-top: 1px solid var(--ink-12);
+    background: var(--paper);
+    padding: .6rem clamp(1.25rem, 5vw, 4rem) 1.4rem;
+  }
+  .nav__panel a {
+    padding: .95em 0; font-size: .85rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-70); border-bottom: 1px solid var(--ink-12);
+  }
+  .nav__panel a:last-child { border-bottom: 0; }
+  .nav__panel-cta { color: var(--ink) !important; font-weight: 500; }
+
   @media (max-width: 760px) {
-    .nav__links { display: none; }
+    .nav__links, .nav__cta { display: none; }
+    .nav__burger { display: flex; }
     .nav__inner { height: 64px; }
     .nav__brand img { height: 34px; }
+  }
+  @media (min-width: 761px) {
+    .nav__panel { display: none; }
   }
 </style>
