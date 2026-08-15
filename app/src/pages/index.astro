@@ -64,6 +64,28 @@ const cabinas = [
     </div>
   </section>
 
+  <!-- GALERÍA / EL LUGAR -->
+  <section class="section galeria" id="lugar">
+    <div class="wrap">
+      <div class="two">
+        <div class="reveal">
+          <span class="eyebrow">El lugar</span>
+          <h2 class="h2" style="margin-top:1.2rem">Un espacio<br/>con alma.</h2>
+        </div>
+        <p class="lead reveal">Madera, luz cálida y verde. Terraza en planta baja, roof abierto al cielo y rincones curados para exhibir. Así se siente Galería 9 por dentro.</p>
+      </div>
+    </div>
+    <div class="galeria__grid reveal">
+      <figure><img src="/fotos/roof-1.jpg" alt="Roof de Galería 9" loading="lazy" /></figure>
+      <figure><img src="/fotos/terraza-1.jpg" alt="Terraza de Galería 9" loading="lazy" /></figure>
+      <figure><img src="/fotos/popup.jpg" alt="Zona Pop Up" loading="lazy" /></figure>
+      <figure><img src="/fotos/terraza-2.jpg" alt="Terraza · detalle" loading="lazy" /></figure>
+      <figure><img src="/fotos/invitado.jpg" alt="Invitado Especial" loading="lazy" /></figure>
+      <figure><img src="/fotos/roof-2.jpg" alt="Roof · vista" loading="lazy" /></figure>
+      <figure><img src="/fotos/terraza-3.jpg" alt="Terraza · rincón" loading="lazy" /></figure>
+    </div>
+  </section>
+
   <!-- CABINAS -->
   <section class="section cabinas" id="cabinas">
     <div class="wrap">
@@ -161,6 +183,19 @@ const cabinas = [
   .cab--fer .cab__tag { color: var(--gold); }
   .cab--fer .cab__svc { color: rgba(242,242,242,.72); }
 
+  .grid-marcas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .marca { display: flex; flex-direction: column; gap: .6rem; padding: 1.8rem 1.6rem; border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white); transition: border-color .3s var(--ease), transform .3s var(--ease); }
+  .marca:hover { border-color: var(--ink); transform: translateY(-3px); }
+  .marca__top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .marca__meta { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); white-space: nowrap; }
+  .marca .muted { flex: 1; font-size: .92rem; }
+  .marca__cta { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--ink); margin-top: .3rem; }
+
+  .galeria__grid { columns: 3; column-gap: 10px; padding-inline: clamp(1.25rem, 5vw, 4rem); margin-top: clamp(2rem, 5vw, 3rem); }
+  .galeria__grid figure { margin: 0 0 10px; break-inside: avoid; overflow: hidden; border-radius: var(--radius); background: var(--sand); }
+  .galeria__grid img { width: 100%; display: block; transition: transform .8s var(--ease); }
+  .galeria__grid figure:hover img { transform: scale(1.04); }
+
   .espacios { background: var(--sand); }
   .grid-esp { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--ink-12); border: 1px solid var(--ink-12); }
   .esp { background: var(--sand); padding: clamp(1.6rem, 3vw, 2.6rem); }
@@ -178,6 +213,8 @@ const cabinas = [
     .two { grid-template-columns: 1fr; align-items: start; }
     .pilares { grid-template-columns: 1fr; }
     .grid-esp { grid-template-columns: 1fr; }
+    .grid-marcas { grid-template-columns: 1fr; }
+    .galeria__grid { columns: 2; }
     .cabgrid { grid-template-columns: 1fr; }
     .hero__mark { opacity: .05; right: -20%; }
   }

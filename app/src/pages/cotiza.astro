@@ -50,7 +50,7 @@ const dataForClient = { espacios, extras };
             <div class="cards">
               {espacios.map((e) => (
                 <label class="card" data-price={e.precioHora}>
-                  <input type="radio" name="espacio" value={e.id} required />
+                  <input type="checkbox" name="espacio" value={e.id} />
                   <span class="card__body">
                     <span class="card__name">{e.nombre}</span>
                     <span class="card__desc muted">{e.desc}</span>
@@ -60,6 +60,7 @@ const dataForClient = { espacios, extras };
                 </label>
               ))}
             </div>
+            <p class="hint muted">Puedes rentar uno o ambos espacios para el mismo evento.</p>
           </fieldset>
 
           <!-- 3 · Detalles -->
@@ -75,23 +76,19 @@ const dataForClient = { espacios, extras };
                 <input type="date" name="fecha2" />
               </label>
               <label class="field">
-                <span>Horario aproximado</span>
-                <input type="text" name="horario" placeholder="Ej. 18:00 – 22:00" />
+                <span>Hora de inicio</span>
+                <input type="time" name="horaInicio" required />
               </label>
               <label class="field">
-                <span>Duración (horas)</span>
-                <input type="number" name="horas" min="1" max="12" value="4" required />
+                <span>Hora de fin</span>
+                <input type="time" name="horaFin" required />
               </label>
-              <label class="field">
-                <span>Personas esperadas</span>
+              <label class="field field--wide">
+                <span>Personas esperadas <span class="muted">(aprox.)</span></span>
                 <input type="number" name="personas" min="1" max="120" placeholder="Ej. 30" required />
               </label>
-              <label class="field">
-                <span>Público al que va dirigido</span>
-                <input type="text" name="publico" placeholder="Ej. mujeres 25-40, comunidad wellness..." />
-              </label>
             </div>
-            <p class="hint muted">El estimado del espacio se calcula por hora. Los extras se suman en el siguiente paso.</p>
+            <p class="hint muted" id="durHint">Pon hora de inicio y fin; la duración se calcula sola.</p>
           </fieldset>
 
           <!-- 4 · Extras -->

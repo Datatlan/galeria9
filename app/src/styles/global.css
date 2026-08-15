@@ -45,6 +45,7 @@ body {
 
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
+[hidden] { display: none !important; }
 
 h1, h2, h3 { font-weight: 300; line-height: 1.08; margin: 0; letter-spacing: -0.01em; }
 
@@ -106,3 +107,30 @@ h1, h2, h3 { font-weight: 300; line-height: 1.08; margin: 0; letter-spacing: -0.
   .reveal { opacity: 1; transform: none; transition: none; }
   html { scroll-behavior: auto; }
 }
+
+/* ==========================================================================
+   Forms de solicitud del Market (Tu Talento / Pop Up / Tester Day)
+   ========================================================================== */
+.mform { display: grid; gap: 1.2rem; max-width: 640px; }
+.mform-two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+.mfield { display: flex; flex-direction: column; gap: .5rem; }
+.mfield--wide { grid-column: 1 / -1; }
+.mfield > span { font-size: .82rem; letter-spacing: .04em; color: var(--ink-70); }
+.mfield input, .mfield select, .mfield textarea {
+  font-family: var(--sans); font-size: 1rem; color: var(--ink);
+  padding: .9em 1em; border: 1px solid var(--ink-12); border-radius: var(--radius);
+  background: var(--white); transition: border-color .3s var(--ease); resize: vertical;
+}
+.mfield input:focus, .mfield select:focus, .mfield textarea:focus { outline: none; border-color: var(--ink); }
+.mform-note { font-size: .85rem; color: var(--ink-45); line-height: 1.5; }
+.mincluye { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.6rem 0 .5rem; }
+.mincluye span {
+  font-size: .8rem; background: var(--sand); border: 1px solid var(--ink-12);
+  padding: .5em 1em; border-radius: 100px; color: var(--ink-70);
+}
+.mdone { text-align: center; max-width: 520px; margin: 2rem auto; padding: 2rem 0; }
+.mdone__mark { width: 64px; height: 64px; border-radius: 50%; background: var(--gold); color: var(--ink); display: grid; place-items: center; font-size: 1.8rem; margin: 0 auto 1.6rem; }
+.mdone .lead { margin: 1rem 0 2rem; }
+.mhead { max-width: 620px; margin-bottom: clamp(2rem, 5vw, 3rem); }
+
+@media (max-width: 640px) { .mform-two { grid-template-columns: 1fr; } }

@@ -15,6 +15,13 @@ export const T = {
   lineItems: 'tblRZmcGK720YClo5',
 };
 
+// Registros del Catalogo (para ligar el Line_Item de cada solicitud).
+export const CAT = {
+  tuTalento: 'recTiTAR9X3ckXszU',
+  popUp:     'reckqvWsPWiKiwH9T',
+  testerDay: 'rec5Pq8PD4djWQqlL',
+};
+
 // Crea UN registro y devuelve el registro creado (incluye .id).
 export async function crear(tableId, fields) {
   const rec = await crearMuchos(tableId, [fields]);

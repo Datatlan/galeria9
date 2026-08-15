@@ -34,19 +34,30 @@ function showStep(n) {
 // ---- Selección / total ----
 function selection() {
   const fd = new FormData(form);
-  const espacio = espacioById(fd.get('espacio'));
-  const horas = Math.max(0, parseInt(fd.get('horas'), 10) || 0);
+  const espacios = fd.getAll('espacio').map(espacioById).filter(Boolean);
+  const horas = computeHoras(fd);
   const extrasSel = data.extras
     .map((x) => ({ ...x, qty: Math.max(0, parseInt(fd.get(`x_${x.id}`), 10) || 0) }))
     .filter((x) => x.qty > 0);
-  return { espacio, horas, extrasSel, fd };
+  return { espacios, horas, extrasSel, fd };
 }
 
-function computeTotal({ espacio, horas, extrasSel }) {
+function computeTotal({ espacios, horas, extrasSel }) {
   let t = 0;
-  if (espacio && horas) t += espacio.precioHora * horas;
+  if (horas) espacios.forEach((e) => (t += e.precioHora * horas));
   extrasSel.forEach((x) => (t += x.precio * x.qty));
   return t;
+}
+
+// Duración en horas a partir de hora de inicio y fin (soporta cruzar medianoche).
+function computeHoras(fd) {
+  const a = fd.get('horaInicio'), b = fd.get('horaFin');
+  if (!a || !b) return 0;
+  const [ah, am] = a.split(':').map(Number);
+  const [bh, bm] = b.split(':').map(Number);
+  let mins = (bh * 60 + bm) - (ah * 60 + am);
+  if (mins <= 0) mins += 24 * 60;
+  return Math.round((mins / 60) * 100) / 100;
 }
 
 const row = (a, b) => `<div class="summary__row"><span>${a}</span><span>${b}</span></div>`;
@@ -54,14 +65,21 @@ const sub = (a, b) => `<div class="summary__row is-sub"><span>${a}</span><span>$
 
 function renderSummary() {
   const sel = selection();
-  const { espacio, horas, extrasSel, fd } = sel;
+  const { espacios, horas, extrasSel, fd } = sel;
   const rows = [];
+
+  const dh = document.getElementById('durHint');
+  if (dh) dh.textContent = horas
+    ? `Duración: ${horas} h — el estimado del espacio se calcula por estas horas.`
+    : 'Pon hora de inicio y fin; la duración se calcula sola.';
 
   const proyecto = fd.get('proyecto');
   if (proyecto) rows.push(sub('Proyecto', esc(proyecto)));
 
-  if (espacio && horas) rows.push(row(`${espacio.nombre} · ${horas} h`, money(espacio.precioHora * horas)));
-  else if (espacio) rows.push(row(`${espacio.nombre}`, `${money(espacio.precioHora)}/h`));
+  espacios.forEach((e) => {
+    if (horas) rows.push(row(`${e.nombre} · ${horas} h`, money(e.precioHora * horas)));
+    else rows.push(row(e.nombre, `${money(e.precioHora)}/h`));
+  });
 
   const fecha = fd.get('fecha');
   if (fecha) rows.push(sub('Fecha', new Date(fecha + 'T00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })));
@@ -95,12 +113,12 @@ form.querySelectorAll('.xrow').forEach((rowEl) => {
 // ---- Validación por paso ----
 function validateStep(n) {
   const panel = panels[n];
-  const radios = panel.querySelectorAll('input[type=radio][required]');
-  if (radios.length && ![...radios].some((r) => r.checked)) { flashCards(panel); return false; }
+  const cards = panel.querySelectorAll('.cards input[type=checkbox]');
+  if (cards.length && ![...cards].some((c) => c.checked)) { flashCards(panel); return false; }
 
   let ok = true;
   [...panel.querySelectorAll('input, textarea')]
-    .filter((i) => i.required && i.type !== 'radio')
+    .filter((i) => i.required && i.type !== 'radio' && i.type !== 'checkbox')
     .forEach((i) => {
       const good = i.checkValidity() && i.value.trim() !== '';
       i.closest('.field')?.classList.toggle('invalid', !good);
@@ -130,15 +148,14 @@ form.addEventListener('submit', async (e) => {
   if (!validateStep(step)) return;
 
   const sel = selection();
-  const { espacio, horas, extrasSel, fd } = sel;
+  const { espacios, horas, extrasSel, fd } = sel;
   const g = (k) => (fd.get(k) || '').trim();
 
   const notas = [
     `Tipo: ${g('tipoEvento')}`,
     `Objetivo: ${g('objetivo')}`,
-    g('publico') && `Público: ${g('publico')}`,
     g('mensaje') && `Actividades: ${g('mensaje')}`,
-    g('horario') && `Horario: ${g('horario')}`,
+    (g('horaInicio') && g('horaFin')) && `Horario: ${g('horaInicio')}–${g('horaFin')} (${horas} h)`,
     g('fecha2') && `Fecha alterna: ${g('fecha2')}`,
     `Personas: ${g('personas')}`,
   ].filter(Boolean).join('\n');
@@ -159,15 +176,15 @@ form.addEventListener('submit', async (e) => {
 
     // 2) Line_Items (base por horas + extras)
     const items = [];
-    if (espacio && horas) {
+    if (horas) espacios.forEach((e) => {
       items.push({
-        Nombre: `${espacio.nombre} · ${horas} h`,
+        Nombre: `${e.nombre} · ${horas} h`,
         Orden: [orden.id],
-        Servicios_Extras: [espacio.rec],
+        Servicios_Extras: [e.rec],
         Qty: horas,
-        Precio_Unitario: espacio.precioHora,
+        Precio_Unitario: e.precioHora,
       });
-    }
+    });
     extrasSel.forEach((x) => {
       items.push({
         Nombre: `${x.nombre}${x.qty > 1 ? ` ×${x.qty}` : ''}`,
