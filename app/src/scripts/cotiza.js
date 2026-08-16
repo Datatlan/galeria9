@@ -246,17 +246,37 @@ leer('precios')
       if (f && typeof f.Precio === 'number') x.precio = f.Precio;
     });
 
-    // Etiquetas de las cards de espacio
+    // Cards de espacio: precio actualizado; si no vino en la lectura (no
+    // disponible), la card se oculta y se des-selecciona.
     form.querySelectorAll('.cards input[name=espacio]').forEach((input) => {
       const e = espacioById(input.value);
-      const label = input.closest('.card')?.querySelector('.card__price');
-      if (e && label) label.textContent = `${money(e.precioHora)} / hora · ${e.cap}`;
+      const card = input.closest('.card');
+      const disponible = !!(e && by.has(e.rec));
+      if (card) card.hidden = !disponible;
+      if (!disponible) input.checked = false;
+      const label = card?.querySelector('.card__price');
+      if (disponible && label) label.textContent = `${money(e.precioHora)} / hora · ${e.cap}`;
     });
-    // Etiquetas de los extras
+
+    // Extras: precio actualizado; los no disponibles desaparecen (y su qty a 0).
     form.querySelectorAll('.xrow').forEach((rowEl) => {
       const x = extraById(rowEl.dataset.id);
+      const disponible = !!(x && by.has(x.rec));
+      rowEl.hidden = !disponible;
+      if (!disponible) {
+        const input = rowEl.querySelector('.stepper__val');
+        if (input) input.value = 0;
+        rowEl.classList.remove('is-on');
+        return;
+      }
       const label = rowEl.querySelector('.xrow__price');
-      if (x && label) label.textContent = money(x.precio);
+      if (label) label.textContent = money(x.precio);
+    });
+
+    // Categorías que quedaron vacías → ocultar el grupo completo
+    form.querySelectorAll('.extra-group').forEach((g) => {
+      const rows = [...g.querySelectorAll('.xrow')];
+      g.hidden = rows.length > 0 && rows.every((r) => r.hidden);
     });
 
     renderSummary();
