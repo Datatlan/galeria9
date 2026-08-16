@@ -1,21 +1,21 @@
 /**
- * Cloudflare Worker — proxy seguro Galería 9 → Airtable
+ * Cloudflare Worker — proxy seguro Galería 9 → Airtable  (v3: escritura + lectura)
  * URL: https://galeria9-airtable.datatlan.workers.dev
  *
- * Guarda el token (secreto AIRTABLE_TOKEN) y reenvía los POST a Airtable.
- * Cambios vs versión demo:
- *   · Acepta ?b=<baseId> (whitelist). Sin ?b usa la base demo (compat).
- *   · Reenvía el body tal cual → soporta {fields} (1) y {records:[...]} (varios).
- *   · Devuelve la respuesta de Airtable (incluye los .id creados) con CORS.
+ * ESCRITURA (POST, igual que v2):
+ *   ?b=<baseId>&t=<tableId> — whitelist de bases; reenvía {fields}/{records}.
  *
- * DEPLOY:
- *   1) Cloudflare dashboard → Workers → galeria9-airtable → Edit code → pega esto → Deploy.
- *   2) Secreto: Settings → Variables → AIRTABLE_TOKEN debe ser un PAT con scope
- *      data.records:read + data.records:write sobre AMBAS bases:
- *        - appNi4fINVF5N50fC  (demo "Galeria 9")
- *        - appSkdHwrlulZ2iJc  (producción "Galeria9 - Operación")   ← AGREGAR ESTA
- *      Si el token no incluye la base de producción, los envíos darán 403.
- *      (El token `galeria9-demo-worker` ya tiene acceso a ambas — ago 2026.)
+ * LECTURA (GET, nuevo):
+ *   ?read=<clave> — el front NUNCA pide una tabla: pide una clave de la
+ *   whitelist READABLE. Cada clave define tabla + campos + filtro exactos.
+ *   Clave desconocida → 403. Así el token puede leer toda la base, pero el
+ *   Worker solo deja salir lo que está en la lista (nada de Clientes/Pagos).
+ *
+ *   Caché: cada lectura se guarda en el edge de Cloudflare (ttl por clave).
+ *   Mil visitas = ~1 request a Airtable por minuto. Protege el límite de 5 req/s.
+ *
+ * DEPLOY: Cloudflare dashboard → Workers → galeria9-airtable → Edit code →
+ *         pegar esto → Deploy. (El secreto AIRTABLE_TOKEN no cambia.)
  */
 
 const BASES = {
@@ -25,26 +25,81 @@ const BASES = {
 const ALLOWED = new Set(Object.values(BASES));
 const DEFAULT_BASE = BASES.demo;
 
+// ── Whitelist de lecturas ───────────────────────────────────────────────────
+// Agregar aquí cada dato que el sitio pueda leer. Nada más existe hacia afuera.
+const READABLE = {
+  // Precios vigentes de Servicios_Extras (espacios por hora + extras del cotizador)
+  precios: {
+    base: BASES.prod,
+    table: 'tblXTaleJPTMiJBDJ', // Servicios_Extras
+    fields: ['Nombre', 'Precio', 'Categoria', 'Estatus'],
+    filter: "{Estatus}='Disponible'",
+    ttl: 60,
+  },
+  // Catálogo de productos (familias, periodos, precios base)
+  catalogo: {
+    base: BASES.prod,
+    table: 'tblu379wzXculcvNY', // Catalogo
+    fields: ['Nombre', 'Familia', 'Tipo_Unidad', 'Precio_Unitario', 'Periodo'],
+    ttl: 300,
+  },
+  // Futuro (cuando exista el rework de Tester Day):
+  // testerDays: { base: BASES.prod, table: 'tblsOvEhdkacWz5yZ', fields: [...], filter: ..., ttl: 60 },
+};
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
-    if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
     const url = new URL(request.url);
+
+    // ── LECTURA ────────────────────────────────────────────────────────────
+    if (request.method === 'GET') {
+      const cfg = READABLE[url.searchParams.get('read')];
+      if (!cfg) return json({ error: 'Lectura no permitida' }, 403);
+
+      // caché en el edge
+      const cacheKey = new Request(url.toString());
+      const cache = caches.default;
+      const hit = await cache.match(cacheKey);
+      if (hit) return hit;
+
+      const p = new URLSearchParams();
+      cfg.fields.forEach((f) => p.append('fields[]', f));
+      if (cfg.filter) p.set('filterByFormula', cfg.filter);
+      p.set('pageSize', '100');
+
+      const air = await fetch(`https://api.airtable.com/v0/${cfg.base}/${cfg.table}?${p}`, {
+        headers: { Authorization: `Bearer ${env.AIRTABLE_TOKEN}` },
+      });
+      const body = await air.text();
+      const res = new Response(body, {
+        status: air.status,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': `public, max-age=${cfg.ttl}`,
+          ...CORS,
+        },
+      });
+      if (air.ok) ctx.waitUntil(cache.put(cacheKey, res.clone()));
+      return res;
+    }
+
+    // ── ESCRITURA ──────────────────────────────────────────────────────────
+    if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+
     const base = url.searchParams.get('b') || DEFAULT_BASE;
     const table = url.searchParams.get('t');
-
     if (!ALLOWED.has(base)) return json({ error: 'Base no permitida' }, 400);
     if (!table) return json({ error: 'Falta el parámetro t (tableId)' }, 400);
 
     const body = await request.text();
-
     const air = await fetch(`https://api.airtable.com/v0/${base}/${table}`, {
       method: 'POST',
       headers: {

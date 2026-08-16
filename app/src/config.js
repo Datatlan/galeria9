@@ -23,6 +23,15 @@ export const CAT = {
   testerDay: 'rec5Pq8PD4djWQqlL',
 };
 
+// Lee una clave de la whitelist del Worker (?read=<clave>). Devuelve records[].
+// El Worker cachea en el edge (~60s), así que es barato llamarla al cargar.
+export async function leer(clave) {
+  const res = await fetch(`${WORKER}?read=${clave}`);
+  if (!res.ok) throw new Error(`Worker ${res.status}`);
+  const json = await res.json();
+  return json.records || [];
+}
+
 // Crea UN registro y devuelve el registro creado (incluye .id).
 export async function crear(tableId, fields) {
   const rec = await crearMuchos(tableId, [fields]);

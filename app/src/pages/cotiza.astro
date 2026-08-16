@@ -77,11 +77,25 @@ const dataForClient = { espacios, extras };
               </label>
               <label class="field">
                 <span>Hora de inicio</span>
-                <input type="time" name="horaInicio" required />
+                <select name="horaInicio" required>
+                  <option value="">Elige…</option>
+                  {Array.from({ length: 15 }, (_, i) => 7 + i).map((h) => (
+                    <option value={`${String(h).padStart(2, '0')}:00`}>
+                      {h < 12 ? `${h}:00 am` : h === 12 ? '12:00 pm' : `${h - 12}:00 pm`}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label class="field">
                 <span>Hora de fin</span>
-                <input type="time" name="horaFin" required />
+                <select name="horaFin" required>
+                  <option value="">Elige…</option>
+                  {Array.from({ length: 15 }, (_, i) => 8 + i).map((h) => (
+                    <option value={`${String(h).padStart(2, '0')}:00`}>
+                      {h < 12 ? `${h}:00 am` : h === 12 ? '12:00 pm' : `${h - 12}:00 pm`}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label class="field field--wide">
                 <span>Personas esperadas <span class="muted">(aprox.)</span></span>
@@ -219,12 +233,12 @@ const dataForClient = { espacios, extras };
   .field { display: flex; flex-direction: column; gap: .5rem; }
   .field--wide { grid-column: 1 / -1; }
   .field span { font-size: .82rem; letter-spacing: .04em; color: var(--ink-70); }
-  .field input, .field textarea {
+  .field input, .field select, .field textarea {
     font-family: var(--sans); font-size: 1rem; color: var(--ink);
     padding: .9em 1em; border: 1px solid var(--ink-12); border-radius: var(--radius);
     background: var(--white); transition: border-color .3s var(--ease); resize: vertical;
   }
-  .field input:focus, .field textarea:focus { outline: none; border-color: var(--ink); }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--ink); }
 
   .extra-group { margin-bottom: 2rem; }
   .extra-group .eyebrow { display: block; margin-bottom: 1rem; }

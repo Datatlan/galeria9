@@ -1,5 +1,5 @@
 // Flujo "Cotiza tu evento" — estado, total en vivo y creación de Orden borrador.
-import { BASE, T, crear, crearMuchos } from '../config.js';
+import { BASE, T, crear, crearMuchos, leer } from '../config.js';
 import { money } from '../data/catalogo.js';
 
 const data = JSON.parse(document.getElementById('catData').textContent);
@@ -49,15 +49,12 @@ function computeTotal({ espacios, horas, extrasSel }) {
   return t;
 }
 
-// Duración en horas a partir de hora de inicio y fin (soporta cruzar medianoche).
+// Duración en horas (horas cerradas 7am–10pm, mismo día; fin debe ser > inicio).
 function computeHoras(fd) {
   const a = fd.get('horaInicio'), b = fd.get('horaFin');
   if (!a || !b) return 0;
-  const [ah, am] = a.split(':').map(Number);
-  const [bh, bm] = b.split(':').map(Number);
-  let mins = (bh * 60 + bm) - (ah * 60 + am);
-  if (mins <= 0) mins += 24 * 60;
-  return Math.round((mins / 60) * 100) / 100;
+  const horas = parseInt(b, 10) - parseInt(a, 10);
+  return horas > 0 ? horas : 0;
 }
 
 const row = (a, b) => `<div class="summary__row"><span>${a}</span><span>${b}</span></div>`;
@@ -117,7 +114,7 @@ function validateStep(n) {
   if (cards.length && ![...cards].some((c) => c.checked)) { flashCards(panel); return false; }
 
   let ok = true;
-  [...panel.querySelectorAll('input, textarea')]
+  [...panel.querySelectorAll('input, select, textarea')]
     .filter((i) => i.required && i.type !== 'radio' && i.type !== 'checkbox')
     .forEach((i) => {
       const good = i.checkValidity() && i.value.trim() !== '';
@@ -211,5 +208,57 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
+// ---- Reglas de fecha y horario ----
+// Sin fechas pasadas
+const hoy = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local
+if (form.elements['fecha']) form.elements['fecha'].min = hoy;
+if (form.elements['fecha2']) form.elements['fecha2'].min = hoy;
+
+// La hora de fin debe ser posterior a la de inicio
+const selIni = form.elements['horaInicio'];
+const selFin = form.elements['horaFin'];
+selIni?.addEventListener('change', () => {
+  const ini = parseInt(selIni.value, 10);
+  [...selFin.options].forEach((o) => {
+    if (!o.value) return;
+    o.disabled = Number.isFinite(ini) && parseInt(o.value, 10) <= ini;
+  });
+  if (selFin.value && parseInt(selFin.value, 10) <= ini) selFin.value = '';
+  renderSummary();
+});
+
 showStep(0);
 renderSummary();
+
+// ---- Precios en vivo ----
+// El espejo local (catalogo.js) es el fallback; si el Worker responde,
+// actualizamos precios por record ID y refrescamos las etiquetas visibles.
+leer('precios')
+  .then((recs) => {
+    const by = new Map(recs.map((r) => [r.id, r.fields]));
+
+    data.espacios.forEach((e) => {
+      const f = by.get(e.rec);
+      if (f && typeof f.Precio === 'number') e.precioHora = f.Precio;
+    });
+    data.extras.forEach((x) => {
+      const f = by.get(x.rec);
+      if (f && typeof f.Precio === 'number') x.precio = f.Precio;
+    });
+
+    // Etiquetas de las cards de espacio
+    form.querySelectorAll('.cards input[name=espacio]').forEach((input) => {
+      const e = espacioById(input.value);
+      const label = input.closest('.card')?.querySelector('.card__price');
+      if (e && label) label.textContent = `${money(e.precioHora)} / hora · ${e.cap}`;
+    });
+    // Etiquetas de los extras
+    form.querySelectorAll('.xrow').forEach((rowEl) => {
+      const x = extraById(rowEl.dataset.id);
+      const label = rowEl.querySelector('.xrow__price');
+      if (x && label) label.textContent = money(x.precio);
+    });
+
+    renderSummary();
+  })
+  .catch(() => {}); // sin red o Worker viejo → se queda el espejo local
