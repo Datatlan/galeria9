@@ -26,7 +26,7 @@ const puntoPresencia = {
 
 // Formatos de showcase para MARCAS
 const marcas = [
-  { n: 'Pop Up', d: '6 días de showroom con exhibición propia y campaña de promoción incluida. Una sola marca por mes.', meta: 'Mensual', foto: '/fotos/popup.jpg' },
+  { n: 'Pop Up', d: '6 días de showroom con exhibición propia y campaña de promoción incluida. Una sola marca por mes.', meta: 'Mensual', foto: '/fotos/popup.jpg', href: '/pop-up' },
   { n: 'Tu Talento es un Arte', d: 'Una semana de presencia física y digital para tu marca, taller o talento. Que te conozcan, que te sigan.', meta: 'Semanal', foto: '/fotos/tu-talento.png' },
   { n: 'Tester Day', d: 'Da a probar tu producto gratis los miércoles y crea conexiones reales con nuevas personas.', meta: 'Miércoles', foto: '/fotos/tester-day.jpg' },
   { n: 'Invitado Especial', d: 'La sección estelar del Market con 5 pedestales incluidos, tuya por 6 días.', meta: '6 días', foto: '/fotos/invitado.jpg' },
@@ -195,7 +195,7 @@ const cabinas = [
 
       <div class="grid-marcas">
         {marcas.map((m, i) => (
-          <a class="marca reveal" href="/#contacto" data-interes={m.n} style={`transition-delay:${i * 80}ms`}>
+          <a class="marca reveal" href={m.href || '/#contacto'} data-interes={m.n} style={`transition-delay:${i * 80}ms`}>
             {m.foto && (
               <figure class="marca__media">
                 <img src={m.foto} alt={`${m.n} · Galería 9`} loading="lazy" />

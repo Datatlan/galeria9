@@ -43,6 +43,16 @@ const READABLE = {
     fields: ['Nombre', 'Familia', 'Tipo_Unidad', 'Precio_Unitario', 'Periodo'],
     ttl: 300,
   },
+  // Ocupación de Pop Out: rentas confirmadas de las unidades PO_ (una marca/mes).
+  // Solo salen las fechas; el front calcula qué meses quedan libres. Si una renta
+  // existe, ese mes está tomado (no hay holds tentativos: solo lo confirmado bloquea).
+  popout: {
+    base: BASES.prod,
+    table: 'tble36WbySAVkODVp', // Display_Rentals
+    fields: ['Fecha_Inicio', 'Fecha_Fin'],
+    filter: "FIND('PO_', ARRAYJOIN({Unidades_Display}))",
+    ttl: 120,
+  },
   // Futuro (cuando exista el rework de Tester Day):
   // testerDays: { base: BASES.prod, table: 'tblsOvEhdkacWz5yZ', fields: [...], filter: ..., ttl: 60 },
 };

@@ -1,0 +1,135 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Pop Up — Galería 9" description="6 días de showroom para vivir tu marca en Galería 9, con campaña incluida.">
+  <section class="section">
+    <div class="wrap">
+      <header class="mhead reveal">
+        <span class="eyebrow">Market · Pop Up</span>
+        <h1 class="h2" style="margin-top:1rem">6 días de showroom.</h1>
+        <p class="lead">Una experiencia temporal para vivir tu marca en Galería 9, con exhibición propia y campaña de promoción incluida. Solo una marca por mes.</p>
+        <div class="mincluye">
+          <span>6 días en el showroom (lun–sáb)</span>
+          <span>4 historias + 1 reel colaborativo</span>
+          <span>1 rack + 2 maniquíes</span>
+        </div>
+      </header>
+
+      <form id="f" class="mform reveal" novalidate>
+        <div class="mform-two">
+          <label class="mfield mfield--wide"><span>Nombre de tu marca / proyecto</span><input type="text" name="marca" placeholder="Tu marca" required /></label>
+          <label class="mfield"><span>Giro</span>
+            <select name="giro" required>
+              <option value="">Elige…</option>
+              <option>Moda</option><option>Accesorios</option><option>Joyería</option><option>Repostería</option><option>Belleza</option><option>Arte / Diseño</option><option>Otro</option>
+            </select>
+          </label>
+          <label class="mfield"><span>Mes que te interesa</span>
+            <select name="mes" required>
+              <option value="">Cargando disponibilidad…</option>
+            </select>
+          </label>
+          <label class="mfield"><span>Persona responsable</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
+          <label class="mfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+          <label class="mfield mfield--wide"><span>Correo <span class="muted">(opcional)</span></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
+          <label class="mfield mfield--wide"><span>¿Qué quieres hacer en tu Pop Up?</span><textarea name="idea" rows="3" placeholder="Ej. lanzar una nueva temporada, edición especial, degustación en vivo, taller exprés…" required></textarea></label>
+        </div>
+        <p class="mform-note"><b>Cupo: 1 marca por mes.</b> Los meses tomados aparecen deshabilitados; el que elijas te lo confirmamos por WhatsApp.</p>
+        <div><button type="submit" class="btn">Enviar solicitud</button></div>
+      </form>
+
+      <div class="mdone" id="done" hidden>
+        <div class="mdone__mark">✓</div>
+        <h2 class="h2">¡Recibimos tu solicitud!</h2>
+        <p class="lead">Revisamos la disponibilidad de tu mes y te contactamos para reservar tu Pop Up.</p>
+        <a href="/" class="btn btn--ghost">Volver al inicio</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { T, crear, leer } from '../config.js';
+
+    const form = document.getElementById('f');
+    const selMes = form.elements['mes'];
+
+    const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const ym = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+    // Próximos 12 meses a partir del mes actual (se calcula en el navegador → siempre vigente).
+    const now = new Date();
+    const opciones = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      return { key: ym(d), label: `${MESES[d.getMonth()]} ${d.getFullYear()}` };
+    });
+
+    function pintar(tomados) {
+      selMes.innerHTML = '<option value="">Elige…</option>' + opciones.map((o) => {
+        const t = tomados.has(o.key);
+        return `<option value="${o.label}"${t ? ' disabled' : ''}>${o.label}${t ? ' — no disponible' : ''}</option>`;
+      }).join('');
+    }
+
+    // Estado inicial: todo disponible (fallback si el Worker no responde).
+    pintar(new Set());
+
+    // Ocupación en vivo: cada renta Pop Out marca como tomado(s) el/los mes(es) que toca.
+    leer('popout')
+      .then((recs) => {
+        const tomados = new Set();
+        for (const r of recs) {
+          const ini = r.fields.Fecha_Inicio;
+          if (!ini) continue;
+          const fin = r.fields.Fecha_Fin || ini;
+          let d = new Date(ini + 'T00:00');
+          const end = new Date(fin + 'T00:00');
+          d = new Date(d.getFullYear(), d.getMonth(), 1);
+          while (d <= end) {
+            tomados.add(ym(d));
+            d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+          }
+        }
+        pintar(tomados);
+      })
+      .catch(() => {}); // sin red / Worker viejo → se queda "todo disponible"
+
+    // Envío → Lead (no Orden). El mes y el contexto viajan en Detalle; Fer convierte si prospera.
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+
+      const fd = new FormData(form);
+      const g = (k) => (fd.get(k) || '').trim();
+      const btn = form.querySelector('[type=submit]');
+      const label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+
+      try {
+        await crear(T.leads, {
+          Nombre: g('nombre'),
+          WhatsApp: g('telefono'),
+          Correo: g('correo') || undefined,
+          Interes: 'Pop Up',
+          Mensaje: g('idea'),
+          Detalle: [
+            `Marca: ${g('marca')}`,
+            `Giro: ${g('giro')}`,
+            `Mes de interés: ${g('mes')}`,
+          ].filter(Boolean).join('\n'),
+          Estatus: 'Nuevo',
+        });
+
+        form.hidden = true;
+        const done = document.getElementById('done');
+        done.hidden = false;
+        done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = label;
+        alert('No pudimos enviar tu solicitud. Intenta de nuevo o escríbenos por WhatsApp.');
+        console.error(err);
+      }
+    });
+  </script>
+</Base>
