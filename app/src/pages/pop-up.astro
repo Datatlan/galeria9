@@ -24,17 +24,26 @@ import Base from '../layouts/Base.astro';
               <option>Moda</option><option>Accesorios</option><option>Joyería</option><option>Repostería</option><option>Belleza</option><option>Arte / Diseño</option><option>Otro</option>
             </select>
           </label>
-          <label class="mfield"><span>Mes que te interesa</span>
-            <select name="mes" required>
-              <option value="">Cargando disponibilidad…</option>
-            </select>
-          </label>
+
+          <div class="mfield mfield--wide monthpick">
+            <span>Mes que te interesa</span>
+            <div class="monthpick__legend" aria-hidden="true">
+              <span class="lg lg--free">Disponible</span>
+              <span class="lg lg--taken">Ocupado</span>
+            </div>
+            <div id="monthGrid" class="monthpick__wrap" role="group" aria-label="Elige un mes disponible">
+              <p class="muted monthpick__loading">Cargando disponibilidad…</p>
+            </div>
+            <p class="monthpick__pick" id="mesPick" hidden></p>
+            <input type="hidden" name="mes" id="mesInput" />
+            <p class="month-error" id="mesError" hidden>Elige un mes disponible.</p>
+          </div>
+
           <label class="mfield"><span>Persona responsable</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
           <label class="mfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
           <label class="mfield mfield--wide"><span>Correo <span class="muted">(opcional)</span></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
           <label class="mfield mfield--wide"><span>¿Qué quieres hacer en tu Pop Up?</span><textarea name="idea" rows="3" placeholder="Ej. lanzar una nueva temporada, edición especial, degustación en vivo, taller exprés…" required></textarea></label>
         </div>
-        <p class="mform-note"><b>Cupo: 1 marca por mes.</b> Los meses tomados aparecen deshabilitados; el que elijas te lo confirmamos por WhatsApp.</p>
         <div><button type="submit" class="btn">Enviar solicitud</button></div>
       </form>
 
@@ -51,32 +60,72 @@ import Base from '../layouts/Base.astro';
     import { T, crear, leer } from '../config.js';
 
     const form = document.getElementById('f');
-    const selMes = form.elements['mes'];
+    const grid = document.getElementById('monthGrid');
+    const pick = document.getElementById('mesPick');
+    const mesInput = document.getElementById('mesInput');
+    const mesError = document.getElementById('mesError');
 
     const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const ym = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const ym = (y, m) => `${y}-${String(m + 1).padStart(2, '0')}`;
 
-    // Próximos 12 meses a partir del mes actual (se calcula en el navegador → siempre vigente).
     const now = new Date();
-    const opciones = Array.from({ length: 12 }, (_, i) => {
-      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      return { key: ym(d), label: `${MESES[d.getMonth()]} ${d.getFullYear()}` };
-    });
+    const curY = now.getFullYear();
+    const curM = now.getMonth();
+    const years = [curY, curY + 1]; // año actual + próximo
 
-    function pintar(tomados) {
-      selMes.innerHTML = '<option value="">Elige…</option>' + opciones.map((o) => {
-        const t = tomados.has(o.key);
-        return `<option value="${o.label}"${t ? ' disabled' : ''}>${o.label}${t ? ' — no disponible' : ''}</option>`;
-      }).join('');
+    // Preview seguro: ?demo=2026-11,2027-02 pinta esos meses como ocupados
+    // (solo para revisar el UX en local; en prod sin el param no bloquea nada).
+    const demoTaken = new Set(
+      (new URLSearchParams(location.search).get('demo') || '')
+        .split(',').map((s) => s.trim()).filter(Boolean),
+    );
+
+    // Estado
+    let tomados = new Set(demoTaken);
+    let activeYear = curY;
+    let selectedKey = '';
+    let selectedLabel = '';
+
+    function render() {
+      const tabs = years.map((Y) =>
+        `<button type="button" class="yeartab${Y === activeYear ? ' is-active' : ''}" data-year="${Y}" aria-pressed="${Y === activeYear}">${Y}</button>`,
+      ).join('');
+
+      const startM = (activeYear === curY) ? curM : 0;
+      const cells = [];
+      for (let m = startM; m < 12; m++) {
+        const key = ym(activeYear, m);
+        const label = `${MESES[m]} ${activeYear}`;
+        const taken = tomados.has(key);
+        const selected = key === selectedKey;
+        const estado = taken ? 'Ocupado' : selected ? '✓ Elegido' : 'Disponible';
+        cells.push(
+          `<button type="button" class="mcell${taken ? ' is-taken' : selected ? ' is-selected' : ''}" data-key="${key}" data-label="${label}"` +
+          `${taken ? ' disabled aria-disabled="true"' : ` aria-pressed="${selected}"`}>` +
+          `<span class="mcell__m">${MESES[m]}</span>` +
+          `<span class="mcell__tag">${estado}</span>` +
+          `</button>`,
+        );
+      }
+      grid.innerHTML = `<div class="yeartabs" role="tablist">${tabs}</div><div class="month-grid">${cells.join('')}</div>`;
+      updatePick();
     }
 
-    // Estado inicial: todo disponible (fallback si el Worker no responde).
-    pintar(new Set());
+    function updatePick() {
+      if (selectedLabel) {
+        pick.textContent = `Elegiste: ${selectedLabel}`;
+        pick.hidden = false;
+      } else {
+        pick.hidden = true;
+      }
+    }
 
-    // Ocupación en vivo: cada renta Pop Out marca como tomado(s) el/los mes(es) que toca.
+    render();
+
+    // Ocupación en vivo: cada renta Pop Out marca el/los mes(es) que toca.
     leer('popout')
       .then((recs) => {
-        const tomados = new Set();
+        const t = new Set(demoTaken);
         for (const r of recs) {
           const ini = r.fields.Fecha_Inicio;
           if (!ini) continue;
@@ -85,17 +134,44 @@ import Base from '../layouts/Base.astro';
           const end = new Date(fin + 'T00:00');
           d = new Date(d.getFullYear(), d.getMonth(), 1);
           while (d <= end) {
-            tomados.add(ym(d));
+            t.add(ym(d.getFullYear(), d.getMonth()));
             d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
           }
         }
-        pintar(tomados);
+        tomados = t;
+        // Si el mes elegido resultó ocupado, límpialo.
+        if (selectedKey && tomados.has(selectedKey)) {
+          selectedKey = ''; selectedLabel = ''; mesInput.value = '';
+        }
+        render();
       })
-      .catch(() => {}); // sin red / Worker viejo → se queda "todo disponible"
+      .catch(() => {}); // sin red / Worker viejo → se queda lo ya pintado
 
-    // Envío → Lead (no Orden). El mes y el contexto viajan en Detalle; Fer convierte si prospera.
+    // Click: cambiar de año o elegir mes (delegación).
+    grid.addEventListener('click', (e) => {
+      const tab = e.target.closest('.yeartab');
+      if (tab) {
+        activeYear = Number(tab.dataset.year);
+        render();
+        return;
+      }
+      const cell = e.target.closest('.mcell');
+      if (!cell || cell.classList.contains('is-taken')) return;
+      selectedKey = cell.dataset.key;
+      selectedLabel = cell.dataset.label;
+      mesInput.value = selectedLabel;
+      mesError.hidden = true;
+      render();
+    });
+
+    // Envío → Lead (no Orden). Mes + contexto en Detalle; Fer convierte si prospera.
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!mesInput.value) {
+        mesError.hidden = false;
+        grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
       if (!form.reportValidity()) return;
 
       const fd = new FormData(form);
@@ -132,4 +208,57 @@ import Base from '../layouts/Base.astro';
       }
     });
   </script>
+
+  <style is:global>
+    .monthpick { gap: 0; }
+    .monthpick__legend { display: flex; gap: 1.4rem; font-size: .78rem; color: var(--ink-45); margin: .6rem 0 .2rem; }
+    .lg { display: inline-flex; align-items: center; gap: .5em; }
+    .lg::before { content: ''; width: 12px; height: 12px; border-radius: 50%; }
+    .lg--free::before { background: var(--white); box-shadow: inset 0 0 0 1px var(--ink-12); }
+    .lg--taken::before { background: repeating-linear-gradient(45deg, var(--sand), var(--sand) 3px, transparent 3px, transparent 6px); box-shadow: inset 0 0 0 1px var(--ink-12); }
+
+    .monthpick__loading { font-size: .9rem; padding: 1.4rem 0; }
+
+    /* Toggle de año */
+    .yeartabs { display: inline-flex; gap: .3rem; padding: .3rem; background: var(--sand); border-radius: 100px; margin: .7rem 0 1.1rem; }
+    .yeartab { border: 0; background: transparent; color: var(--ink-70); font-family: inherit; font-size: .92rem; font-weight: 600; letter-spacing: .04em; padding: .55rem 1.6rem; border-radius: 100px; cursor: pointer; transition: background .25s var(--ease), color .25s var(--ease); }
+    .yeartab.is-active { background: var(--white); color: var(--ink); box-shadow: 0 2px 8px -4px rgba(43, 43, 42, .3); }
+    .yeartab:not(.is-active):hover { color: var(--ink); }
+
+    .month-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .8rem; }
+
+    .mcell {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem;
+      min-height: 118px; padding: 1.4rem 1rem;
+      border: 1px solid transparent; border-radius: var(--radius);
+      background: var(--white); color: var(--ink);
+      box-shadow: 0 2px 10px -6px rgba(43, 43, 42, .18), 0 1px 2px rgba(43, 43, 42, .04);
+      font-family: inherit; cursor: pointer;
+      transition: transform .28s var(--ease), box-shadow .28s var(--ease), background .28s var(--ease), color .28s var(--ease), border-color .28s var(--ease);
+    }
+    .mcell__m { font-size: 1.22rem; font-weight: 500; letter-spacing: .01em; }
+    .mcell__tag { font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-45); }
+
+    .mcell:not(.is-taken):hover { transform: translateY(-4px); box-shadow: 0 14px 28px -14px rgba(43, 43, 42, .38); }
+    .mcell:not(.is-taken):hover .mcell__tag { color: var(--gold-ink); }
+
+    .mcell.is-selected { background: var(--ink); color: var(--paper); transform: translateY(-4px); box-shadow: 0 16px 30px -14px rgba(43, 43, 42, .5); }
+    .mcell.is-selected .mcell__tag { color: var(--gold); }
+
+    .mcell.is-taken {
+      cursor: not-allowed; color: var(--ink-45);
+      background: repeating-linear-gradient(45deg, var(--sand), var(--sand) 5px, rgba(255, 255, 255, .55) 5px, rgba(255, 255, 255, .55) 10px);
+      box-shadow: none;
+    }
+    .mcell.is-taken .mcell__m { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+    .monthpick__pick { margin-top: .9rem; font-size: .88rem; color: var(--gold-ink); font-weight: 500; }
+    .month-error { color: #b23a2f; font-size: .82rem; margin-top: .55rem; }
+
+    @media (max-width: 520px) {
+      .month-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .6rem; }
+      .mcell { min-height: 100px; padding: 1.1rem .7rem; }
+      .mcell__m { font-size: 1.08rem; }
+    }
+  </style>
 </Base>
