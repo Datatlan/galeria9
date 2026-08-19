@@ -32,12 +32,15 @@ const marcas = [
   { n: 'Invitado Especial', d: 'La sección estelar del Market con 5 pedestales incluidos, tuya por 6 días.', meta: '6 días', foto: '/fotos/invitado.jpg' },
 ];
 
+// Cabinas — estructura pareja: nombre · lema · duración · contacto.
+// Arigato 88 y Jar Almodovar siguen con placeholder (sin waLink = texto plano).
 const cabinas = [
-  { n: 'Fer', marca: 'ferdelamonja', svc: 'Soundhealing · respiración · mindfulness', ic: 'self_improvement', featured: true },
-  { n: 'Terapia', marca: 'Terapia', svc: 'Inconsciente y reprogramación', ic: 'psychology', wa: '33 1000 0001', ig: '@terapia.g9' },
-  { n: 'Arigato 88', marca: 'Arigato 88', svc: 'Masajes terapéuticos', ic: 'spa', wa: '33 1000 0002', ig: '@arigato88' },
-  { n: 'Jar Almodovar', marca: 'Jar Almodovar', svc: 'Regeneración nutricional', ic: 'nutrition', wa: '33 1000 0003', ig: '@jaralmodovar' },
-  { n: 'Ceja & depilación', marca: 'Cabina', svc: 'Diseño en depilación y ceja', ic: 'face_retouching_natural', wa: '33 1000 0004', ig: '@ceja.g9' },
+  { n: 'Fer', lema: 'Respiración y Sonido', ic: 'self_improvement', wa: '33 3395 3558', waLink: '523333953558', ig: '@elsonidodefer', igLink: 'elsonidodefer', featured: true },
+  { n: 'Reprogramación Mental', lema: 'Educa tu palabra', dur: '60 min', ic: 'psychology', wa: '33 1803 0563', waLink: '523318030563' },
+  { n: 'Carolina', lema: 'El arte de volver a ti', dur: '60 / 90 min', ic: 'volunteer_activism', wa: '33 3956 4990', waLink: '523339564990' },
+  { n: 'Manoela Mena', lema: 'Diseña tu mirada', dur: '20 min', ic: 'face_retouching_natural', wa: '33 2312 4894', waLink: '523323124894', ig: '@bymanoelamena', igLink: 'bymanoelamena' },
+  { n: 'Arigato 88', lema: 'Masajes terapéuticos', ic: 'spa', wa: '33 1000 0002', ig: '@arigato88' },
+  { n: 'Jar Almodovar', lema: 'Regeneración nutricional', ic: 'nutrition', wa: '33 1000 0003', ig: '@jaralmodovar' },
 ];
 ---
 <Base>
@@ -108,19 +111,25 @@ const cabinas = [
           <span class="eyebrow">Bienestar · Planta alta</span>
           <h2 class="h2" style="margin-top:1.2rem">Nuestras<br/>cabinas.</h2>
         </div>
-        <p class="lead reveal">Marcas residentes de bienestar, cada una con su especialidad. Reserva con Fer muy pronto en línea; las demás, en camino.</p>
+        <p class="lead reveal">Marcas residentes de bienestar, cada una con su especialidad. Escríbeles directo para agendar tu cita.</p>
       </div>
 
       <div class="cabgrid">
         {cabinas.map((c, i) => (
           <article class={`cab reveal ${c.featured ? 'cab--fer' : ''}`} style={`transition-delay:${i * 70}ms`}>
             <span class="cab__ic"><span class="material-symbols-outlined">{c.ic}</span></span>
-            <span class="cab__tag">Cabina · {c.marca}</span>
+            <span class="cab__tag">Cabina</span>
             <h3 class="cab__name">{c.n}</h3>
-            <p class="cab__svc">{c.svc}</p>
-            {c.featured
-              ? <span class="cab__cta">Reserva en línea · muy pronto</span>
-              : <div class="cab__contact"><span>WhatsApp · {c.wa}</span><span class="cab__ig">{c.ig}</span></div>}
+            <p class="cab__svc">{c.lema}</p>
+            {c.dur && <span class="cab__dur">{c.dur}</span>}
+            <div class="cab__contact">
+              {c.waLink
+                ? <a href={`https://wa.me/${c.waLink}`} target="_blank" rel="noopener">WhatsApp · {c.wa}</a>
+                : <span>WhatsApp · {c.wa}</span>}
+              {c.ig && (c.igLink
+                ? <a class="cab__ig" href={`https://instagram.com/${c.igLink}`} target="_blank" rel="noopener">{c.ig}</a>
+                : <span class="cab__ig">{c.ig}</span>)}
+            </div>
           </article>
         ))}
       </div>
@@ -309,7 +318,7 @@ const cabinas = [
   .pilar__num { font-size: .8rem; letter-spacing: .2em; color: var(--gold-ink); }
   .pilar h3 { margin: 1.2rem 0 .8rem; }
 
-  .cabgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+  .cabgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
   .cab {
     display: flex; flex-direction: column; gap: .5rem;
     padding: 1.6rem 1.4rem; min-height: 210px;
@@ -326,9 +335,16 @@ const cabinas = [
   .cab__tag { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
   .cab__name { font-size: 1.4rem; font-weight: 300; margin: .2rem 0; }
   .cab__svc { font-size: .88rem; color: var(--ink-70); line-height: 1.4; }
+  .cab__dur { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-ink); margin-top: .25rem; }
+  .cab--fer .cab__dur { color: var(--gold); }
   .cab__contact { margin-top: auto; display: flex; flex-direction: column; gap: .2rem; font-size: .78rem; color: var(--ink-70); letter-spacing: .01em; }
+  .cab__contact a { transition: color .3s var(--ease); }
+  .cab__contact a:hover { color: var(--ink); text-decoration: underline; }
+  .cab--fer .cab__contact { color: rgba(242,242,242,.72); }
+  .cab--fer .cab__contact a:hover { color: var(--paper); }
   .cab__ig { color: var(--gold-ink); }
-  .cab__cta { margin-top: auto; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+  .cab--fer .cab__ig { color: var(--gold); }
+  .cab__cta { margin-top: .6rem; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
   .cab--fer { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .cab--fer .cab__tag { color: var(--gold); }
   .cab--fer .cab__svc { color: rgba(242,242,242,.72); }
