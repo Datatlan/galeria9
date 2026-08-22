@@ -48,6 +48,42 @@ import Base from '../layouts/Base.astro';
 
     let items = [];
 
+    // Opciones (Tipo=Selección): cada línea es una pregunta; "Etiqueta :: a | b"
+    // o solo "a | b" para un único grupo. La respuesta se guarda como texto.
+    function parseOpts(txt) {
+      return String(txt).split('\n').map((l) => l.trim()).filter(Boolean).map((line) => {
+        const ix = line.indexOf('::');
+        const label = ix >= 0 ? line.slice(0, ix).trim() : '';
+        const opts = (ix >= 0 ? line.slice(ix + 2) : line).split('|').map((s) => s.trim()).filter(Boolean);
+        return { label, opts };
+      });
+    }
+
+    function prevChoices(respuesta, rows) {
+      const lines = String(respuesta || '').split('\n').map((l) => l.trim());
+      return rows.map((r) => {
+        if (!r.label) return (respuesta || '').trim();
+        const hit = lines.find((l) => l.startsWith(r.label + ':'));
+        return hit ? hit.slice(r.label.length + 1).trim() : '';
+      });
+    }
+
+    function renderSel(rows, respuesta, locked, itemId) {
+      const prev = prevChoices(respuesta, rows);
+      return `<div class="ob-opts">` + rows.map((r, ri) => `
+        <div class="ob-optrow" data-label="${esc(r.label)}">
+          ${r.label ? `<span class="ob-optrow__label">${esc(r.label)}</span>` : ''}
+          <div class="ob-optrow__choices">
+            ${r.opts.map((op) => `
+              <label class="ob-opt">
+                <input type="radio" name="og_${itemId}_${ri}" value="${esc(op)}"
+                  ${prev[ri] === op ? 'checked' : ''} ${locked ? 'disabled' : ''} />
+                <span>${esc(op)}</span>
+              </label>`).join('')}
+          </div>
+        </div>`).join('') + `</div>`;
+    }
+
     function estadoChip(estatus) {
       const cls = estatus === 'Aprobado' ? 'is-ok' : estatus === 'Recibido' ? 'is-rx' : '';
       const txt = estatus === 'Aprobado' ? '✓ Aprobado' : estatus === 'Recibido' ? 'Recibido' : 'Pendiente';
@@ -69,6 +105,8 @@ import Base from '../layouts/Base.astro';
         const hasText = tipo !== 'Archivo';
         const hasFiles = tipo === 'Archivo' || tipo === 'Pago';
         const files = f.Archivos || [];
+        const opciones = one(f.Opciones);
+        const selRows = tipo === 'Selección' && opciones ? parseOpts(opciones) : null;
 
         return `
         <article class="ob-card ${locked ? 'is-locked' : ''}" data-id="${it.id}">
@@ -79,7 +117,7 @@ import Base from '../layouts/Base.astro';
           </div>
           ${one(f.Instrucciones) ? `<p class="ob-card__inst">${esc(one(f.Instrucciones))}</p>` : ''}
 
-          ${hasText ? `
+          ${selRows ? renderSel(selRows, f.Respuesta, locked, it.id) : hasText ? `
             <textarea class="ob-input" rows="3" placeholder="${esc(PLACEHOLDER[tipo] || 'Escribe aquí…')}"
               ${locked ? 'disabled' : ''}>${esc(f.Respuesta || '')}</textarea>` : ''}
 
@@ -119,13 +157,27 @@ import Base from '../layouts/Base.astro';
       setTimeout(() => { m.hidden = true; }, 3500);
     }
 
-    // Guardar texto
+    // Guardar respuesta (texto libre o selección de opciones)
     list.addEventListener('click', async (e) => {
       const btn = e.target.closest('.ob-save');
       if (!btn) return;
       const card = btn.closest('.ob-card');
-      const txt = (card.querySelector('.ob-input')?.value || '').trim();
-      if (!txt) { msgOf(card, 'Escribe tu respuesta primero.', false); return; }
+
+      let txt;
+      const optRows = [...card.querySelectorAll('.ob-optrow')];
+      if (optRows.length) {
+        const partes = [];
+        for (const rowEl of optRows) {
+          const sel = rowEl.querySelector('input:checked');
+          if (!sel) { msgOf(card, 'Marca todas las opciones primero.', false); return; }
+          partes.push(rowEl.dataset.label ? `${rowEl.dataset.label}: ${sel.value}` : sel.value);
+        }
+        txt = partes.join('\n');
+      } else {
+        txt = (card.querySelector('.ob-input')?.value || '').trim();
+        if (!txt) { msgOf(card, 'Escribe tu respuesta primero.', false); return; }
+      }
+
       btn.disabled = true; btn.textContent = 'Enviando…';
       try {
         await guardarItem(card.dataset.id, txt);
@@ -209,6 +261,20 @@ import Base from '../layouts/Base.astro';
     }
     .ob-input:focus { outline: none; border-color: var(--ink); }
     .ob-input:disabled { opacity: .6; }
+
+    .ob-opts { margin-top: 1.1rem; display: flex; flex-direction: column; gap: .6rem; }
+    .ob-optrow { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .ob-optrow__label { font-size: .88rem; color: var(--ink-70); min-width: 92px; }
+    .ob-optrow__choices { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .ob-opt input { position: absolute; opacity: 0; pointer-events: none; }
+    .ob-opt span {
+      display: inline-block; font-size: .82rem; padding: .55em 1.1em; border-radius: 100px;
+      border: 1px solid var(--ink-12); background: var(--white); color: var(--ink-70);
+      cursor: pointer; transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+    }
+    .ob-opt:hover span { border-color: var(--ink); color: var(--ink); }
+    .ob-opt input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+    .ob-opt input:disabled + span { opacity: .6; cursor: not-allowed; }
 
     .ob-files { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
     .ob-file {

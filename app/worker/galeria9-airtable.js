@@ -90,7 +90,7 @@ export default {
         if (!REC_RE.test(o)) return json({ error: 'Orden inválida' }, 400);
 
         const p = new URLSearchParams();
-        ['Nombre', 'Estatus', 'Respuesta', 'Archivos', 'Tipo', 'Instrucciones', 'Orden_Num', 'Marca']
+        ['Nombre', 'Estatus', 'Respuesta', 'Archivos', 'Tipo', 'Instrucciones', 'Opciones', 'Orden_Num', 'Marca']
           .forEach((f) => p.append('fields[]', f));
         p.set('filterByFormula', `{Orden_RecID}='${o}'`);
         p.set('pageSize', '100');
