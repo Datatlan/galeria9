@@ -32,6 +32,45 @@ export async function leer(clave) {
   return json.records || [];
 }
 
+// ---- Onboarding (portal del cliente: /onboarding?o=<ordenId>) ----
+
+// Checklist de una orden. Sin caché: refleja lo recién guardado.
+export async function leerChecklist(ordenId) {
+  const res = await fetch(`${WORKER}?read=onboarding&o=${ordenId}`);
+  if (!res.ok) throw new Error(`Worker ${res.status}`);
+  const json = await res.json();
+  return json.records || [];
+}
+
+// Guarda la respuesta de un item (el Worker fuerza Estatus=Recibido).
+export async function guardarItem(itemId, respuesta) {
+  const res = await fetch(`${WORKER}?onb=${itemId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ Respuesta: respuesta }),
+  });
+  if (!res.ok) throw new Error(`Worker ${res.status}`);
+  return res.json();
+}
+
+// Sube UN archivo al item (máx 5 MB, límite de Airtable) y lo marca Recibido.
+export async function subirArchivo(itemId, file) {
+  if (file.size > 5 * 1024 * 1024) throw new Error('MAX_5MB');
+  const b64 = await new Promise((ok, err) => {
+    const r = new FileReader();
+    r.onload = () => ok(String(r.result).split(',')[1]); // sin el prefijo data:
+    r.onerror = err;
+    r.readAsDataURL(file);
+  });
+  const res = await fetch(`${WORKER}?upload=${itemId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contentType: file.type || 'application/octet-stream', file: b64, filename: file.name }),
+  });
+  if (!res.ok) throw new Error(`Worker ${res.status}`);
+  return res.json();
+}
+
 // Crea UN registro y devuelve el registro creado (incluye .id).
 export async function crear(tableId, fields) {
   const rec = await crearMuchos(tableId, [fields]);

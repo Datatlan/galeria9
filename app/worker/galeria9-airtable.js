@@ -1,18 +1,24 @@
 /**
- * Cloudflare Worker — proxy seguro Galería 9 → Airtable  (v3: escritura + lectura)
+ * Cloudflare Worker — proxy seguro Galería 9 → Airtable  (v4: + onboarding)
  * URL: https://galeria9-airtable.datatlan.workers.dev
  *
  * ESCRITURA (POST, igual que v2):
  *   ?b=<baseId>&t=<tableId> — whitelist de bases; reenvía {fields}/{records}.
  *
- * LECTURA (GET, nuevo):
- *   ?read=<clave> — el front NUNCA pide una tabla: pide una clave de la
- *   whitelist READABLE. Cada clave define tabla + campos + filtro exactos.
- *   Clave desconocida → 403. Así el token puede leer toda la base, pero el
- *   Worker solo deja salir lo que está en la lista (nada de Clientes/Pagos).
+ * LECTURA (GET):
+ *   ?read=<clave> — whitelist READABLE: cada clave fija tabla + campos + filtro.
+ *   Clave desconocida → 403. Caché en el edge (ttl por clave).
  *
- *   Caché: cada lectura se guarda en el edge de Cloudflare (ttl por clave).
- *   Mil visitas = ~1 request a Airtable por minuto. Protege el límite de 5 req/s.
+ * ONBOARDING (v4) — el portal del cliente (/onboarding?o=<ordenId>):
+ *   El ID de la orden funciona como llave de acceso (link que Fer manda).
+ *   · GET  ?read=onboarding&o=<recOrden>  → items del checklist de ESA orden
+ *     (sin caché: el cliente quiere ver su estado recién guardado).
+ *   · PATCH ?onb=<recItem>  body {Respuesta} → guarda la respuesta y fuerza
+ *     Estatus='Recibido'. SOLO la tabla Onboarding, SOLO ese campo; el
+ *     cliente nunca puede aprobar ni tocar otra cosa.
+ *   · POST ?upload=<recItem>  body {contentType, file(base64), filename} →
+ *     sube el archivo al campo Archivos del item (límite Airtable: 5 MB)
+ *     y marca Recibido.
  *
  * DEPLOY: Cloudflare dashboard → Workers → galeria9-airtable → Edit code →
  *         pegar esto → Deploy. (El secreto AIRTABLE_TOKEN no cambia.)
@@ -24,6 +30,14 @@ const BASES = {
 };
 const ALLOWED = new Set(Object.values(BASES));
 const DEFAULT_BASE = BASES.demo;
+
+const REC_RE = /^rec[A-Za-z0-9]{14}$/;
+
+// Tabla Onboarding (checklist del cliente) — únicos escribibles desde fuera.
+const ONB = {
+  table: 'tblIOBv4kM0YOCb6S',
+  archivosField: 'fld4OuCZqGfUIjp7Y', // Archivos (attachments)
+};
 
 // ── Whitelist de lecturas ───────────────────────────────────────────────────
 // Agregar aquí cada dato que el sitio pueda leer. Nada más existe hacia afuera.
@@ -44,8 +58,6 @@ const READABLE = {
     ttl: 300,
   },
   // Ocupación de Pop Out: rentas confirmadas de las unidades PO_ (una marca/mes).
-  // Solo salen las fechas; el front calcula qué meses quedan libres. Si una renta
-  // existe, ese mes está tomado (no hay holds tentativos: solo lo confirmado bloquea).
   popout: {
     base: BASES.prod,
     table: 'tble36WbySAVkODVp', // Display_Rentals
@@ -53,13 +65,11 @@ const READABLE = {
     filter: "FIND('PO_', ARRAYJOIN({Unidades_Display}))",
     ttl: 120,
   },
-  // Futuro (cuando exista el rework de Tester Day):
-  // testerDays: { base: BASES.prod, table: 'tblsOvEhdkacWz5yZ', fields: [...], filter: ..., ttl: 60 },
 };
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
@@ -68,10 +78,28 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
 
     const url = new URL(request.url);
+    const auth = { Authorization: `Bearer ${env.AIRTABLE_TOKEN}` };
 
     // ── LECTURA ────────────────────────────────────────────────────────────
     if (request.method === 'GET') {
-      const cfg = READABLE[url.searchParams.get('read')];
+      const clave = url.searchParams.get('read');
+
+      // Checklist de onboarding de UNA orden (parametrizada, sin caché)
+      if (clave === 'onboarding') {
+        const o = url.searchParams.get('o') || '';
+        if (!REC_RE.test(o)) return json({ error: 'Orden inválida' }, 400);
+
+        const p = new URLSearchParams();
+        ['Nombre', 'Estatus', 'Respuesta', 'Archivos', 'Tipo', 'Instrucciones', 'Orden_Num', 'Marca']
+          .forEach((f) => p.append('fields[]', f));
+        p.set('filterByFormula', `{Orden_RecID}='${o}'`);
+        p.set('pageSize', '100');
+
+        const air = await fetch(`https://api.airtable.com/v0/${BASES.prod}/${ONB.table}?${p}`, { headers: auth });
+        return passthrough(air);
+      }
+
+      const cfg = READABLE[clave];
       if (!cfg) return json({ error: 'Lectura no permitida' }, 403);
 
       // caché en el edge
@@ -85,9 +113,7 @@ export default {
       if (cfg.filter) p.set('filterByFormula', cfg.filter);
       p.set('pageSize', '100');
 
-      const air = await fetch(`https://api.airtable.com/v0/${cfg.base}/${cfg.table}?${p}`, {
-        headers: { Authorization: `Bearer ${env.AIRTABLE_TOKEN}` },
-      });
+      const air = await fetch(`https://api.airtable.com/v0/${cfg.base}/${cfg.table}?${p}`, { headers: auth });
       const body = await air.text();
       const res = new Response(body, {
         status: air.status,
@@ -101,9 +127,61 @@ export default {
       return res;
     }
 
-    // ── ESCRITURA ──────────────────────────────────────────────────────────
+    // ── ONBOARDING: guardar respuesta ──────────────────────────────────────
+    if (request.method === 'PATCH') {
+      const item = url.searchParams.get('onb') || '';
+      if (!REC_RE.test(item)) return json({ error: 'Item inválido' }, 400);
+
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'JSON inválido' }, 400); }
+
+      // Solo Respuesta (texto) + Estatus forzado a Recibido. Nada más.
+      const fields = { Estatus: 'Recibido' };
+      if (typeof body.Respuesta === 'string') fields.Respuesta = body.Respuesta.slice(0, 10000);
+
+      const air = await fetch(`https://api.airtable.com/v0/${BASES.prod}/${ONB.table}/${item}`, {
+        method: 'PATCH',
+        headers: { ...auth, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields, typecast: true }),
+      });
+      return passthrough(air);
+    }
+
     if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
+    // ── ONBOARDING: subir archivo ──────────────────────────────────────────
+    const up = url.searchParams.get('upload');
+    if (up) {
+      if (!REC_RE.test(up)) return json({ error: 'Item inválido' }, 400);
+
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'JSON inválido' }, 400); }
+      const { contentType, file, filename } = body || {};
+      if (typeof file !== 'string' || typeof filename !== 'string' || typeof contentType !== 'string')
+        return json({ error: 'Falta archivo' }, 400);
+      if (file.length > 7_500_000) return json({ error: 'Archivo demasiado grande (máx 5 MB)' }, 413);
+
+      const air = await fetch(
+        `https://content.airtable.com/v0/${BASES.prod}/${up}/${ONB.archivosField}/uploadAttachment`,
+        {
+          method: 'POST',
+          headers: { ...auth, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contentType, file, filename: filename.slice(0, 200) }),
+        },
+      );
+
+      // Si subió bien, el item pasa a Recibido (sin bloquear la respuesta).
+      if (air.ok) {
+        ctx.waitUntil(fetch(`https://api.airtable.com/v0/${BASES.prod}/${ONB.table}/${up}`, {
+          method: 'PATCH',
+          headers: { ...auth, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: { Estatus: 'Recibido' }, typecast: true }),
+        }));
+      }
+      return passthrough(air);
+    }
+
+    // ── ESCRITURA (crear registros, igual que v2) ──────────────────────────
     const base = url.searchParams.get('b') || DEFAULT_BASE;
     const table = url.searchParams.get('t');
     if (!ALLOWED.has(base)) return json({ error: 'Base no permitida' }, 400);
@@ -112,20 +190,20 @@ export default {
     const body = await request.text();
     const air = await fetch(`https://api.airtable.com/v0/${base}/${table}`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.AIRTABLE_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { ...auth, 'Content-Type': 'application/json' },
       body,
     });
-
-    const text = await air.text();
-    return new Response(text, {
-      status: air.status,
-      headers: { 'Content-Type': 'application/json', ...CORS },
-    });
+    return passthrough(air);
   },
 };
+
+async function passthrough(air) {
+  const text = await air.text();
+  return new Response(text, {
+    status: air.status,
+    headers: { 'Content-Type': 'application/json', ...CORS },
+  });
+}
 
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
