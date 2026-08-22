@@ -103,7 +103,8 @@ import Base from '../layouts/Base.astro';
         const estatus = f.Estatus?.name ?? f.Estatus ?? 'Pendiente';
         const locked = estatus === 'Aprobado';
         const hasText = tipo !== 'Archivo';
-        const hasFiles = tipo === 'Archivo' || tipo === 'Pago';
+        // Texto también acepta archivo (por si el cliente ya lo tiene en documento).
+        const hasFiles = tipo === 'Archivo' || tipo === 'Pago' || tipo === 'Texto';
         const files = f.Archivos || [];
         const opciones = one(f.Opciones);
         const selRows = tipo === 'Selección' && opciones ? parseOpts(opciones) : null;
