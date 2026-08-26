@@ -8,9 +8,9 @@ const espacios = [
 ];
 
 const pilares = [
-  { t: 'Bienestar', d: 'Cabinas de psicología, masaje, sound healing y más. Citas con especialistas residentes.' },
-  { t: 'Market', d: 'Marcas y talento local en exhibición. Un espacio curado que descubres al visitarnos.' },
-  { t: 'Eventos', d: 'Terraza y roof para tus celebraciones, talleres y activaciones de marca.' },
+  { t: 'Bienestar', lema: 'Date una pausa', d: 'Entrena tu mente, cuerpo y emoción. Hábitos de belleza, relajación, reprogramación y respiración.' },
+  { t: 'Market', lema: 'Invierte en ti', d: 'Market de marcas, eventos, activaciones y talleres.' },
+  { t: 'Eventos', lema: 'Celébrate en gratitud', d: 'Encuentros y celebraciones diseñados a tu medida.' },
 ];
 
 // Producto estrella del Market — card destacada de ancho completo.
@@ -19,28 +19,28 @@ const pilares = [
 // irán habilitando poco a poco.
 const puntoPresencia = {
   n: 'Punto Presencia',
-  d: 'Tu marca exhibida en el corazón del Market durante 6 meses. Displays individuales, tráfico constante de la comunidad de bienestar, y presencia todos los días.',
+  d: 'Tu marca encuentra un espacio físico. Membresía de 6 meses para compartir, validar y expandir la comunidad de tu marca.',
   meta: 'Mensual · 6 meses',
   foto: '/fotos/punto-presencia.jpg',
 };
 
 // Formatos de showcase para MARCAS
 const marcas = [
-  { n: 'Pop Up', d: '6 días de showroom con exhibición propia y campaña de promoción incluida. Una sola marca por mes.', meta: 'Mensual', foto: '/fotos/popup.jpg', href: '/pop-up' },
-  { n: 'Tu Talento es un Arte', d: 'Una semana de presencia física y digital para tu marca, taller o talento. Que te conozcan, que te sigan.', meta: 'Semanal', foto: '/fotos/tu-talento.png' },
-  { n: 'Tester Day', d: 'Da a probar tu producto gratis los miércoles y crea conexiones reales con nuevas personas.', meta: 'Miércoles', foto: '/fotos/tester-day.jpg' },
-  { n: 'Invitado Especial', d: 'La sección estelar del Market con 5 pedestales incluidos, tuya por 6 días.', meta: '6 días', foto: '/fotos/invitado.jpg' },
+  { n: 'Pop Up', d: 'Estrategia de 1 semana, movimiento digital y físico para la expansión de tu marca.', meta: 'Exhibición', foto: '/fotos/popup.jpg', href: '/pop-up' },
+  { n: 'Tu Talento es un Arte', d: 'Expresa tu marca como arte, estrategia de visibilidad por 1 semana, conecta con nuevas comunidades.', meta: 'Semanal', foto: '/fotos/tu-talento.png' },
+  { n: 'Tester Day', d: 'Regala pruebas o experiencias express y crea conexiones de valor con nuevas personas.', meta: 'Activación', foto: '/fotos/tester-day.jpg' },
+  { n: 'Invitado Especial', d: 'Exhibe en el corazón de Galería 9 y expande tu visibilidad.', meta: '6 días', foto: '/fotos/invitado.jpg' },
 ];
 
 // Cabinas — estructura pareja: nombre · lema · duración · contacto.
-// Arigato 88 y Jar Almodovar siguen con placeholder (sin waLink = texto plano).
+// Jar Almodovar sigue con placeholder (sin waLink = texto plano).
+// Arigato 88 se quitó (ya no está en Galería 9).
 const cabinas = [
-  { n: 'Fer', lema: 'Respiración y Sonido', ic: 'self_improvement', wa: '33 3395 3558', waLink: '523333953558', ig: '@elsonidodefer', igLink: 'elsonidodefer', featured: true },
-  { n: 'Reprogramación Mental', lema: 'Educa tu palabra', dur: '60 min', ic: 'psychology', wa: '33 1803 0563', waLink: '523318030563' },
-  { n: 'Carolina', lema: 'El arte de volver a ti', dur: '60 / 90 min', ic: 'volunteer_activism', wa: '33 3956 4990', waLink: '523339564990' },
-  { n: 'Manoela Mena', lema: 'Diseña tu mirada', dur: '20 min', ic: 'face_retouching_natural', wa: '33 2312 4894', waLink: '523323124894', ig: '@bymanoelamena', igLink: 'bymanoelamena' },
-  { n: 'Arigato 88', lema: 'Masajes terapéuticos', ic: 'spa', wa: '33 1000 0002', ig: '@arigato88' },
-  { n: 'Jar Almodovar', lema: 'Regeneración nutricional', ic: 'nutrition', wa: '33 1000 0003', ig: '@jaralmodovar' },
+  { n: 'Elsonidodefer', tipo: 'Studio', lema: 'Experiencias y programas de respiración y autoconocimiento', ic: 'self_improvement', wa: '33 3395 3558', waLink: '523333953558', ig: '@elsonidodefer', igLink: 'elsonidodefer', featured: true },
+  { n: 'Reprogramación Mental', lema: 'Sesiones y programas 1:1 — entrena tu mente, educa tu palabra y transforma tu inconsciente', dur: '60 min', ic: 'psychology', wa: '33 1803 0563', waLink: '523318030563' },
+  { n: 'Carolina', lema: 'El arte de volver a ti', desc: 'Masajes, talleres y experiencias de relajación', dur: '60 / 90 min', ic: 'volunteer_activism', wa: '33 3956 4990', waLink: '523339564990' },
+  { n: 'Manoela Mena', lema: 'Diseña tu mirada — hidratación en piel y servicios de belleza', dur: '20 min', ic: 'face_retouching_natural', wa: '33 2312 4894', waLink: '523323124894', ig: '@bymanoelamena', igLink: 'bymanoelamena' },
+  { n: 'Jar Almodovar', lema: 'Regeneración nutricional y hormonal', ic: 'nutrition', wa: '33 1000 0003', ig: '@jaralmodovar' },
 ];
 ---
 <Base>
@@ -49,8 +49,8 @@ const cabinas = [
     <div class="wrap hero__inner">
       <div class="hero__copy">
         <span class="eyebrow reveal">Guadalajara · Market de Talentos</span>
-        <h1 class="display reveal">Una casa para<br/>el bienestar,<br/>el arte y la<br/>comunidad.</h1>
-        <p class="lead hero__lead reveal">Galería 9 reúne cabinas de bienestar, un market de marcas locales y espacios para tus eventos — todo bajo un mismo techo con alma.</p>
+        <h1 class="display reveal">Un punto de<br/>encuentro<br/>para marcas<br/>en expansión.</h1>
+        <p class="lead hero__lead reveal">Galería 9 es un espacio de expansión en donde marcas y personas se expresan y comparten su esencia a través de la conexión con su talento.</p>
         <div class="hero__cta reveal">
           <a href="/cotiza" class="btn">Cotiza tu evento</a>
           <a href="/#experiencia" class="link-arrow">Conoce la casa →</a>
@@ -69,10 +69,10 @@ const cabinas = [
     <div class="wrap">
       <div class="two">
         <div class="reveal">
-          <span class="eyebrow">La experiencia</span>
-          <h2 class="h2" style="margin-top:1.2rem">Tres mundos, un mismo lugar.</h2>
+          <span class="eyebrow">Centro de negocios</span>
+          <h2 class="h2" style="margin-top:1.2rem">Nuevo estilo de vida. Nueva transformación.</h2>
         </div>
-        <p class="lead reveal">No somos una tienda ni un salón de eventos. Somos una casa curada donde el bienestar, las marcas locales y las celebraciones conviven — y se potencian entre sí.</p>
+        <p class="lead reveal">No somos una tienda ni un salón de eventos. Somos una casa curada donde el bienestar, las marcas locales y las celebraciones conviven — y se potencian entre sí. Además de los programas y estrategias que te apoyan en tu expansión, encuentras hábitos nuevos que sostienen toda tu transformación.</p>
       </div>
 
       <div class="exp-body">
@@ -84,7 +84,7 @@ const cabinas = [
           {pilares.map((p, i) => (
             <article class="pilar reveal" style={`transition-delay:${i * 90}ms`}>
               <span class="pilar__num">{String(i + 1).padStart(2, '0')}</span>
-              <h3 class="h3">{p.t}</h3>
+              <h3 class="h3">{p.t} <span class="pilar__lema">{p.lema}</span></h3>
               <p class="muted">{p.d}</p>
             </article>
           ))}
@@ -108,8 +108,8 @@ const cabinas = [
     <div class="wrap">
       <div class="two">
         <div class="reveal">
-          <span class="eyebrow">Bienestar · Planta alta</span>
-          <h2 class="h2" style="margin-top:1.2rem">Nuestras<br/>cabinas.</h2>
+          <span class="eyebrow">Nueva transformación · Nuevo estilo de vida</span>
+          <h2 class="h2" style="margin-top:1.2rem">Nuevos<br/>hábitos.</h2>
         </div>
         <p class="lead reveal">Marcas residentes de bienestar, cada una con su especialidad. Escríbeles directo para agendar tu cita.</p>
       </div>
@@ -118,9 +118,10 @@ const cabinas = [
         {cabinas.map((c, i) => (
           <article class={`cab reveal ${c.featured ? 'cab--fer' : ''}`} style={`transition-delay:${i * 70}ms`}>
             <span class="cab__ic"><span class="material-symbols-outlined">{c.ic}</span></span>
-            <span class="cab__tag">Cabina</span>
+            <span class="cab__tag">{c.tipo || 'Cabina'}</span>
             <h3 class="cab__name">{c.n}</h3>
             <p class="cab__svc">{c.lema}</p>
+            {c.desc && <p class="cab__svc">{c.desc}</p>}
             {c.dur && <span class="cab__dur">{c.dur}</span>}
             <div class="cab__contact">
               {c.waLink
@@ -141,10 +142,10 @@ const cabinas = [
     <div class="wrap">
       <div class="two">
         <div class="reveal">
-          <span class="eyebrow">Espacios para tu evento</span>
-          <h2 class="h2" style="margin-top:1.2rem">Dos escenarios,<br/>una casa.</h2>
+          <span class="eyebrow">Una nueva forma de hacer negocios</span>
+          <h2 class="h2" style="margin-top:1.2rem">Crea tu evento<br/>o taller.</h2>
         </div>
-        <p class="lead reveal">Un patio íntimo o una azotea abierta al cielo — renta por hora el escenario de tu celebración, taller o activación.</p>
+        <p class="lead reveal">Espacios disponibles — renta por hora el escenario de tu celebración, taller o activación.</p>
       </div>
 
       <div class="grid-esp">
@@ -156,7 +157,6 @@ const cabinas = [
             <div class="esp__body">
               <div class="esp__top">
                 <h3 class="h3">{e.n}</h3>
-                <span class="esp__cap">{e.cap}</span>
               </div>
               <p class="muted">{e.d}</p>
             </div>
@@ -164,7 +164,7 @@ const cabinas = [
         ))}
       </div>
       <div class="esp-cta reveal">
-        <a href="/cotiza" class="btn">Cotiza tu evento</a>
+        <a href="/cotiza" class="btn">Empieza aquí</a>
         <span class="muted">Estimado al instante, sin compromiso.</span>
       </div>
     </div>
@@ -176,9 +176,9 @@ const cabinas = [
       <div class="two">
         <div class="reveal">
           <span class="eyebrow">Para marcas</span>
-          <h2 class="h2" style="margin-top:1.2rem">Muéstrate en<br/>Galería 9.</h2>
+          <h2 class="h2" style="margin-top:1.2rem">Expándete en<br/>Galería 9.</h2>
         </div>
-        <p class="lead reveal">Formatos para dar a conocer tu marca, taller o talento — de un día a una temporada. Elige el tuyo y mándanos tu solicitud.</p>
+        <p class="lead reveal">Estrategias de visibilidad y expansión. Toma acción, activa tu marca y comienza ahora.</p>
       </div>
 
       <a class="pp-card reveal" href="/#contacto" data-interes="Punto Presencia">
@@ -317,6 +317,7 @@ const cabinas = [
   .pilar { border-top: 1px solid var(--ink); padding-top: 1.4rem; }
   .pilar__num { font-size: .8rem; letter-spacing: .2em; color: var(--gold-ink); }
   .pilar h3 { margin: 1.2rem 0 .8rem; }
+  .pilar__lema { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); margin-left: .8em; white-space: nowrap; }
 
   .cabgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
   .cab {
