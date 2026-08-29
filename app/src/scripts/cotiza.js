@@ -163,7 +163,8 @@ form.addEventListener('submit', async (e) => {
     // 1) Orden borrador — con los datos del solicitante (Cliente queda vacío para Fer)
     // Fecha/horario/espacio van también como CAPTURA estructurada: al aprobar
     // la orden, una automation crea el registro en Eventos (el calendario).
-    const hh = (h) => `${g('fecha')}T${String(h).padStart(2, '0')}:00:00-06:00`;
+    // horaInicio/horaFin valen "HH:MM" (ej. "10:00") → ISO con offset CDMX
+    const hh = (h) => `${g('fecha')}T${h}:00-06:00`;
     const orden = await crear(T.ordenes, {
       Nombre: `Cotización — ${g('proyecto')} · ${g('fecha')}`,
       Estatus: 'Borrador',
