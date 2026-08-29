@@ -161,6 +161,9 @@ form.addEventListener('submit', async (e) => {
   btnSend.textContent = 'Enviando…';
   try {
     // 1) Orden borrador — con los datos del solicitante (Cliente queda vacío para Fer)
+    // Fecha/horario/espacio van también como CAPTURA estructurada: al aprobar
+    // la orden, una automation crea el registro en Eventos (el calendario).
+    const hh = (h) => `${g('fecha')}T${String(h).padStart(2, '0')}:00:00-06:00`;
     const orden = await crear(T.ordenes, {
       Nombre: `Cotización — ${g('proyecto')} · ${g('fecha')}`,
       Estatus: 'Borrador',
@@ -169,6 +172,9 @@ form.addEventListener('submit', async (e) => {
       WhatsApp: g('telefono'),
       Correo: g('correo') || undefined,
       Notas: notas,
+      Fecha_Evento_Inicio: (g('fecha') && g('horaInicio')) ? hh(g('horaInicio')) : undefined,
+      Fecha_Evento_Fin: (g('fecha') && g('horaFin')) ? hh(g('horaFin')) : undefined,
+      Espacio_Evento: espacios.map((e) => e.espacioRec).filter(Boolean),
     });
 
     // 2) Line_Items (base por horas + extras)

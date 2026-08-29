@@ -10,13 +10,15 @@
 // ============================================================================
 
 // Espacios rentables — precio POR HORA (Servicios_Extras · categoría Horas)
+// `rec` = Servicios_Extras (precio/hora); `espacioRec` = tabla Espacios (para
+// Espacio_Evento de la orden → el registro del calendario al aprobar).
 export const espacios = [
   {
-    id: 'terraza', rec: 'recjr5OwrR5u14N2s', nombre: 'Terraza', precioHora: 800,
+    id: 'terraza', rec: 'recjr5OwrR5u14N2s', espacioRec: 'rectIPFmUlyMd3ugh', nombre: 'Terraza', precioHora: 800,
     desc: 'Patio en planta baja, íntimo y verde.', cap: 'Hasta 40 personas',
   },
   {
-    id: 'roof', rec: 'recoklqZQCJ83ARtA', nombre: 'Roof', precioHora: 1200,
+    id: 'roof', rec: 'recoklqZQCJ83ARtA', espacioRec: 'rec5rMMPUjeWvA7dD', nombre: 'Roof', precioHora: 1200,
     desc: 'Azotea con zona techada y cielo abierto.', cap: 'Hasta 60 personas',
   },
 ];
