@@ -176,6 +176,10 @@ form.addEventListener('submit', async (e) => {
       Fecha_Evento_Inicio: (g('fecha') && g('horaInicio')) ? hh(g('horaInicio')) : undefined,
       Fecha_Evento_Fin: (g('fecha') && g('horaFin')) ? hh(g('horaFin')) : undefined,
       Espacio_Evento: espacios.map((e) => e.espacioRec).filter(Boolean),
+      // Marca el TIPO de la orden: la automation de servicios crea el line item
+      // "Evento" (sin precio, subtotal $0) y Servicio_Contratado se llena solo,
+      // para que las vistas por servicio de la Interface la clasifiquen.
+      Servicios_Solicitados: ['recOWUjpfQ93T3j06'], // Catalogo · Evento
     });
 
     // 2) Line_Items (base por horas + extras)
