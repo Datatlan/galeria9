@@ -165,8 +165,8 @@ form.addEventListener('submit', async (e) => {
     // la orden, una automation crea el registro en Eventos (el calendario).
     // horaInicio/horaFin valen "HH:MM" (ej. "10:00") → ISO con offset CDMX
     const hh = (h) => `${g('fecha')}T${h}:00-06:00`;
+    // Nombre NO se envía: es fórmula en Airtable (servicio — marca · #ID).
     const orden = await crear(T.ordenes, {
-      Nombre: `Cotización — ${g('proyecto')} · ${g('fecha')}`,
       Estatus: 'Borrador',
       Marca: g('proyecto'),
       Solicitante: g('nombre'),
