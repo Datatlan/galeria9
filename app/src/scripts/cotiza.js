@@ -1,5 +1,5 @@
 // Flujo "Cotiza tu evento" — estado, total en vivo y creación de Orden borrador.
-import { BASE, T, crear, crearMuchos, leer } from '../config.js';
+import { T, crear, leer } from '../config.js';
 import { money } from '../data/catalogo.js';
 
 const data = JSON.parse(document.getElementById('catData').textContent);
@@ -137,9 +137,10 @@ btnNext.addEventListener('click', () => { if (validateStep(step)) showStep(step 
 btnBack.addEventListener('click', () => showStep(step - 1));
 stepsEls.forEach((s, i) => s.addEventListener('click', () => { if (i <= step) showStep(i); }));
 
-// ---- Envío: Orden (Borrador, con datos del solicitante) → Line_Items ----
-// No se crea Cliente ni Contacto: los datos quedan en la Orden y Fer asigna/crea
-// el Cliente manualmente desde su panel (evita duplicados en el CRM).
+// ---- Envío: LEAD (interés de evento) ----
+// El cotizador NO crea la orden: capta el interés con su estimado en Leads,
+// y el equipo crea la Orden manualmente desde su Interface (decisión ago 2026:
+// una sola vía de creación de órdenes = la manual, sin dualidad web/equipo).
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!validateStep(step)) return;
@@ -148,60 +149,31 @@ form.addEventListener('submit', async (e) => {
   const { espacios, horas, extrasSel, fd } = sel;
   const g = (k) => (fd.get(k) || '').trim();
 
-  const notas = [
-    `Tipo: ${g('tipoEvento')}`,
-    `Objetivo: ${g('objetivo')}`,
-    g('mensaje') && `Actividades: ${g('mensaje')}`,
+  // Todo el brief + el estimado, estructurado para que el equipo arme la orden.
+  const detalle = [
+    `Marca/Proyecto: ${g('proyecto')}`,
+    `Tipo: ${g('tipoEvento')} · Objetivo: ${g('objetivo')}`,
+    `Espacio(s): ${espacios.map((x) => x.nombre).join(' + ') || '—'}`,
+    `Fecha: ${g('fecha')}${g('fecha2') ? ` (alterna: ${g('fecha2')})` : ''}`,
     (g('horaInicio') && g('horaFin')) && `Horario: ${g('horaInicio')}–${g('horaFin')} (${horas} h)`,
-    g('fecha2') && `Fecha alterna: ${g('fecha2')}`,
     `Personas: ${g('personas')}`,
+    ...(horas ? espacios.map((x) => `· ${x.nombre} ${horas} h — ${money(x.precioHora * horas)}`) : []),
+    ...extrasSel.map((x) => `· ${x.nombre} ×${x.qty} — ${money(x.precio * x.qty)}`),
+    `Estimado total: ${money(computeTotal(sel))}`,
   ].filter(Boolean).join('\n');
 
   btnSend.disabled = true;
   btnSend.textContent = 'Enviando…';
   try {
-    // 1) Orden borrador — con los datos del solicitante (Cliente queda vacío para Fer)
-    // Fecha/horario/espacio van también como CAPTURA estructurada: al aprobar
-    // la orden, una automation crea el registro en Eventos (el calendario).
-    // horaInicio/horaFin valen "HH:MM" (ej. "10:00") → ISO con offset CDMX
-    const hh = (h) => `${g('fecha')}T${h}:00-06:00`;
-    // Nombre NO se envía: es fórmula en Airtable (servicio — marca · #ID).
-    const orden = await crear(T.ordenes, {
-      Estatus: 'Borrador',
-      Marca: g('proyecto'),
-      Solicitante: g('nombre'),
+    await crear(T.leads, {
+      Nombre: g('nombre'),
       WhatsApp: g('telefono'),
       Correo: g('correo') || undefined,
-      Notas: notas,
-      Fecha_Evento_Inicio: (g('fecha') && g('horaInicio')) ? hh(g('horaInicio')) : undefined,
-      Fecha_Evento_Fin: (g('fecha') && g('horaFin')) ? hh(g('horaFin')) : undefined,
-      Espacio_Evento: espacios.map((e) => e.espacioRec).filter(Boolean),
-      // Marca el TIPO de la orden: la automation de servicios crea el line item
-      // "Evento" (sin precio, subtotal $0) y Servicio_Contratado se llena solo,
-      // para que las vistas por servicio de la Interface la clasifiquen.
-      Servicios_Solicitados: ['recOWUjpfQ93T3j06'], // Catalogo · Evento
+      Interes: 'Evento',
+      Mensaje: g('mensaje') || undefined,
+      Detalle: detalle,
+      Estatus: 'Nuevo',
     });
-
-    // 2) Line_Items (base por horas + extras)
-    const items = [];
-    // Nombre NO se envía: es fórmula en Airtable (nombre del servicio/extra ×Qty).
-    if (horas) espacios.forEach((e) => {
-      items.push({
-        Orden: [orden.id],
-        Servicios_Extras: [e.rec],
-        Qty: horas,
-        Precio_Unitario: e.precioHora,
-      });
-    });
-    extrasSel.forEach((x) => {
-      items.push({
-        Orden: [orden.id],
-        Servicios_Extras: [x.rec],
-        Qty: x.qty,
-        Precio_Unitario: x.precio,
-      });
-    });
-    if (items.length) await crearMuchos(T.lineItems, items);
 
     // Éxito
     document.querySelector('.cotiza__grid').hidden = true;
