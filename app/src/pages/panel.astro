@@ -138,10 +138,45 @@ import '../styles/global.css';
         }
       }
 
-      grid.innerHTML = html
-        ? `<div class="pn-desk">${html}</div><div class="pn-mob">${lista}</div>`
-        : '<p class="muted" style="padding:1rem 0">No hay unidades en esta área.</p>';
-      sub.textContent = `${visibles.length} unidades · ${ocupadas} ocupadas hoy o próximamente · ${libres} sin rentas en los próximos 12 meses`;
+      // Agenda de eventos (Terraza/Roof): reservas con fecha y horario.
+      const fmtH = (iso) => new Date(iso).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+      const fmtD = (iso) => new Date(iso).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
+      const hoy0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const evs = (data.eventos || [])
+        .filter((r) => r.fields.Fecha_Inicio && new Date(r.fields.Fecha_Fin || r.fields.Fecha_Inicio) >= hoy0)
+        .sort((a, b) => a.fields.Fecha_Inicio.localeCompare(b.fields.Fecha_Inicio));
+      const porEspacio = new Map();
+      for (const r of evs) {
+        const f = r.fields;
+        const nombres = (f.Espacio || []).map((id) => espacioName.get(id)).filter(Boolean);
+        for (const en of nombres.length ? nombres : ['Sin espacio']) {
+          if (area && !slug(en).includes(area) && area !== 'eventos') continue;
+          if (!porEspacio.has(en)) porEspacio.set(en, []);
+          porEspacio.get(en).push(r);
+        }
+      }
+      let agenda = '';
+      for (const [en, rs] of [...porEspacio.entries()].sort()) {
+        agenda += `<div class="pn-ghead">Agenda · ${esc(en)} <small>${rs.length}</small></div>`;
+        for (const r of rs) {
+          const f = r.fields;
+          agenda += `<button type="button" class="pn-ev"
+            data-orden="${esc((f.Orden || [])[0] || '')}" data-nombre="${esc(f.Nombre || '')}" data-unidad="${esc(en)}"
+            data-ini="${esc(f.Fecha_Inicio)}" data-fin="${esc(f.Fecha_Fin || f.Fecha_Inicio)}">
+            <span class="pn-ev__d">${fmtD(f.Fecha_Inicio)}</span>
+            <span class="pn-ev__h">${fmtH(f.Fecha_Inicio)} – ${fmtH(f.Fecha_Fin || f.Fecha_Inicio)}</span>
+            <span class="pn-ev__n">${esc(f.Nombre || '')}</span>
+          </button>`;
+        }
+      }
+      if ((!area || area === 'eventos' || 'terraza roof'.includes(area)) && !agenda) {
+        agenda = `<div class="pn-ghead">Agenda de eventos</div><p class="muted" style="padding:.8rem 0">Sin eventos próximos — Terraza y Roof libres.</p>`;
+      }
+
+      const unidadesHtml = area === 'eventos' ? '' :
+        (html ? `<div class="pn-desk">${html}</div><div class="pn-mob">${lista}</div>` : '<p class="muted" style="padding:1rem 0">No hay unidades en esta área.</p>');
+      grid.innerHTML = unidadesHtml + (agenda ? `<div class="pn-agenda">${agenda}</div>` : '');
+      sub.textContent = `${visibles.length} unidades · ${ocupadas} ocupadas hoy o próximamente · ${evs.length} eventos próximos`;
     }
 
     function renderFilters(area) {
@@ -150,6 +185,7 @@ import '../styles/global.css';
       const áreas = [...new Set(data.unidades.map((r) => (r.fields.Espacio || []).map((id) => espacioName.get(id)).filter(Boolean)[0]).filter(Boolean))].sort();
       box.innerHTML = [`<button class="pn-pill${!area ? ' is-on' : ''}" data-area="">Todos</button>`]
         .concat(áreas.map((a) => `<button class="pn-pill${area === slug(a) ? ' is-on' : ''}" data-area="${slug(a)}">${esc(a)}</button>`))
+        .concat([`<button class="pn-pill${area === 'eventos' ? ' is-on' : ''}" data-area="eventos">Eventos</button>`])
         .join('');
       box.hidden = false;
       box.onclick = (e) => {
@@ -166,10 +202,15 @@ import '../styles/global.css';
     // Popover: click en una renta → orden, cliente y link directo a Airtable.
     const popBack = document.getElementById('pnPopBack');
     const pop = document.getElementById('pnPop');
-    const fmt = (d) => new Date(d + 'T00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+    // Acepta fecha sola ("2026-10-01") o datetime ISO (eventos)
+    const fmt = (d) => {
+      const dt = new Date(d.includes('T') ? d : d + 'T00:00');
+      const base = dt.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+      return d.includes('T') ? `${base}, ${dt.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}` : base;
+    };
 
     document.getElementById('pnGrid').addEventListener('click', (e) => {
-      const bar = e.target.closest('.pn-rent, .pn-li--btn');
+      const bar = e.target.closest('.pn-rent, .pn-li--btn, .pn-ev');
       if (!bar) return;
       const ordenById = new Map((data.ordenes || []).map((r) => [r.id, r.fields]));
       const clienteById = new Map((data.clientes || []).map((r) => [r.id, r.fields.Nombre]));
@@ -285,6 +326,21 @@ import '../styles/global.css';
     .pn-hoy { grid-row: 1; z-index: 3; width: 2px; background: var(--gold); justify-self: start; height: 100%; }
 
     .pn-error { margin-top: 2.5rem; }
+
+    /* Agenda de eventos (Terraza/Roof) */
+    .pn-ev {
+      display: flex; align-items: center; gap: 1rem; width: 100%;
+      padding: .7rem .2rem; border: 0; border-bottom: 1px solid rgba(43,43,42,.07);
+      background: none; font-family: inherit; text-align: left; cursor: pointer;
+    }
+    .pn-ev:hover { background: var(--paper); }
+    .pn-ev__d { font-size: .8rem; font-weight: 500; color: var(--ink); min-width: 92px; text-transform: capitalize; }
+    .pn-ev__h { font-size: .78rem; color: var(--gold-ink); min-width: 150px; }
+    .pn-ev__n { flex: 1; font-size: .82rem; color: var(--ink-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 720px) {
+      .pn-ev { flex-wrap: wrap; gap: .2rem .8rem; }
+      .pn-ev__n { flex-basis: 100%; }
+    }
 
     /* Columna de unidades pegajosa (scroll horizontal en tablet) */
     .pn-unit, .pn-months span:first-child { position: sticky; left: 0; background: var(--white); z-index: 4; }

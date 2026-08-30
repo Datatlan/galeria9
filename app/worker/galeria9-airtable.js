@@ -124,6 +124,7 @@ export default {
           ['espacios', 'tbltH53ZXqnDQdj5n', ['Nombre']],
           ['ordenes', 'tbl4RvFWf9fMzQUTz', ['OrderID', 'Estatus', 'Cliente', 'Marca']],
           ['clientes', 'tblmPecJQZxArzWJV', ['Nombre']],
+          ['eventos', 'tblsOvEhdkacWz5yZ', ['Nombre', 'Fecha_Inicio', 'Fecha_Fin', 'Espacio', 'Orden']],
         ];
         const out = {};
         for (const [key, table, fields] of lecturas) {
