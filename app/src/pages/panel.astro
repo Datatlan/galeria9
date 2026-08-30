@@ -1,0 +1,202 @@
+---
+// Panel interno de ocupación — SOLO para el equipo (link con token).
+// /panel?k=<token>            → todas las áreas
+// /panel?k=<token>&area=punto-presencia | pop-up | tu-talento | invitado
+// Lee unidades + rentas en vivo vía el Worker (?read=ocupacion, protegido).
+import '../styles/global.css';
+---
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <title>Ocupación — Galería 9</title>
+</head>
+<body>
+  <main class="panel">
+    <span class="eyebrow">Galería 9 · Panel interno</span>
+    <h1 class="pn-title">Inventario y disponibilidad.</h1>
+    <p class="pn-sub" id="pnSub">Cargando ocupación…</p>
+
+    <div class="pn-bar" id="pnFilters" hidden></div>
+
+    <div class="pn-meta" id="pnLegend" hidden>
+      <span class="lg lg--oc"><i></i> Ocupado</span>
+      <span class="lg lg--lb"><i></i> Disponible</span>
+      <span class="lg lg--hoy"><i></i> Hoy</span>
+    </div>
+
+    <div class="pn-board" id="pnBoard" hidden><div class="pn-grid" id="pnGrid"></div></div>
+
+    <div class="pn-error" id="pnError" hidden>
+      <p class="lead">Acceso restringido.</p>
+      <p class="muted">Este panel es del equipo de Galería 9. Revisa que tu link incluya la clave correcta.</p>
+    </div>
+  </main>
+
+  <script>
+    import { WORKER } from '../config.js';
+
+    const qs = new URLSearchParams(location.search);
+    const k = qs.get('k') || '';
+    const esc = (s) => String(s ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+    const slug = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-');
+
+    const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const now = new Date();
+    const win0 = new Date(now.getFullYear(), now.getMonth(), 1); // ventana: 12 meses desde el actual
+    const idxOf = (d) => (d.getFullYear() - win0.getFullYear()) * 12 + (d.getMonth() - win0.getMonth());
+
+    const sub = document.getElementById('pnSub');
+    const grid = document.getElementById('pnGrid');
+    let data = null;
+
+    function render(area) {
+      const espacioName = new Map(data.espacios.map((r) => [r.id, r.fields.Nombre]));
+      const unidades = data.unidades.map((r) => ({
+        id: r.id,
+        n: r.fields.Nombre || '',
+        tipo: r.fields.Tipo || '',
+        espacio: (r.fields.Espacio || []).map((id) => espacioName.get(id)).filter(Boolean)[0] || 'Sin espacio',
+      }));
+
+      // Rentas por unidad (recortadas a la ventana de 12 meses)
+      const porUnidad = new Map();
+      for (const r of data.rentas) {
+        const f = r.fields;
+        if (!f.Fecha_Inicio) continue;
+        const ini = new Date(f.Fecha_Inicio + 'T00:00');
+        const fin = new Date((f.Fecha_Fin || f.Fecha_Inicio) + 'T00:00');
+        let a = idxOf(ini), b = idxOf(fin);
+        if (b < 0 || a > 11) continue;
+        a = Math.max(0, a); b = Math.min(11, b);
+        for (const uid of f.Unidades_Display || []) {
+          if (!porUnidad.has(uid)) porUnidad.set(uid, []);
+          porUnidad.get(uid).push({ nombre: f.Nombre || '', a, span: b - a + 1, fin: f.Fecha_Fin || f.Fecha_Inicio });
+        }
+      }
+
+      // Filtro por área (espacio) + agrupar por espacio → tipo
+      const visibles = unidades.filter((u) => !area || slug(u.espacio).includes(area));
+      const grupos = new Map();
+      for (const u of visibles.sort((x, y) => x.espacio.localeCompare(y.espacio) || x.tipo.localeCompare(y.tipo) || x.n.localeCompare(y.n, undefined, { numeric: true }))) {
+        const g = u.tipo ? `${u.espacio} · ${u.tipo}` : u.espacio;
+        if (!grupos.has(g)) grupos.set(g, []);
+        grupos.get(g).push(u);
+      }
+
+      // Encabezado de meses
+      let html = '<div class="pn-row pn-months"><span></span>' + Array.from({ length: 12 }, (_, i) => {
+        const d = new Date(win0.getFullYear(), win0.getMonth() + i, 1);
+        const y = (i === 0 || d.getMonth() === 0) ? ` <em>’${String(d.getFullYear()).slice(2)}</em>` : '';
+        return `<span>${MESES[d.getMonth()]}${y}</span>`;
+      }).join('') + '</div>';
+
+      let libres = 0, ocupadas = 0;
+      for (const [g, us] of grupos) {
+        html += `<div class="pn-ghead">${esc(g)} <small>${us.length}</small></div>`;
+        for (const u of us) {
+          const rentas = porUnidad.get(u.id) || [];
+          rentas.length ? ocupadas++ : libres++;
+          html += `<div class="pn-row"><div class="pn-unit">${esc(u.n)}</div>`;
+          for (let i = 0; i < 12; i++) html += `<div class="pn-cell" style="grid-column:${i + 2};grid-row:1"></div>`;
+          html += `<div class="pn-hoy" style="grid-column:2"></div>`;
+          for (const rta of rentas) {
+            const marca = rta.nombre.replace(u.n, '').replace(/^\s*·\s*/, '').trim() || rta.nombre;
+            const finTxt = new Date(rta.fin + 'T00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+            html += `<div class="pn-rent" style="grid-column:${rta.a + 2} / span ${rta.span}" title="${esc(rta.nombre)} — hasta ${finTxt}">${esc(marca)}<small>→ ${finTxt}</small></div>`;
+          }
+          html += '</div>';
+        }
+      }
+      grid.innerHTML = html || '<p class="muted" style="padding:1rem 0">No hay unidades en esta área.</p>';
+      sub.textContent = `${visibles.length} unidades · ${ocupadas} ocupadas hoy o próximamente · ${libres} sin rentas en los próximos 12 meses`;
+    }
+
+    function renderFilters(area) {
+      const box = document.getElementById('pnFilters');
+      const espacioName = new Map(data.espacios.map((r) => [r.id, r.fields.Nombre]));
+      const áreas = [...new Set(data.unidades.map((r) => (r.fields.Espacio || []).map((id) => espacioName.get(id)).filter(Boolean)[0]).filter(Boolean))].sort();
+      box.innerHTML = [`<button class="pn-pill${!area ? ' is-on' : ''}" data-area="">Todos</button>`]
+        .concat(áreas.map((a) => `<button class="pn-pill${area === slug(a) ? ' is-on' : ''}" data-area="${slug(a)}">${esc(a)}</button>`))
+        .join('');
+      box.hidden = false;
+      box.onclick = (e) => {
+        const b = e.target.closest('.pn-pill');
+        if (!b) return;
+        const u = new URL(location.href);
+        b.dataset.area ? u.searchParams.set('area', b.dataset.area) : u.searchParams.delete('area');
+        history.replaceState(null, '', u);
+        render(b.dataset.area || '');
+        renderFilters(b.dataset.area || '');
+      };
+    }
+
+    (async () => {
+      try {
+        const res = await fetch(`${WORKER}?read=ocupacion&k=${encodeURIComponent(k)}`);
+        if (!res.ok) throw new Error(String(res.status));
+        data = await res.json();
+        const area = slug(qs.get('area') || '') || '';
+        document.getElementById('pnLegend').hidden = false;
+        document.getElementById('pnBoard').hidden = false;
+        renderFilters(area);
+        render(area);
+      } catch {
+        sub.textContent = '';
+        document.getElementById('pnError').hidden = false;
+      }
+    })();
+  </script>
+
+  <style is:global>
+    body { padding: clamp(1.5rem, 4vw, 3.5rem); background: var(--paper); }
+    .panel { max-width: 1100px; margin: 0 auto; }
+    .pn-title { font-size: clamp(1.6rem, 3vw, 2.3rem); font-weight: 400; margin-top: .8rem; letter-spacing: -.01em; }
+    .pn-sub { margin-top: .6rem; color: var(--ink-70); font-weight: 300; font-size: .95rem; }
+
+    .pn-bar { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.6rem; }
+    .pn-pill {
+      font-family: inherit; font-size: .8rem; padding: .55em 1.2em; border-radius: 100px;
+      border: 1px solid var(--ink-12); background: var(--white); color: var(--ink-70); cursor: pointer;
+      transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
+    }
+    .pn-pill:hover { border-color: var(--ink); color: var(--ink); }
+    .pn-pill.is-on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+    .pn-meta { display: flex; align-items: center; gap: 1.6rem; margin-top: 1.2rem; }
+    .lg { display: inline-flex; align-items: center; gap: .5em; font-size: .76rem; color: var(--ink-45); }
+    .lg i { width: 14px; height: 8px; border-radius: 2px; display: inline-block; }
+    .lg--oc i { background: var(--ink); }
+    .lg--lb i { background: var(--white); box-shadow: inset 0 0 0 1px var(--ink-12); }
+    .lg--hoy i { width: 2px; height: 12px; background: var(--gold); border-radius: 0; }
+
+    .pn-board { margin-top: 1.2rem; background: var(--white); border-radius: var(--radius); box-shadow: 0 2px 14px -8px rgba(43,43,42,.25); padding: 1.2rem 1.4rem 1.6rem; overflow-x: auto; }
+    .pn-grid { min-width: 900px; }
+
+    .pn-row { display: grid; grid-template-columns: 130px repeat(12, 1fr); align-items: stretch; position: relative; }
+    .pn-months { border-bottom: 1px solid var(--ink); padding-bottom: .5rem; }
+    .pn-months span { font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-45); padding-left: .4rem; }
+    .pn-months em { font-style: normal; color: var(--gold-ink); }
+
+    .pn-ghead { padding: 1.4rem .2rem .45rem; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-ink); font-weight: 600; border-bottom: 1px solid var(--ink-12); }
+    .pn-ghead small { color: var(--ink-45); font-weight: 400; letter-spacing: .05em; margin-left: .5em; }
+
+    .pn-unit { font-size: .8rem; color: var(--ink-70); padding: .55rem .4rem .55rem 0; display: flex; align-items: center; }
+    .pn-cell { border-left: 1px solid rgba(43,43,42,.06); border-bottom: 1px solid rgba(43,43,42,.06); }
+    .pn-row:not(.pn-months) { border-bottom: 1px solid rgba(43,43,42,.06); }
+
+    .pn-rent {
+      grid-row: 1; z-index: 2; align-self: center;
+      background: var(--ink); color: var(--paper); border-radius: 2px;
+      font-size: .68rem; letter-spacing: .02em; padding: .32em .7em; margin: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pn-rent small { color: var(--gold); margin-left: .5em; letter-spacing: .06em; }
+    .pn-hoy { grid-row: 1; z-index: 3; width: 2px; background: var(--gold); justify-self: start; height: 100%; }
+
+    .pn-error { margin-top: 2.5rem; }
+  </style>
+</body>
+</html>

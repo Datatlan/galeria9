@@ -33,6 +33,10 @@ const DEFAULT_BASE = BASES.demo;
 
 const REC_RE = /^rec[A-Za-z0-9]{14}$/;
 
+// Token del panel interno de ocupación (Fer). Cambiarlo = editar aquí + redeploy
+// + actualizar los links/botones de la Interface.
+const OCUPACION_KEY = 'g9-ocupacion-x7Kd2Qw9';
+
 // Tabla Onboarding (checklist del cliente) — únicos escribibles desde fuera.
 const ONB = {
   table: 'tblIOBv4kM0YOCb6S',
@@ -90,13 +94,34 @@ export default {
         if (!REC_RE.test(o)) return json({ error: 'Orden inválida' }, 400);
 
         const p = new URLSearchParams();
-        ['Nombre', 'Estatus', 'Respuesta', 'Archivos', 'Tipo', 'Instrucciones', 'Opciones', 'Orden_Num', 'Marca']
+        ['Nombre', 'Estatus', 'Respuesta', 'Archivos', 'Tipo', 'Instrucciones', 'Opciones', 'Seccion', 'Orden_Num', 'Marca']
           .forEach((f) => p.append('fields[]', f));
         p.set('filterByFormula', `{Orden_RecID}='${o}'`);
         p.set('pageSize', '100');
 
         const air = await fetch(`https://api.airtable.com/v0/${BASES.prod}/${ONB.table}?${p}`, { headers: auth });
         return passthrough(air);
+      }
+
+      // Panel interno de ocupación (todas las unidades + rentas + espacios).
+      // Datos internos (qué marca ocupa qué): protegido con token, sin caché.
+      if (clave === 'ocupacion') {
+        if (url.searchParams.get('k') !== OCUPACION_KEY) return json({ error: 'Acceso restringido' }, 403);
+
+        const q = (fields) => {
+          const p = new URLSearchParams();
+          fields.forEach((f) => p.append('fields[]', f));
+          p.set('pageSize', '100');
+          return p;
+        };
+        const [u, r, e] = await Promise.all([
+          fetch(`https://api.airtable.com/v0/${BASES.prod}/tblxjuV4KYjhGOQBx?${q(['Nombre', 'Tipo', 'Espacio'])}`, { headers: auth }),
+          fetch(`https://api.airtable.com/v0/${BASES.prod}/tble36WbySAVkODVp?${q(['Nombre', 'Fecha_Inicio', 'Fecha_Fin', 'Unidades_Display'])}`, { headers: auth }),
+          fetch(`https://api.airtable.com/v0/${BASES.prod}/tbltH53ZXqnDQdj5n?${q(['Nombre'])}`, { headers: auth }),
+        ]);
+        if (!u.ok || !r.ok || !e.ok) return json({ error: 'Airtable error' }, 502);
+        const [uj, rj, ej] = await Promise.all([u.json(), r.json(), e.json()]);
+        return json({ unidades: uj.records, rentas: rj.records, espacios: ej.records });
       }
 
       const cfg = READABLE[clave];
