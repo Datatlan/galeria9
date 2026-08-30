@@ -116,16 +116,22 @@ export default {
         };
         // Nota: pageSize 100 sin paginación — suficiente hoy; si Ordenes pasa de
         // 100 filas vivas habrá que paginar o filtrar aquí.
-        const [u, r, e, o, c] = await Promise.all([
-          fetch(`https://api.airtable.com/v0/${BASES.prod}/tblxjuV4KYjhGOQBx?${q(['Nombre', 'Tipo', 'Espacio'])}`, { headers: auth }),
-          fetch(`https://api.airtable.com/v0/${BASES.prod}/tble36WbySAVkODVp?${q(['Nombre', 'Fecha_Inicio', 'Fecha_Fin', 'Unidades_Display', 'Orden'])}`, { headers: auth }),
-          fetch(`https://api.airtable.com/v0/${BASES.prod}/tbltH53ZXqnDQdj5n?${q(['Nombre'])}`, { headers: auth }),
-          fetch(`https://api.airtable.com/v0/${BASES.prod}/tbl4RvFWf9fMzQUTz?${q(['Nombre', 'Estatus', 'Cliente', 'Marca'])}`, { headers: auth }),
-          fetch(`https://api.airtable.com/v0/${BASES.prod}/tblmPecJQZxArzWJV?${q(['Nombre'])}`, { headers: auth }),
-        ]);
-        if (!u.ok || !r.ok || !e.ok || !o.ok || !c.ok) return json({ error: 'Airtable error' }, 502);
-        const [uj, rj, ej, oj, cj] = await Promise.all([u.json(), r.json(), e.json(), o.json(), c.json()]);
-        return json({ unidades: uj.records, rentas: rj.records, espacios: ej.records, ordenes: oj.records, clientes: cj.records });
+        // EN SECUENCIA (no Promise.all): 5 fetches paralelos rozan el límite de
+        // 5 req/s de Airtable y provocan 429 intermitentes.
+        const lecturas = [
+          ['unidades', 'tblxjuV4KYjhGOQBx', ['Nombre', 'Tipo', 'Espacio']],
+          ['rentas', 'tble36WbySAVkODVp', ['Nombre', 'Fecha_Inicio', 'Fecha_Fin', 'Unidades_Display', 'Orden']],
+          ['espacios', 'tbltH53ZXqnDQdj5n', ['Nombre']],
+          ['ordenes', 'tbl4RvFWf9fMzQUTz', ['Nombre', 'Estatus', 'Cliente', 'Marca']],
+          ['clientes', 'tblmPecJQZxArzWJV', ['Nombre']],
+        ];
+        const out = {};
+        for (const [key, table, fields] of lecturas) {
+          const res = await fetch(`https://api.airtable.com/v0/${BASES.prod}/${table}?${q(fields)}`, { headers: auth });
+          if (!res.ok) return json({ error: `Airtable ${res.status} en ${key}` }, 502);
+          out[key] = (await res.json()).records;
+        }
+        return json(out);
       }
 
       const cfg = READABLE[clave];
