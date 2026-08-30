@@ -116,7 +116,31 @@ import '../styles/global.css';
           html += '</div>';
         }
       }
-      grid.innerHTML = html || '<p class="muted" style="padding:1rem 0">No hay unidades en esta área.</p>';
+      // Versión móvil: lista de estado por unidad (mismo popover al tocar).
+      const fmtC = (d) => new Date(d + 'T00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+      let lista = '';
+      for (const [g, us] of grupos) {
+        lista += `<div class="pn-lg">${esc(g)}</div>`;
+        for (const u of us) {
+          const rentas = (porUnidad.get(u.id) || []).slice().sort((x, y) => x.a - y.a);
+          if (!rentas.length) {
+            lista += `<div class="pn-li"><span class="pn-li__u">${esc(u.n)}</span><span class="pn-chip pn-chip--free">Libre</span></div>`;
+          } else {
+            const r0 = rentas[0];
+            const marca = r0.nombre.replace(u.n, '').replace(/^\s*·\s*/, '').trim() || r0.nombre;
+            lista += `<button type="button" class="pn-li pn-li--btn"
+              data-orden="${esc(r0.orden)}" data-nombre="${esc(r0.nombre)}" data-unidad="${esc(u.n)}" data-ini="${esc(r0.ini)}" data-fin="${esc(r0.fin)}">
+              <span class="pn-li__u">${esc(u.n)}</span>
+              <span class="pn-li__m">${esc(marca)}</span>
+              <span class="pn-chip pn-chip--oc">hasta ${fmtC(r0.fin)}</span>
+            </button>`;
+          }
+        }
+      }
+
+      grid.innerHTML = html
+        ? `<div class="pn-desk">${html}</div><div class="pn-mob">${lista}</div>`
+        : '<p class="muted" style="padding:1rem 0">No hay unidades en esta área.</p>';
       sub.textContent = `${visibles.length} unidades · ${ocupadas} ocupadas hoy o próximamente · ${libres} sin rentas en los próximos 12 meses`;
     }
 
@@ -145,7 +169,7 @@ import '../styles/global.css';
     const fmt = (d) => new Date(d + 'T00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
 
     document.getElementById('pnGrid').addEventListener('click', (e) => {
-      const bar = e.target.closest('.pn-rent');
+      const bar = e.target.closest('.pn-rent, .pn-li--btn');
       if (!bar) return;
       const ordenById = new Map((data.ordenes || []).map((r) => [r.id, r.fields]));
       const clienteById = new Map((data.clientes || []).map((r) => [r.id, r.fields.Nombre]));
@@ -261,6 +285,34 @@ import '../styles/global.css';
     .pn-hoy { grid-row: 1; z-index: 3; width: 2px; background: var(--gold); justify-self: start; height: 100%; }
 
     .pn-error { margin-top: 2.5rem; }
+
+    /* Columna de unidades pegajosa (scroll horizontal en tablet) */
+    .pn-unit, .pn-months span:first-child { position: sticky; left: 0; background: var(--white); z-index: 4; }
+
+    /* Vista móvil: lista de estado por unidad */
+    .pn-mob { display: none; }
+    .pn-lg { padding: 1.3rem .2rem .45rem; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-ink); font-weight: 600; border-bottom: 1px solid var(--ink-12); }
+    .pn-li {
+      display: flex; align-items: center; gap: .8rem; width: 100%;
+      padding: .75rem .2rem; border: 0; border-bottom: 1px solid rgba(43,43,42,.07);
+      background: none; font-family: inherit; text-align: left;
+    }
+    .pn-li--btn { cursor: pointer; }
+    .pn-li--btn:active { background: var(--paper); }
+    .pn-li__u { font-size: .85rem; color: var(--ink); min-width: 64px; font-weight: 500; }
+    .pn-li__m { flex: 1; font-size: .85rem; color: var(--ink-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pn-chip { font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; padding: .4em .9em; border-radius: 100px; white-space: nowrap; }
+    .pn-chip--free { background: var(--white); box-shadow: inset 0 0 0 1px var(--ink-12); color: var(--ink-45); }
+    .pn-chip--oc { background: var(--ink); color: var(--paper); }
+
+    @media (max-width: 720px) {
+      body { padding: 1.2rem; }
+      .pn-desk { display: none; }
+      .pn-mob { display: block; }
+      .pn-grid { min-width: 0; }
+      .pn-board { padding: .4rem 1rem 1rem; }
+      .pn-li:last-child { border-bottom: 0; }
+    }
   </style>
 </body>
 </html>
