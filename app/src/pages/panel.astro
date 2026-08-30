@@ -98,30 +98,40 @@ import '../styles/global.css';
         return `<span>${MESES[d.getMonth()]}${y}</span>`;
       }).join('') + '</div>';
 
+      const ghead = (g, us, occ, open) =>
+        `<button type="button" class="pn-ghead pn-ghead--btn" data-g="${esc(g)}">
+          <i class="pn-chev${open ? ' is-open' : ''}">›</i>${esc(g)}
+          <small>${us.length}${occ ? ` · ${occ} ocupada${occ > 1 ? 's' : ''}` : ' · todas libres'}</small>
+        </button>`;
+
       let libres = 0, ocupadas = 0;
       for (const [g, us] of grupos) {
-        html += `<div class="pn-ghead">${esc(g)} <small>${us.length}</small></div>`;
+        let occ = 0, rows = '';
         for (const u of us) {
           const rentas = porUnidad.get(u.id) || [];
-          rentas.length ? ocupadas++ : libres++;
-          html += `<div class="pn-row"><div class="pn-unit">${esc(u.n)}</div>`;
-          for (let i = 0; i < 12; i++) html += `<div class="pn-cell" style="grid-column:${i + 2};grid-row:1"></div>`;
-          html += `<div class="pn-hoy" style="grid-column:2"></div>`;
+          rentas.length ? (ocupadas++, occ++) : libres++;
+          rows += `<div class="pn-row"><div class="pn-unit">${esc(u.n)}</div>`;
+          for (let i = 0; i < 12; i++) rows += `<div class="pn-cell" style="grid-column:${i + 2};grid-row:1"></div>`;
+          rows += `<div class="pn-hoy" style="grid-column:2"></div>`;
           for (const rta of rentas) {
             const marca = rta.nombre.replace(u.n, '').replace(/^\s*·\s*/, '').trim() || rta.nombre;
             const finTxt = new Date(rta.fin + 'T00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-            html += `<button type="button" class="pn-rent" style="grid-column:${rta.a + 2} / span ${rta.span}"
+            rows += `<button type="button" class="pn-rent" style="grid-column:${rta.a + 2} / span ${rta.span}"
               data-orden="${esc(rta.orden)}" data-nombre="${esc(rta.nombre)}" data-unidad="${esc(u.n)}" data-ini="${esc(rta.ini)}" data-fin="${esc(rta.fin)}"
               title="${esc(rta.nombre)} — hasta ${finTxt}">${esc(marca)}<small>→ ${finTxt}</small></button>`;
           }
-          html += '</div>';
+          rows += '</div>';
         }
+        const open = isOpen(g, us.length, occ);
+        html += ghead(g, us, occ, open) + `<div ${open ? '' : 'hidden'}>${rows}</div>`;
       }
       // Versión móvil: lista de estado por unidad (mismo popover al tocar).
       const fmtC = (d) => new Date(d + 'T00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
       let lista = '';
       for (const [g, us] of grupos) {
-        lista += `<div class="pn-lg">${esc(g)}</div>`;
+        const occM = us.filter((u) => (porUnidad.get(u.id) || []).length).length;
+        const openM = isOpen(g, us.length, occM);
+        lista += ghead(g, us, occM, openM) + `<div ${openM ? '' : 'hidden'}>`;
         for (const u of us) {
           const rentas = (porUnidad.get(u.id) || []).slice().sort((x, y) => x.a - y.a);
           if (!rentas.length) {
@@ -137,6 +147,7 @@ import '../styles/global.css';
             </button>`;
           }
         }
+        lista += '</div>';
       }
 
       const showCal = !area || area === 'eventos' || 'terraza roof'.includes(area);
@@ -169,6 +180,16 @@ import '../styles/global.css';
     // Popover: click en una renta → orden, cliente y link directo a Airtable.
     const popBack = document.getElementById('pnPopBack');
     const pop = document.getElementById('pnPop');
+    // ---- Grupos colapsables (elección recordada en este navegador) ----
+    let colapso = {};
+    try { colapso = JSON.parse(localStorage.getItem('g9panel-colapso') || '{}'); } catch {}
+    // Default: colapsado si el grupo es grande y está todo libre; abierto si hay rentas.
+    const isOpen = (g, n, occ) => (g in colapso) ? !colapso[g] : !(n > 8 && occ === 0);
+    function toggleGrupo(g, abierto) {
+      colapso[g] = abierto; // true = colapsado
+      try { localStorage.setItem('g9panel-colapso', JSON.stringify(colapso)); } catch {}
+    }
+
     // ---- Calendario de eventos (Terraza/Roof) ----
     let calMes = new Date(now.getFullYear(), now.getMonth(), 1);
     let diaSel = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -267,6 +288,15 @@ import '../styles/global.css';
     };
 
     document.getElementById('pnGrid').addEventListener('click', (e) => {
+      const gh = e.target.closest('.pn-ghead--btn');
+      if (gh) {
+        const cuerpo = gh.nextElementSibling;
+        const abierto = !cuerpo.hidden;
+        cuerpo.hidden = abierto;
+        gh.querySelector('.pn-chev')?.classList.toggle('is-open', abierto ? false : true);
+        toggleGrupo(gh.dataset.g, abierto);
+        return;
+      }
       const nav = e.target.closest('.pn-calnav');
       if (nav) {
         calMes = new Date(calMes.getFullYear(), calMes.getMonth() + Number(nav.dataset.nav), 1);
@@ -353,6 +383,10 @@ import '../styles/global.css';
 
     .pn-ghead { padding: 1.4rem .2rem .45rem; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-ink); font-weight: 600; border-bottom: 1px solid var(--ink-12); }
     .pn-ghead small { color: var(--ink-45); font-weight: 400; letter-spacing: .05em; margin-left: .5em; }
+    .pn-ghead--btn { display: flex; align-items: center; gap: .5rem; width: 100%; background: none; border: 0; border-bottom: 1px solid var(--ink-12); font-family: inherit; text-align: left; cursor: pointer; }
+    .pn-ghead--btn:hover { color: var(--ink); }
+    .pn-chev { font-style: normal; display: inline-block; transition: transform .2s var(--ease); color: var(--ink-45); }
+    .pn-chev.is-open { transform: rotate(90deg); }
 
     .pn-unit { font-size: .8rem; color: var(--ink-70); padding: .55rem .4rem .55rem 0; display: flex; align-items: center; }
     .pn-cell { border-left: 1px solid rgba(43,43,42,.06); border-bottom: 1px solid rgba(43,43,42,.06); }
