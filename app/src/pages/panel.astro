@@ -159,7 +159,7 @@ import '../styles/global.css';
         <h2 class="pn-pop__t">${esc(bar.dataset.nombre)}</h2>
         <div class="pn-pop__rows">
           <div><span>Cliente</span><b>${esc(cliente)}</b></div>
-          <div><span>Orden</span><b>${esc(o?.Nombre || 'Sin orden ligada')}</b></div>
+          <div><span>Orden</span><b>${esc(o?.OrderID || 'Sin orden ligada')}</b></div>
           ${est ? `<div><span>Estatus</span><b>${esc(est)}</b></div>` : ''}
           <div><span>Periodo</span><b>${fmt(bar.dataset.ini)} — ${fmt(bar.dataset.fin)}</b></div>
         </div>

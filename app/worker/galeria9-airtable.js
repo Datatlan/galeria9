@@ -122,7 +122,7 @@ export default {
           ['unidades', 'tblxjuV4KYjhGOQBx', ['Nombre', 'Tipo', 'Espacio']],
           ['rentas', 'tble36WbySAVkODVp', ['Nombre', 'Fecha_Inicio', 'Fecha_Fin', 'Unidades_Display', 'Orden']],
           ['espacios', 'tbltH53ZXqnDQdj5n', ['Nombre']],
-          ['ordenes', 'tbl4RvFWf9fMzQUTz', ['Nombre', 'Estatus', 'Cliente', 'Marca']],
+          ['ordenes', 'tbl4RvFWf9fMzQUTz', ['OrderID', 'Estatus', 'Cliente', 'Marca']],
           ['clientes', 'tblmPecJQZxArzWJV', ['Nombre']],
         ];
         const out = {};
