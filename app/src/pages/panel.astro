@@ -212,23 +212,35 @@ import '../styles/global.css';
         celdas += `<button type="button" class="${cls}" data-d="${k}">${dia}${n ? `<i>${'·'.repeat(Math.min(n, 3))}</i>` : ''}</button>`;
       }
 
-      // Detalle del día elegido: horarios por zona
+      // Detalle del día: gráfica de horas (7am–10pm) con una fila por zona
+      const H0 = 7, H1 = 22;
+      const pos = (iso) => {
+        const d = new Date(iso);
+        const h = d.getHours() + d.getMinutes() / 60;
+        return Math.max(0, Math.min(1, (h - H0) / (H1 - H0))) * 100;
+      };
       const delDia = porDia.get(diaSel) || [];
       const fsel = new Date(diaSel + 'T00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
-      let detalle = `<div class="pn-ghead">${fsel}</div>`;
+
+      const ticks = [7, 10, 13, 16, 19, 22].map((h) => {
+        const lbl = h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`;
+        return `<span style="left:${((h - H0) / (H1 - H0)) * 100}%">${lbl}</span>`;
+      }).join('');
+
+      let detalle = `<div class="pn-ghead">${fsel}</div>
+        <div class="pn-dg"><span></span><div class="pn-dg__axis">${ticks}</div></div>`;
       for (const z of zonas.sort()) {
         const evz = delDia.filter((e) => e.espacios.includes(z));
-        detalle += `<div class="pn-zona"><span class="pn-zona__n">${esc(z)}</span>`;
-        if (!evz.length) detalle += `<span class="pn-chip pn-chip--free">Libre todo el día</span></div>`;
-        else {
-          detalle += evz.map((e) => `<button type="button" class="pn-ev"
+        const bars = evz.map((e) => {
+          const a = pos(e.f.Fecha_Inicio), b = Math.max(pos(e.f.Fecha_Fin || e.f.Fecha_Inicio), a + 4);
+          const rango = `${fmtH(e.f.Fecha_Inicio)} – ${fmtH(e.f.Fecha_Fin || e.f.Fecha_Inicio)}`;
+          return `<button type="button" class="pn-dg__bar"
+            style="left:${a}%;width:${b - a}%"
             data-orden="${esc((e.f.Orden || [])[0] || '')}" data-nombre="${esc(e.f.Nombre || '')}" data-unidad="${esc(z)}"
-            data-ini="${esc(e.f.Fecha_Inicio)}" data-fin="${esc(e.f.Fecha_Fin || e.f.Fecha_Inicio)}">
-            <span class="pn-ev__h">${fmtH(e.f.Fecha_Inicio)} – ${fmtH(e.f.Fecha_Fin || e.f.Fecha_Inicio)}</span>
-            <span class="pn-ev__n">${esc(e.f.Nombre || '')}</span>
-          </button>`).join('');
-          detalle += '</div>';
-        }
+            data-ini="${esc(e.f.Fecha_Inicio)}" data-fin="${esc(e.f.Fecha_Fin || e.f.Fecha_Inicio)}"
+            title="${esc(e.f.Nombre)} · ${rango}">${rango}</button>`;
+        }).join('');
+        detalle += `<div class="pn-dg"><span class="pn-zona__n">${esc(z)}</span><div class="pn-dg__track">${bars}</div></div>`;
       }
 
       return `
@@ -267,7 +279,7 @@ import '../styles/global.css';
         render(areaActual);
         return;
       }
-      const bar = e.target.closest('.pn-rent, .pn-li--btn, .pn-ev');
+      const bar = e.target.closest('.pn-rent, .pn-li--btn, .pn-ev, .pn-dg__bar');
       if (!bar) return;
       const ordenById = new Map((data.ordenes || []).map((r) => [r.id, r.fields]));
       const clienteById = new Map((data.clientes || []).map((r) => [r.id, r.fields.Nombre]));
@@ -407,9 +419,24 @@ import '../styles/global.css';
     .pn-day i { position: absolute; bottom: 3px; left: 0; right: 0; font-style: normal; font-size: .8rem; line-height: .4; color: var(--gold-ink); letter-spacing: 1px; text-align: center; }
     .pn-day.is-sel i { color: var(--gold); }
     .pn-cal__detalle { margin-top: .6rem; }
-    .pn-zona { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: .55rem 0; border-bottom: 1px solid rgba(43,43,42,.07); }
-    .pn-zona__n { font-size: .85rem; font-weight: 500; min-width: 70px; }
-    .pn-zona .pn-ev { width: auto; flex: 1; border-bottom: 0; padding: .2rem 0; min-width: 240px; }
+    .pn-zona__n { font-size: .85rem; font-weight: 500; }
+
+    /* Gráfica del día: horas de izquierda a derecha, una fila por zona */
+    .pn-dg { display: grid; grid-template-columns: 80px 1fr; align-items: center; gap: .8rem; padding: .4rem 0; }
+    .pn-dg__axis { position: relative; height: 16px; font-size: .6rem; letter-spacing: .06em; color: var(--ink-45); }
+    .pn-dg__axis span { position: absolute; transform: translateX(-50%); }
+    .pn-dg__track {
+      position: relative; height: 36px; border-radius: 2px; background: var(--paper);
+      box-shadow: inset 0 0 0 1px rgba(43,43,42,.08);
+      background-image: repeating-linear-gradient(to right, rgba(43,43,42,.05) 0 1px, transparent 1px calc(100%/15));
+    }
+    .pn-dg__bar {
+      position: absolute; top: 4px; bottom: 4px; border: 0; border-radius: 2px;
+      background: var(--ink); color: var(--paper); font-family: inherit; font-size: .64rem; letter-spacing: .02em;
+      padding: 0 .5em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+      cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s var(--ease);
+    }
+    .pn-dg__bar:hover { transform: translateY(-1px); box-shadow: 0 5px 12px -6px rgba(43,43,42,.5); }
 
     /* Agenda de eventos (Terraza/Roof) */
     .pn-ev {
