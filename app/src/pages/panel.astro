@@ -57,6 +57,7 @@ import '../styles/global.css';
     let data = null;
 
     function render(area) {
+      areaActual = area || '';
       const espacioName = new Map(data.espacios.map((r) => [r.id, r.fields.Nombre]));
       const unidades = data.unidades.map((r) => ({
         id: r.id,
@@ -138,45 +139,11 @@ import '../styles/global.css';
         }
       }
 
-      // Agenda de eventos (Terraza/Roof): reservas con fecha y horario.
-      const fmtH = (iso) => new Date(iso).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
-      const fmtD = (iso) => new Date(iso).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
-      const hoy0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const evs = (data.eventos || [])
-        .filter((r) => r.fields.Fecha_Inicio && new Date(r.fields.Fecha_Fin || r.fields.Fecha_Inicio) >= hoy0)
-        .sort((a, b) => a.fields.Fecha_Inicio.localeCompare(b.fields.Fecha_Inicio));
-      const porEspacio = new Map();
-      for (const r of evs) {
-        const f = r.fields;
-        const nombres = (f.Espacio || []).map((id) => espacioName.get(id)).filter(Boolean);
-        for (const en of nombres.length ? nombres : ['Sin espacio']) {
-          if (area && !slug(en).includes(area) && area !== 'eventos') continue;
-          if (!porEspacio.has(en)) porEspacio.set(en, []);
-          porEspacio.get(en).push(r);
-        }
-      }
-      let agenda = '';
-      for (const [en, rs] of [...porEspacio.entries()].sort()) {
-        agenda += `<div class="pn-ghead">Agenda · ${esc(en)} <small>${rs.length}</small></div>`;
-        for (const r of rs) {
-          const f = r.fields;
-          agenda += `<button type="button" class="pn-ev"
-            data-orden="${esc((f.Orden || [])[0] || '')}" data-nombre="${esc(f.Nombre || '')}" data-unidad="${esc(en)}"
-            data-ini="${esc(f.Fecha_Inicio)}" data-fin="${esc(f.Fecha_Fin || f.Fecha_Inicio)}">
-            <span class="pn-ev__d">${fmtD(f.Fecha_Inicio)}</span>
-            <span class="pn-ev__h">${fmtH(f.Fecha_Inicio)} – ${fmtH(f.Fecha_Fin || f.Fecha_Inicio)}</span>
-            <span class="pn-ev__n">${esc(f.Nombre || '')}</span>
-          </button>`;
-        }
-      }
-      if ((!area || area === 'eventos' || 'terraza roof'.includes(area)) && !agenda) {
-        agenda = `<div class="pn-ghead">Agenda de eventos</div><p class="muted" style="padding:.8rem 0">Sin eventos próximos — Terraza y Roof libres.</p>`;
-      }
-
+      const showCal = !area || area === 'eventos' || 'terraza roof'.includes(area);
       const unidadesHtml = area === 'eventos' ? '' :
         (html ? `<div class="pn-desk">${html}</div><div class="pn-mob">${lista}</div>` : '<p class="muted" style="padding:1rem 0">No hay unidades en esta área.</p>');
-      grid.innerHTML = unidadesHtml + (agenda ? `<div class="pn-agenda">${agenda}</div>` : '');
-      sub.textContent = `${visibles.length} unidades · ${ocupadas} ocupadas hoy o próximamente · ${evs.length} eventos próximos`;
+      grid.innerHTML = unidadesHtml + (showCal ? renderCal() : '');
+      sub.textContent = `${visibles.length} unidades · ${ocupadas} ocupadas hoy o próximamente · ${(data.eventos || []).length} eventos en agenda`;
     }
 
     function renderFilters(area) {
@@ -202,6 +169,84 @@ import '../styles/global.css';
     // Popover: click en una renta → orden, cliente y link directo a Airtable.
     const popBack = document.getElementById('pnPopBack');
     const pop = document.getElementById('pnPop');
+    // ---- Calendario de eventos (Terraza/Roof) ----
+    let calMes = new Date(now.getFullYear(), now.getMonth(), 1);
+    let diaSel = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    let areaActual = '';
+
+    const dkey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const fmtH = (iso) => new Date(iso).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+
+    function renderCal() {
+      const espacioName = new Map(data.espacios.map((r) => [r.id, r.fields.Nombre]));
+      const zonas = data.espacios.filter((r) => (r.fields.Tipo?.name ?? r.fields.Tipo) === 'Eventos').map((r) => r.fields.Nombre);
+
+      // Índice: día → eventos (un evento multi-día cuenta en cada día que toca)
+      const porDia = new Map();
+      for (const r of data.eventos || []) {
+        const f = r.fields;
+        if (!f.Fecha_Inicio) continue;
+        const espacios = (f.Espacio || []).map((id) => espacioName.get(id)).filter(Boolean);
+        let d = new Date(f.Fecha_Inicio); d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const fin = new Date(f.Fecha_Fin || f.Fecha_Inicio);
+        for (let i = 0; i < 62 && d <= fin; i++, d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+          const k = dkey(d);
+          if (!porDia.has(k)) porDia.set(k, []);
+          porDia.get(k).push({ f, espacios });
+        }
+      }
+
+      // Rejilla del mes
+      const y = calMes.getFullYear(), m = calMes.getMonth();
+      const primero = new Date(y, m, 1);
+      const diasMes = new Date(y, m + 1, 0).getDate();
+      const titulo = calMes.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+      const hoyK = dkey(new Date());
+
+      let celdas = '';
+      for (let i = 0; i < primero.getDay(); i++) celdas += '<span></span>';
+      for (let dia = 1; dia <= diasMes; dia++) {
+        const k = dkey(new Date(y, m, dia));
+        const n = (porDia.get(k) || []).length;
+        const cls = ['pn-day', k === hoyK ? 'is-hoy' : '', k === diaSel ? 'is-sel' : '', n ? 'has-ev' : ''].join(' ');
+        celdas += `<button type="button" class="${cls}" data-d="${k}">${dia}${n ? `<i>${'·'.repeat(Math.min(n, 3))}</i>` : ''}</button>`;
+      }
+
+      // Detalle del día elegido: horarios por zona
+      const delDia = porDia.get(diaSel) || [];
+      const fsel = new Date(diaSel + 'T00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+      let detalle = `<div class="pn-ghead">${fsel}</div>`;
+      for (const z of zonas.sort()) {
+        const evz = delDia.filter((e) => e.espacios.includes(z));
+        detalle += `<div class="pn-zona"><span class="pn-zona__n">${esc(z)}</span>`;
+        if (!evz.length) detalle += `<span class="pn-chip pn-chip--free">Libre todo el día</span></div>`;
+        else {
+          detalle += evz.map((e) => `<button type="button" class="pn-ev"
+            data-orden="${esc((e.f.Orden || [])[0] || '')}" data-nombre="${esc(e.f.Nombre || '')}" data-unidad="${esc(z)}"
+            data-ini="${esc(e.f.Fecha_Inicio)}" data-fin="${esc(e.f.Fecha_Fin || e.f.Fecha_Inicio)}">
+            <span class="pn-ev__h">${fmtH(e.f.Fecha_Inicio)} – ${fmtH(e.f.Fecha_Fin || e.f.Fecha_Inicio)}</span>
+            <span class="pn-ev__n">${esc(e.f.Nombre || '')}</span>
+          </button>`).join('');
+          detalle += '</div>';
+        }
+      }
+
+      return `
+      <div class="pn-cal">
+        <div class="pn-ghead" style="border:0;padding-bottom:0">Agenda de eventos</div>
+        <div class="pn-cal__head">
+          <button type="button" class="pn-calnav" data-nav="-1">‹</button>
+          <span class="pn-cal__t">${titulo}</span>
+          <button type="button" class="pn-calnav" data-nav="1">›</button>
+        </div>
+        <div class="pn-cal__grid">
+          ${['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d) => `<span class="pn-cal__wd">${d}</span>`).join('')}
+          ${celdas}
+        </div>
+        <div class="pn-cal__detalle">${detalle}</div>
+      </div>`;
+    }
+
     // Acepta fecha sola ("2026-10-01") o datetime ISO (eventos)
     const fmt = (d) => {
       const dt = new Date(d.includes('T') ? d : d + 'T00:00');
@@ -210,6 +255,18 @@ import '../styles/global.css';
     };
 
     document.getElementById('pnGrid').addEventListener('click', (e) => {
+      const nav = e.target.closest('.pn-calnav');
+      if (nav) {
+        calMes = new Date(calMes.getFullYear(), calMes.getMonth() + Number(nav.dataset.nav), 1);
+        render(areaActual);
+        return;
+      }
+      const day = e.target.closest('.pn-day');
+      if (day) {
+        diaSel = day.dataset.d;
+        render(areaActual);
+        return;
+      }
       const bar = e.target.closest('.pn-rent, .pn-li--btn, .pn-ev');
       if (!bar) return;
       const ordenById = new Map((data.ordenes || []).map((r) => [r.id, r.fields]));
@@ -326,6 +383,33 @@ import '../styles/global.css';
     .pn-hoy { grid-row: 1; z-index: 3; width: 2px; background: var(--gold); justify-self: start; height: 100%; }
 
     .pn-error { margin-top: 2.5rem; }
+
+    /* Calendario de eventos */
+    .pn-cal { max-width: 720px; }
+    .pn-cal__head { display: flex; align-items: center; gap: 1rem; margin: 1rem 0 .8rem; }
+    .pn-cal__t { font-size: .95rem; font-weight: 500; text-transform: capitalize; min-width: 150px; text-align: center; }
+    .pn-calnav {
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--ink-12);
+      background: var(--white); font-size: 1.1rem; color: var(--ink-70); cursor: pointer; line-height: 1;
+      transition: border-color .25s var(--ease), color .25s var(--ease);
+    }
+    .pn-calnav:hover { border-color: var(--ink); color: var(--ink); }
+    .pn-cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .25rem; max-width: 380px; }
+    .pn-cal__wd { font-size: .62rem; letter-spacing: .1em; color: var(--ink-45); text-align: center; padding: .3rem 0; }
+    .pn-day {
+      position: relative; aspect-ratio: 1; border: 0; border-radius: 50%;
+      background: none; font-family: inherit; font-size: .8rem; color: var(--ink-70); cursor: pointer;
+      display: grid; place-items: center; transition: background .2s var(--ease), color .2s var(--ease);
+    }
+    .pn-day:hover { background: var(--sand); }
+    .pn-day.is-hoy { box-shadow: inset 0 0 0 1px var(--gold); }
+    .pn-day.is-sel { background: var(--ink); color: var(--paper); }
+    .pn-day i { position: absolute; bottom: 3px; left: 0; right: 0; font-style: normal; font-size: .8rem; line-height: .4; color: var(--gold-ink); letter-spacing: 1px; text-align: center; }
+    .pn-day.is-sel i { color: var(--gold); }
+    .pn-cal__detalle { margin-top: .6rem; }
+    .pn-zona { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: .55rem 0; border-bottom: 1px solid rgba(43,43,42,.07); }
+    .pn-zona__n { font-size: .85rem; font-weight: 500; min-width: 70px; }
+    .pn-zona .pn-ev { width: auto; flex: 1; border-bottom: 0; padding: .2rem 0; min-width: 240px; }
 
     /* Agenda de eventos (Terraza/Roof) */
     .pn-ev {

@@ -121,7 +121,7 @@ export default {
         const lecturas = [
           ['unidades', 'tblxjuV4KYjhGOQBx', ['Nombre', 'Tipo', 'Espacio']],
           ['rentas', 'tble36WbySAVkODVp', ['Nombre', 'Fecha_Inicio', 'Fecha_Fin', 'Unidades_Display', 'Orden']],
-          ['espacios', 'tbltH53ZXqnDQdj5n', ['Nombre']],
+          ['espacios', 'tbltH53ZXqnDQdj5n', ['Nombre', 'Tipo']],
           ['ordenes', 'tbl4RvFWf9fMzQUTz', ['OrderID', 'Estatus', 'Cliente', 'Marca']],
           ['clientes', 'tblmPecJQZxArzWJV', ['Nombre']],
           ['eventos', 'tblsOvEhdkacWz5yZ', ['Nombre', 'Fecha_Inicio', 'Fecha_Fin', 'Espacio', 'Orden']],
