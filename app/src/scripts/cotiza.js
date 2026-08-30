@@ -184,9 +184,9 @@ form.addEventListener('submit', async (e) => {
 
     // 2) Line_Items (base por horas + extras)
     const items = [];
+    // Nombre NO se envía: es fórmula en Airtable (nombre del servicio/extra ×Qty).
     if (horas) espacios.forEach((e) => {
       items.push({
-        Nombre: `${e.nombre} · ${horas} h`,
         Orden: [orden.id],
         Servicios_Extras: [e.rec],
         Qty: horas,
@@ -195,7 +195,6 @@ form.addEventListener('submit', async (e) => {
     });
     extrasSel.forEach((x) => {
       items.push({
-        Nombre: `${x.nombre}${x.qty > 1 ? ` ×${x.qty}` : ''}`,
         Orden: [orden.id],
         Servicios_Extras: [x.rec],
         Qty: x.qty,
