@@ -20,9 +20,12 @@ import Base from '../layouts/Base.astro';
             <strong>Agenda tu sesión de bienvenida</strong>
             <p class="muted" style="margin:.2rem 0 0">20 minutos para aclarar cualquier duda de tu proceso.</p>
           </div>
-          <a href="https://cal.com/galeria-9-raembd/sesion-de-bienvenida" target="_blank" rel="noopener" class="ob-cita__alt">Abrir en Cal.com →</a>
+          <button type="button" class="btn btn--invert"
+            data-cal-link="galeria-9-raembd/sesion-de-bienvenida"
+            data-cal-namespace="bienvenida"
+            data-cal-config='{"layout":"month_view","theme":"light"}'>Agendar</button>
         </div>
-        <div id="calBienvenida" class="ob-cita__cal"></div>
+        <a href="https://cal.com/galeria-9-raembd/sesion-de-bienvenida" target="_blank" rel="noopener" class="ob-cita__alt">Si el calendario no abre, agenda en Cal.com →</a>
       </div>
 
       <div id="obList" class="ob-list"></div>
@@ -37,12 +40,9 @@ import Base from '../layouts/Base.astro';
   <script is:inline>
     // Cal.com inline embed — sesión de bienvenida (loader oficial)
     (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+    // Modal al click en [data-cal-link] (namespace "bienvenida") — sin embed inline:
+    // la lista vertical de horarios de 15 min hacía la tarjeta kilométrica.
     Cal("init", "bienvenida", { origin: "https://app.cal.com" });
-    Cal.ns.bienvenida("inline", {
-      elementOrSelector: "#calBienvenida",
-      calLink: "galeria-9-raembd/sesion-de-bienvenida",
-      config: { layout: "month_view", theme: "light" },
-    });
     Cal.ns.bienvenida("ui", {
       theme: "light",
       cssVarsPerTheme: { light: { "cal-brand": "#2B2B2A" } },
@@ -359,9 +359,8 @@ import Base from '../layouts/Base.astro';
     }
     .ob-cita strong { font-size: .95rem; font-weight: 600; }
     .ob-cita__head { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
-    .ob-cita__alt { font-size: .78rem; color: var(--ink-45); text-decoration: none; white-space: nowrap; }
+    .ob-cita__alt { display: inline-block; margin-top: .7rem; font-size: .72rem; color: var(--ink-45); text-decoration: none; }
     .ob-cita__alt:hover { color: var(--ink); }
-    .ob-cita__cal { margin-top: 1rem; min-height: 420px; overflow: auto; }
     .ob-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 2.4rem; }
 
     .ob-card {
