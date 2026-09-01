@@ -14,20 +14,6 @@ import Base from '../layouts/Base.astro';
         </div>
       </header>
 
-      <div class="ob-cita">
-        <div class="ob-cita__head">
-          <div>
-            <strong>Agenda tu sesión de bienvenida</strong>
-            <p class="muted" style="margin:.2rem 0 0">20 minutos para aclarar cualquier duda de tu proceso.</p>
-          </div>
-          <button type="button" class="btn btn--invert"
-            data-cal-link="galeria-9-raembd/sesion-de-bienvenida"
-            data-cal-namespace="bienvenida"
-            data-cal-config='{"layout":"month_view","theme":"light"}'>Agendar</button>
-        </div>
-        <a href="https://cal.com/galeria-9-raembd/sesion-de-bienvenida" target="_blank" rel="noopener" class="ob-cita__alt">Si el calendario no abre, agenda en Cal.com →</a>
-      </div>
-
       <div id="obList" class="ob-list"></div>
 
       <div class="ob-error" id="obError" hidden>
@@ -224,15 +210,42 @@ import Base from '../layouts/Base.astro';
       </article>`;
     }
 
+    // Paso fijo del flujo (no vive en Airtable): agendar la sesión por Cal.com.
+    // Va como paso 2; el botón abre el modal (embed.js delega el click en
+    // [data-cal-link], así que funciona aunque la card se pinte después).
+    function renderCitaCard(num) {
+      return `
+      <article class="ob-card ob-card--cita">
+        <div class="ob-card__head">
+          <span class="ob-card__num">${num}</span>
+          <h2 class="ob-card__title">Agenda tu sesión de bienvenida</h2>
+        </div>
+        <p class="ob-card__inst">Una llamada de 20 minutos para aclarar dudas y afinar detalles. Elige el horario que te acomode.</p>
+        <div class="ob-actions">
+          <button type="button" class="btn"
+            data-cal-link="galeria-9-raembd/sesion-de-bienvenida"
+            data-cal-namespace="bienvenida"
+            data-cal-config='{"layout":"month_view","theme":"light"}'>Agendar sesión</button>
+          <a href="https://cal.com/galeria-9-raembd/sesion-de-bienvenida" target="_blank" rel="noopener" class="ob-cita__alt">¿No abre el calendario? Agenda aquí →</a>
+        </div>
+      </article>`;
+    }
+
     function render() {
       const done = items.filter((it) => estOf(it) !== 'Pendiente').length;
       progress.hidden = false;
       fill.style.width = items.length ? `${(done / items.length) * 100}%` : '0%';
       label.textContent = `${done} de ${items.length} entregados`;
 
-      list.innerHTML = buildBlocks().map((b, i) =>
-        b.type === 'sec' ? renderSecCard(b, i + 1) : renderItemCard(b.items[0], i + 1),
-      ).join('');
+      const blocks = buildBlocks();
+      const cards = [];
+      let n = 0;
+      blocks.forEach((b, i) => {
+        cards.push(b.type === 'sec' ? renderSecCard(b, ++n) : renderItemCard(b.items[0], ++n));
+        if (i === 0) cards.push(renderCitaCard(++n));
+      });
+      if (!blocks.length) cards.push(renderCitaCard(++n));
+      list.innerHTML = cards.join('');
     }
 
     async function refresh() {
@@ -353,13 +366,8 @@ import Base from '../layouts/Base.astro';
     .ob-progress__fill { height: 100%; background: var(--gold); width: 0%; transition: width .6s var(--ease); }
     .ob-progress__label { font-size: .78rem; color: var(--ink-45); letter-spacing: .04em; white-space: nowrap; }
 
-    .ob-cita {
-      margin-top: 2rem; padding: 1.2rem 1.5rem;
-      background: var(--white); border: 1px solid var(--ink-12); border-left: 3px solid var(--gold);
-    }
-    .ob-cita strong { font-size: .95rem; font-weight: 600; }
-    .ob-cita__head { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
-    .ob-cita__alt { display: inline-block; margin-top: .7rem; font-size: .72rem; color: var(--ink-45); text-decoration: none; }
+    .ob-card--cita { border-left: 3px solid var(--gold); }
+    .ob-cita__alt { font-size: .72rem; color: var(--ink-45); text-decoration: none; align-self: center; }
     .ob-cita__alt:hover { color: var(--ink); }
     .ob-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 2.4rem; }
 
