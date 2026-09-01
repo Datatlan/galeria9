@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Tester Day — Galería 9" description="Miércoles 10am–2pm: comparte una prueba gratis de tu producto y crea conexiones reales.">
+  <section class="section">
+    <div class="wrap">
+      <header class="mhead reveal">
+        <span class="eyebrow">Market · Tester Day</span>
+        <h1 class="h2" style="margin-top:1rem">Comparte una prueba.</h1>
+        <p class="lead">Un espacio para que las marcas den a probar sus productos gratis y creen conexiones reales con nuevas personas. Todos los miércoles, de 10:00 am a 2:00 pm.</p>
+        <div class="mincluye">
+          <span>Mesa y silla incluidas</span>
+          <span>4 horas de convivencia</span>
+          <span>Experiencias de máx. 10 min por cliente</span>
+        </div>
+      </header>
+
+      <form id="f" class="mform reveal" novalidate>
+        <div class="mform-two">
+          <label class="mfield mfield--wide"><span>Nombre de tu marca</span><input type="text" name="marca" placeholder="Tu marca" required /></label>
+          <label class="mfield"><span>Persona responsable</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
+          <label class="mfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+          <label class="mfield mfield--wide"><span>¿Qué vas a dar a probar?</span><textarea name="producto" rows="2" placeholder="El producto o experiencia que ofrecerás" required></textarea></label>
+          <label class="mfield"><span>¿Cómo participas?</span>
+            <select name="ticket" required>
+              <option value="">Elige…</option>
+              <option value="externo">Externo — $499</option>
+              <option value="pp">Tengo paquete Punto Presencia — $299</option>
+            </select>
+          </label>
+          <label class="mfield"><span>Miércoles que te interesa <span class="muted">(opcional)</span></span><input type="date" name="fecha" /></label>
+          <label class="mfield mfield--wide"><span>¿Tienes una gran idea? <span class="muted">(opcional)</span></span><textarea name="idea" rows="2" placeholder="Compártela para que podamos hacerla realidad"></textarea></label>
+        </div>
+        <p class="mform-note">Confirmamos participación <b>cada lunes</b> por WhatsApp.</p>
+        <div><button type="submit" class="btn">Enviar solicitud</button></div>
+      </form>
+
+      <div class="mdone" id="done" hidden>
+        <div class="mdone__mark">✓</div>
+        <h2 class="h2">¡Recibimos tu solicitud!</h2>
+        <p class="lead">Te confirmamos tu participación el lunes por WhatsApp.</p>
+        <a href="/" class="btn btn--ghost">Volver al inicio</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { initSolicitud } from '../scripts/marketForm.js';
+    import { CAT } from '../config.js';
+    initSolicitud({
+      formId: 'f',
+      titulo: 'Tester Day',
+      catId: CAT.testerDay,
+      precioFrom: (g) => (g('ticket') === 'pp' ? 299 : 499),
+      notasFrom: (g) => [
+        `Participa: ${g('ticket') === 'pp' ? 'Punto Presencia ($299)' : 'Externo ($499)'}`,
+        `Producto: ${g('producto')}`,
+        g('fecha') && `Miércoles: ${g('fecha')}`,
+        g('idea') && `Idea: ${g('idea')}`,
+      ].filter(Boolean).join('\n'),
+    });
+  </script>
+</Base>

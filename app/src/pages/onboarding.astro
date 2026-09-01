@@ -14,6 +14,14 @@ import Base from '../layouts/Base.astro';
         </div>
       </header>
 
+      <div class="ob-cita">
+        <div>
+          <strong>Sesión de bienvenida</strong>
+          <p class="muted" style="margin:.2rem 0 0">20 minutos para aclarar cualquier duda de tu proceso.</p>
+        </div>
+        <a href="https://cal.com/galeria-9-raembd/sesion-de-bienvenida" target="_blank" rel="noopener" class="btn btn--ghost">Agendar</a>
+      </div>
+
       <div id="obList" class="ob-list"></div>
 
       <div class="ob-error" id="obError" hidden>
@@ -84,62 +92,127 @@ import Base from '../layouts/Base.astro';
         </div>`).join('') + `</div>`;
     }
 
+    function renderFiles(it, locked) {
+      const files = it.f.Archivos || [];
+      const multiple = one(it.f.Tipo) === 'Archivo';
+      return `
+        <div class="ob-files">
+          ${files.map((a) => `<span class="ob-file">📎 ${esc(a.filename)}</span>`).join('')}
+          ${!locked ? `
+            <label class="ob-upload">
+              <input type="file" ${multiple ? 'multiple' : ''} hidden />
+              <span>＋ ${files.length ? 'Agregar otro archivo' : 'Subir archivo'}</span>
+            </label>` : ''}
+        </div>
+        <p class="ob-hint muted">Máx. 5 MB por archivo.</p>`;
+    }
+
+    const estOf = (it) => it.f.Estatus?.name ?? it.f.Estatus ?? 'Pendiente';
+
     function estadoChip(estatus) {
       const cls = estatus === 'Aprobado' ? 'is-ok' : estatus === 'Recibido' ? 'is-rx' : '';
       const txt = estatus === 'Aprobado' ? '✓ Aprobado' : estatus === 'Recibido' ? 'Recibido' : 'Pendiente';
       return `<span class="ob-chip ${cls}">${txt}</span>`;
     }
 
+    // Agrupa items consecutivos que comparten Seccion.
+    function buildBlocks() {
+      const blocks = [];
+      for (const it of items) {
+        const sec = one(it.f.Seccion);
+        const last = blocks[blocks.length - 1];
+        if (sec && last && last.type === 'sec' && last.name === sec) last.items.push(it);
+        else if (sec) blocks.push({ type: 'sec', name: sec, items: [it] });
+        else blocks.push({ type: 'item', items: [it] });
+      }
+      return blocks;
+    }
+
+    // Card individual (igual que siempre)
+    function renderItemCard(it, num) {
+      const f = it.f;
+      const tipo = one(f.Tipo);
+      const estatus = estOf(it);
+      const locked = estatus === 'Aprobado';
+      const hasText = tipo !== 'Archivo';
+      const hasFiles = tipo === 'Archivo' || tipo === 'Pago' || tipo === 'Texto';
+      const opciones = one(f.Opciones);
+      const selRows = tipo === 'Selección' && opciones ? parseOpts(opciones) : null;
+
+      return `
+      <article class="ob-card ${locked ? 'is-locked' : ''}" data-id="${it.id}">
+        <div class="ob-card__head">
+          <span class="ob-card__num">${num}</span>
+          <h2 class="ob-card__title">${esc(f.Nombre)}</h2>
+          ${estadoChip(estatus)}
+        </div>
+        ${one(f.Instrucciones) ? `<p class="ob-card__inst">${esc(one(f.Instrucciones))}</p>` : ''}
+        ${selRows ? renderSel(selRows, f.Respuesta, locked, it.id) : hasText ? `
+          <textarea class="ob-input" rows="3" placeholder="${esc(PLACEHOLDER[tipo] || 'Escribe aquí…')}"
+            ${locked ? 'disabled' : ''}>${esc(f.Respuesta || '')}</textarea>` : ''}
+        ${hasFiles ? renderFiles(it, locked) : ''}
+        ${!locked ? `
+          <div class="ob-actions">
+            ${hasText ? `<button type="button" class="btn ob-save">${estatus === 'Pendiente' ? 'Enviar' : 'Actualizar'}</button>` : ''}
+            <span class="ob-msg" hidden></span>
+          </div>` : ''}
+      </article>`;
+    }
+
+    // Card de SECCIÓN: varios requisitos juntos, un solo botón.
+    function renderSecCard(block, num) {
+      const allDone = block.items.every((it) => estOf(it) !== 'Pendiente');
+      const allLocked = block.items.every((it) => estOf(it) === 'Aprobado');
+      const chip = allLocked ? estadoChip('Aprobado') : allDone ? estadoChip('Recibido') : estadoChip('Pendiente');
+
+      const rows = block.items.map((it) => {
+        const f = it.f;
+        const tipo = one(f.Tipo);
+        const locked = estOf(it) === 'Aprobado';
+        const check = estOf(it) !== 'Pendiente' ? ' <span class="ob-secrow__ok">✓</span>' : '';
+        const opciones = one(f.Opciones);
+        const selRows = tipo === 'Selección' && opciones ? parseOpts(opciones) : null;
+
+        let control;
+        if (selRows) control = renderSel(selRows, f.Respuesta, locked, it.id);
+        else if (tipo === 'Archivo') control = renderFiles(it, locked);
+        else control = `<input type="text" class="ob-secinput" value="${esc(f.Respuesta || '')}"
+          placeholder="${esc(one(f.Instrucciones) || 'Escribe aquí…')}" ${locked ? 'disabled' : ''} />`;
+
+        return `
+        <div class="ob-secrow" data-id="${it.id}">
+          <span class="ob-secrow__label">${esc(f.Nombre)}${check}</span>
+          ${!selRows && one(f.Instrucciones) && tipo !== 'Texto' ? `<p class="ob-card__inst ob-card__inst--sec">${esc(one(f.Instrucciones))}</p>` : ''}
+          ${selRows && one(f.Instrucciones) ? `<p class="ob-card__inst ob-card__inst--sec">${esc(one(f.Instrucciones))}</p>` : ''}
+          ${control}
+        </div>`;
+      }).join('');
+
+      return `
+      <article class="ob-card ob-card--sec ${allLocked ? 'is-locked' : ''}">
+        <div class="ob-card__head">
+          <span class="ob-card__num">${num}</span>
+          <h2 class="ob-card__title">${esc(block.name)}</h2>
+          ${chip}
+        </div>
+        <div class="ob-secrows">${rows}</div>
+        ${!allLocked ? `
+          <div class="ob-actions">
+            <button type="button" class="btn ob-save ob-save--sec">${allDone ? 'Actualizar' : 'Enviar'}</button>
+            <span class="ob-msg" hidden></span>
+          </div>` : ''}
+      </article>`;
+    }
+
     function render() {
-      // Progreso
-      const done = items.filter((it) => one(it.f.Estatus?.name ?? it.f.Estatus) !== 'Pendiente').length;
+      const done = items.filter((it) => estOf(it) !== 'Pendiente').length;
       progress.hidden = false;
       fill.style.width = items.length ? `${(done / items.length) * 100}%` : '0%';
       label.textContent = `${done} de ${items.length} entregados`;
 
-      list.innerHTML = items.map((it, i) => {
-        const f = it.f;
-        const tipo = one(f.Tipo);
-        const estatus = f.Estatus?.name ?? f.Estatus ?? 'Pendiente';
-        const locked = estatus === 'Aprobado';
-        const hasText = tipo !== 'Archivo';
-        // Texto también acepta archivo (por si el cliente ya lo tiene en documento).
-        const hasFiles = tipo === 'Archivo' || tipo === 'Pago' || tipo === 'Texto';
-        const files = f.Archivos || [];
-        const opciones = one(f.Opciones);
-        const selRows = tipo === 'Selección' && opciones ? parseOpts(opciones) : null;
-
-        return `
-        <article class="ob-card ${locked ? 'is-locked' : ''}" data-id="${it.id}">
-          <div class="ob-card__head">
-            <span class="ob-card__num">${i + 1}</span>
-            <h2 class="ob-card__title">${esc(f.Nombre)}</h2>
-            ${estadoChip(estatus)}
-          </div>
-          ${one(f.Instrucciones) ? `<p class="ob-card__inst">${esc(one(f.Instrucciones))}</p>` : ''}
-
-          ${selRows ? renderSel(selRows, f.Respuesta, locked, it.id) : hasText ? `
-            <textarea class="ob-input" rows="3" placeholder="${esc(PLACEHOLDER[tipo] || 'Escribe aquí…')}"
-              ${locked ? 'disabled' : ''}>${esc(f.Respuesta || '')}</textarea>` : ''}
-
-          ${hasFiles ? `
-            <div class="ob-files">
-              ${files.map((a) => `<span class="ob-file">📎 ${esc(a.filename)}</span>`).join('')}
-              ${!locked ? `
-                <label class="ob-upload">
-                  <input type="file" ${tipo === 'Archivo' ? 'multiple' : ''} hidden />
-                  <span>＋ ${files.length ? 'Agregar otro archivo' : 'Subir archivo'}</span>
-                </label>` : ''}
-            </div>
-            <p class="ob-hint muted">Máx. 5 MB por archivo.</p>` : ''}
-
-          ${!locked ? `
-            <div class="ob-actions">
-              ${hasText ? `<button type="button" class="btn ob-save">${estatus === 'Pendiente' ? 'Enviar' : 'Actualizar'}</button>` : ''}
-              <span class="ob-msg" hidden></span>
-            </div>` : ''}
-        </article>`;
-      }).join('');
+      list.innerHTML = buildBlocks().map((b, i) =>
+        b.type === 'sec' ? renderSecCard(b, i + 1) : renderItemCard(b.items[0], i + 1),
+      ).join('');
     }
 
     async function refresh() {
@@ -158,47 +231,76 @@ import Base from '../layouts/Base.astro';
       setTimeout(() => { m.hidden = true; }, 3500);
     }
 
-    // Guardar respuesta (texto libre o selección de opciones)
-    list.addEventListener('click', async (e) => {
-      const btn = e.target.closest('.ob-save');
-      if (!btn) return;
-      const card = btn.closest('.ob-card');
-
-      let txt;
-      const optRows = [...card.querySelectorAll('.ob-optrow')];
+    // Lee la respuesta de un contenedor (fila de sección o card individual).
+    function readValue(scope) {
+      const optRows = [...scope.querySelectorAll('.ob-optrow')];
       if (optRows.length) {
         const partes = [];
         for (const rowEl of optRows) {
           const sel = rowEl.querySelector('input:checked');
-          if (!sel) { msgOf(card, 'Marca todas las opciones primero.', false); return; }
+          if (!sel) return { incomplete: true };
           partes.push(rowEl.dataset.label ? `${rowEl.dataset.label}: ${sel.value}` : sel.value);
         }
-        txt = partes.join('\n');
-      } else {
-        txt = (card.querySelector('.ob-input')?.value || '').trim();
-        if (!txt) { msgOf(card, 'Escribe tu respuesta primero.', false); return; }
+        return { value: partes.join('\n') };
+      }
+      const input = scope.querySelector('.ob-input, .ob-secinput');
+      if (input) return { value: (input.value || '').trim() };
+      return {};
+    }
+
+    // Guardar (card individual o sección)
+    list.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.ob-save');
+      if (!btn) return;
+      const card = btn.closest('.ob-card');
+      const label0 = btn.textContent;
+
+      // --- Sección: guarda cada fila con contenido ---
+      if (btn.classList.contains('ob-save--sec')) {
+        const rows = [...card.querySelectorAll('.ob-secrow[data-id]')];
+        const pend = [];
+        for (const row of rows) {
+          const { value, incomplete } = readValue(row);
+          if (incomplete) { msgOf(card, 'Marca todas las opciones primero.', false); return; }
+          if (value) pend.push({ id: row.dataset.id, value });
+        }
+        if (!pend.length) { msgOf(card, 'Llena al menos un campo.', false); return; }
+        btn.disabled = true; btn.textContent = 'Enviando…';
+        try {
+          for (const p of pend) await guardarItem(p.id, p.value);
+          await refresh(); render();
+        } catch {
+          btn.disabled = false; btn.textContent = label0;
+          msgOf(card, 'No se pudo enviar. Intenta de nuevo.', false);
+        }
+        return;
       }
 
+      // --- Card individual ---
+      const { value, incomplete } = readValue(card);
+      if (incomplete) { msgOf(card, 'Marca todas las opciones primero.', false); return; }
+      if (!value) { msgOf(card, 'Escribe tu respuesta primero.', false); return; }
       btn.disabled = true; btn.textContent = 'Enviando…';
       try {
-        await guardarItem(card.dataset.id, txt);
+        await guardarItem(card.dataset.id, value);
         await refresh(); render();
       } catch {
-        btn.disabled = false; btn.textContent = 'Enviar';
+        btn.disabled = false; btn.textContent = label0;
         msgOf(card, 'No se pudo enviar. Intenta de nuevo.', false);
       }
     });
 
-    // Subir archivos
+    // Subir archivos (el data-id vive en la card o en la fila de sección)
     list.addEventListener('change', async (e) => {
       const input = e.target.closest('.ob-upload input[type=file]');
       if (!input || !input.files.length) return;
+      const holder = input.closest('[data-id]');
       const card = input.closest('.ob-card');
-      const lbl = card.querySelector('.ob-upload span');
+      const lbl = input.closest('.ob-upload').querySelector('span');
       const files = [...input.files];
       lbl.textContent = 'Subiendo…';
       try {
-        for (const file of files) await subirArchivo(card.dataset.id, file);
+        for (const file of files) await subirArchivo(holder.dataset.id, file);
         await refresh(); render();
       } catch (err) {
         lbl.textContent = '＋ Subir archivo';
@@ -231,6 +333,12 @@ import Base from '../layouts/Base.astro';
     .ob-progress__fill { height: 100%; background: var(--gold); width: 0%; transition: width .6s var(--ease); }
     .ob-progress__label { font-size: .78rem; color: var(--ink-45); letter-spacing: .04em; white-space: nowrap; }
 
+    .ob-cita {
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+      margin-top: 2rem; padding: 1.2rem 1.5rem;
+      background: var(--white); border: 1px solid var(--ink-12); border-left: 3px solid var(--gold);
+    }
+    .ob-cita strong { font-size: .95rem; font-weight: 600; }
     .ob-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 2.4rem; }
 
     .ob-card {
@@ -254,6 +362,7 @@ import Base from '../layouts/Base.astro';
     .ob-chip.is-ok { background: var(--gold); color: var(--ink); }
 
     .ob-card__inst { margin-top: .9rem; font-size: .9rem; color: var(--ink-70); white-space: pre-line; line-height: 1.55; }
+    .ob-card__inst--sec { margin-top: .2rem; font-size: .82rem; }
 
     .ob-input {
       width: 100%; margin-top: 1rem; font-family: var(--sans); font-size: .98rem; color: var(--ink);
@@ -262,6 +371,19 @@ import Base from '../layouts/Base.astro';
     }
     .ob-input:focus { outline: none; border-color: var(--ink); }
     .ob-input:disabled { opacity: .6; }
+
+    /* Filas dentro de una sección */
+    .ob-secrows { display: flex; flex-direction: column; gap: 1.1rem; margin-top: 1.3rem; }
+    .ob-secrow__label { display: block; font-size: .82rem; letter-spacing: .04em; color: var(--ink-70); margin-bottom: .45rem; }
+    .ob-secrow__ok { color: var(--gold-ink); }
+    .ob-secinput {
+      width: 100%; font-family: var(--sans); font-size: .95rem; color: var(--ink);
+      padding: .75em 1em; border: 1px solid var(--ink-12); border-radius: var(--radius);
+      background: var(--paper); transition: border-color .3s var(--ease);
+    }
+    .ob-secinput:focus { outline: none; border-color: var(--ink); }
+    .ob-secinput:disabled { opacity: .6; }
+    .ob-secrow .ob-opts, .ob-secrow .ob-files { margin-top: .2rem; }
 
     .ob-opts { margin-top: 1.1rem; display: flex; flex-direction: column; gap: .6rem; }
     .ob-optrow { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
@@ -291,7 +413,7 @@ import Base from '../layouts/Base.astro';
     .ob-upload:hover span { border-color: var(--ink); color: var(--ink); }
     .ob-hint { font-size: .74rem; margin-top: .5rem; }
 
-    .ob-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1.1rem; }
+    .ob-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1.3rem; }
     .ob-msg { font-size: .82rem; color: var(--gold-ink); }
     .ob-msg.is-err { color: #b23a2f; }
 

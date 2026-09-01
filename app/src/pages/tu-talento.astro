@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Tu Talento es un Arte — Galería 9" description="Una semana de presencia en Galería 9 para que conozcan el valor de lo que haces.">
+  <section class="section">
+    <div class="wrap">
+      <header class="mhead reveal">
+        <span class="eyebrow">Market · Tu Talento es un Arte</span>
+        <h1 class="h2" style="margin-top:1rem">Una semana de presencia.</h1>
+        <p class="lead">Que nuevas personas conozcan, sigan y reconozcan el valor de lo que haces. Tu marca, taller o talento con presencia física y digital en Galería 9 durante una semana.</p>
+        <div class="mincluye">
+          <span>1 semana de presencia física</span>
+          <span>2 historias en las redes de G9</span>
+          <span>Contenido para presentar tu propuesta</span>
+        </div>
+      </header>
+
+      <form id="f" class="mform reveal" novalidate>
+        <div class="mform-two">
+          <label class="mfield mfield--wide"><span>Nombre de tu marca / proyecto</span><input type="text" name="marca" placeholder="Tu marca" required /></label>
+          <label class="mfield"><span>¿Qué es?</span>
+            <select name="tipo" required>
+              <option value="">Elige…</option>
+              <option>Marca</option><option>Taller</option><option>Talento</option><option>Servicio</option><option>Proyecto</option>
+            </select>
+          </label>
+          <label class="mfield"><span>Persona responsable</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
+          <label class="mfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+          <label class="mfield"><span>Correo <span class="muted">(opcional)</span></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
+          <label class="mfield mfield--wide"><span>¿Qué te distingue? <span class="muted">(en una o dos líneas)</span></span><textarea name="distingue" rows="2" placeholder="Quién eres y qué hace especial tu propuesta" required></textarea></label>
+          <label class="mfield mfield--wide"><span>Enlace principal <span class="muted">(al que dirige tu QR: Instagram, web…)</span></span><input type="text" name="enlace" placeholder="instagram.com/tumarca" /></label>
+          <label class="mfield"><span>Semana que te interesa <span class="muted">(opcional)</span></span><input type="date" name="semana" /></label>
+        </div>
+        <p class="mform-note">Al confirmar te pediremos: tu <b>logo</b> (digital e impreso), <b>2 imágenes</b> de tu marca, tu <b>QR impreso 7×7 cm</b> y tu <b>comprobante de pago</b>.</p>
+        <div><button type="submit" class="btn">Enviar solicitud</button></div>
+      </form>
+
+      <div class="mdone" id="done" hidden>
+        <div class="mdone__mark">✓</div>
+        <h2 class="h2">¡Recibimos tu solicitud!</h2>
+        <p class="lead">Te contactamos muy pronto para afinar los detalles de tu semana en Galería 9.</p>
+        <a href="https://cal.com/galeria-9-raembd/visita-galeria-9" target="_blank" rel="noopener" class="btn btn--invert">Conoce el espacio · Agenda una visita</a>
+        <a href="/" class="btn btn--ghost">Volver al inicio</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { initSolicitud } from '../scripts/marketForm.js';
+    import { CAT } from '../config.js';
+    initSolicitud({
+      formId: 'f',
+      titulo: 'Tu Talento es un Arte',
+      catId: CAT.tuTalento,
+      notasFrom: (g) => [
+        `Tipo: ${g('tipo')}`,
+        `Distingue: ${g('distingue')}`,
+        g('enlace') && `Enlace: ${g('enlace')}`,
+        g('semana') && `Semana: ${g('semana')}`,
+      ].filter(Boolean).join('\n'),
+    });
+  </script>
+</Base>
