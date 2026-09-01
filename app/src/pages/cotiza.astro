@@ -178,7 +178,7 @@ const dataForClient = { espacios, extras };
         <div class="done__mark">✓</div>
         <h2 class="h2">¡Recibimos tu solicitud!</h2>
         <p class="lead">Guardamos tu solicitud y te contactaremos muy pronto para afinar los detalles.</p>
-        <a href="https://cal.com/galeria-9-raembd/visita-galeria-9" target="_blank" rel="noopener" class="btn btn--invert">Conoce el espacio · Agenda una visita</a>
+        <button type="button" class="btn btn--invert" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Conoce el espacio · Agenda una visita</button>
         <a href="/" class="btn btn--ghost">Volver al inicio</a>
       </div>
     </div>
@@ -186,6 +186,7 @@ const dataForClient = { espacios, extras };
 
   <script type="application/json" id="catData" set:html={JSON.stringify(dataForClient)}></script>
   <script src="../scripts/cotiza.js"></script>
+  <script src="../scripts/calPopup.js"></script>
 </Base>
 
 <style>

@@ -223,7 +223,7 @@ const cabinas = [
         <h2 class="h2" style="margin-top:1rem">Platiquemos.</h2>
         <p class="lead">¿Una duda, una idea, una colaboración? Escríbenos y te respondemos muy pronto.</p>
         <p class="contacto__alt">¿Ya sabes qué quieres? <a href="/cotiza" class="link-arrow contacto__alt-link">Cotiza tu evento →</a></p>
-        <p class="contacto__alt">¿Prefieres verla en persona? <a href="https://cal.com/galeria-9-raembd/visita-galeria-9" target="_blank" rel="noopener" class="link-arrow contacto__alt-link">Agenda una visita →</a></p>
+        <p class="contacto__alt">¿Prefieres verla en persona? <button type="button" class="link-arrow contacto__alt-link cal-plain" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Agenda una visita →</button></p>
       </div>
 
       <form id="leadForm" class="contacto__form reveal" novalidate>
@@ -253,12 +253,13 @@ const cabinas = [
         <div class="contacto__mark">✓</div>
         <h2 class="h2">¡Recibido!</h2>
         <p class="lead">Te contactamos muy pronto por WhatsApp.</p>
-        <a href="https://cal.com/galeria-9-raembd/visita-galeria-9" target="_blank" rel="noopener" class="btn btn--ghost" style="margin-top:1.2rem">Agenda una visita a Galería 9</a>
+        <button type="button" class="btn btn--ghost" style="margin-top:1.2rem" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Agenda una visita a Galería 9</button>
       </div>
     </div>
   </section>
 
   <script>
+    import '../scripts/calPopup.js';
     import { T, crear } from '../config.js';
     const lf = document.getElementById('leadForm');
 
@@ -416,6 +417,7 @@ const cabinas = [
   .contacto__grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(2.5rem, 6vw, 5rem); align-items: start; }
   .contacto__alt { margin-top: 2.2rem; font-size: .95rem; color: rgba(242,242,242,.55); }
   .contacto__alt-link { color: var(--paper); border-color: rgba(242,242,242,.3); margin-left: .5rem; font-size: .78rem; }
+  .cal-plain { background: none; border: 0; padding: 0; font-family: inherit; cursor: pointer; }
   .cfields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.2rem; margin-bottom: 1.6rem; }
   .cfield { display: flex; flex-direction: column; gap: .45rem; }
   .cfield--wide { grid-column: 1 / -1; }
