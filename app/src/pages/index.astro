@@ -598,5 +598,7 @@ const cabinas = [
   .ev-card__body .h3 { margin: .15rem 0; }
   .ev-card__place { display: inline-block; font-size: .72rem; letter-spacing: .04em; color: var(--ink-45); padding: .15em .6em; border: 1px solid var(--ink-12); border-radius: 999px; align-self: flex-start; }
   .ev-card__body .muted { font-size: .88rem; line-height: 1.55; }
-  .ev-card__btn { margin-top: .6rem; align-self: flex-start; }
+  /* margin-top:auto pega el botón al fondo del body: queda SIEMPRE a la misma
+     distancia del borde inferior, sin importar si el título es de 1 o 2 líneas. */
+  .ev-card__btn { margin-top: auto; align-self: flex-start; }
 </style>
