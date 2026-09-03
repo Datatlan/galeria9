@@ -14,6 +14,7 @@ export const T = {
   ordenes:   'tbl4RvFWf9fMzQUTz',
   lineItems: 'tblRZmcGK720YClo5',
   leads:     'tbl6G049MoOGABA50', // contacto general (no transaccional)
+  interesados: 'tblC7MvgHXjObbtjM', // "Me interesa" de eventos públicos (RSVP)
 };
 
 // Registros del Catalogo (para ligar el Line_Item de cada solicitud).
@@ -30,6 +31,15 @@ export async function leer(clave) {
   if (!res.ok) throw new Error(`Worker ${res.status}`);
   const json = await res.json();
   return json.records || [];
+}
+
+// Eventos públicos para la web (marquesina + fecha + espacio + imagen).
+// El Worker ya filtra Visibilidad=Público a futuro y oculta el nombre interno.
+export async function leerEventosPublicos() {
+  const res = await fetch(`${WORKER}?read=eventos-publicos`);
+  if (!res.ok) throw new Error(`Worker ${res.status}`);
+  const json = await res.json();
+  return json.eventos || [];
 }
 
 // ---- Onboarding (portal del cliente: /onboarding?o=<ordenId>) ----

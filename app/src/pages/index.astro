@@ -170,6 +170,40 @@ const cabinas = [
     </div>
   </section>
 
+  <!-- PRÓXIMOS EVENTOS (públicos) -->
+  <section class="section agenda" id="agenda" hidden>
+    <div class="wrap">
+      <div class="two">
+        <div class="reveal">
+          <span class="eyebrow">Qué está pasando</span>
+          <h2 class="h2" style="margin-top:1.2rem">Próximos<br/>eventos.</h2>
+        </div>
+        <p class="lead reveal">Talleres, activaciones y encuentros abiertos en Galería 9. Aparta tu lugar.</p>
+      </div>
+      <div class="grid-ev" id="agendaGrid"></div>
+    </div>
+  </section>
+
+  <!-- Modal "Me interesa" -->
+  <div class="ev-modal" id="evModal" hidden>
+    <div class="ev-modal__box" role="dialog" aria-modal="true" aria-labelledby="evModalT">
+      <button type="button" class="ev-modal__x" id="evModalX" aria-label="Cerrar">×</button>
+      <span class="eyebrow" style="color:var(--gold)">Me interesa</span>
+      <h3 class="h3" id="evModalT" style="margin:.6rem 0 .3rem">Evento</h3>
+      <p class="muted" id="evModalD" style="margin-bottom:1.4rem"></p>
+      <form id="evForm" novalidate>
+        <label class="cfield"><span>Tu nombre</span><input type="text" name="nombre" placeholder="Nombre" required /></label>
+        <label class="cfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+        <label class="cfield"><span>Correo <i>(opcional)</i></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
+        <button type="submit" class="btn btn--invert" style="margin-top:.6rem;width:100%">Quiero asistir</button>
+      </form>
+      <div class="ev-modal__done" id="evDone" hidden>
+        <div class="contacto__mark">✓</div>
+        <p class="lead">¡Listo! Te avisamos los detalles por WhatsApp.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- MARCAS -->
   <section class="section marcas" id="marcas">
     <div class="wrap">
@@ -260,8 +294,80 @@ const cabinas = [
 
   <script>
     import '../scripts/calPopup.js';
-    import { T, crear } from '../config.js';
+    import { T, crear, leerEventosPublicos } from '../config.js';
     const lf = document.getElementById('leadForm');
+
+    // ---- Próximos eventos públicos ----
+    const escEv = (s) => String(s ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+    (async () => {
+      let eventos = [];
+      try { eventos = await leerEventosPublicos(); } catch { return; }
+      if (!eventos.length) return;
+
+      const fmtEv = (ini, fin) => {
+        if (!ini) return '';
+        const a = new Date(ini);
+        const dia = a.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+        const hIni = a.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+        const hFin = fin ? new Date(fin).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }) : '';
+        return `${dia} · ${hIni}${hFin ? ` – ${hFin}` : ''}`;
+      };
+
+      const grid = document.getElementById('agendaGrid');
+      grid.innerHTML = eventos.map((e, i) => `
+        <article class="ev-card reveal is-in" style="transition-delay:${i * 80}ms">
+          ${e.imagen ? `<figure class="ev-card__media"><img src="${escEv(e.imagen)}" alt="${escEv(e.titulo)}" loading="lazy" /></figure>` : ''}
+          <div class="ev-card__body">
+            <span class="ev-card__date">${escEv(fmtEv(e.inicio, e.fin))}</span>
+            <h3 class="h3">${escEv(e.titulo)}</h3>
+            ${e.espacios.length ? `<span class="ev-card__place">${escEv(e.espacios.join(' · '))}</span>` : ''}
+            ${e.descripcion ? `<p class="muted">${escEv(e.descripcion)}</p>` : ''}
+            <button type="button" class="btn ev-card__btn"
+              data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Me interesa</button>
+          </div>
+        </article>`).join('');
+      document.getElementById('agenda').hidden = false;
+
+      // Modal "Me interesa"
+      const modal = document.getElementById('evModal');
+      const evForm = document.getElementById('evForm');
+      const evDone = document.getElementById('evDone');
+      let tituloSel = '', idSel = '';
+      const abrir = (id, t, d) => {
+        idSel = id; tituloSel = t;
+        document.getElementById('evModalT').textContent = t;
+        document.getElementById('evModalD').textContent = d;
+        evForm.hidden = false; evDone.hidden = true; evForm.reset();
+        modal.hidden = false; document.body.style.overflow = 'hidden';
+      };
+      const cerrar = () => { modal.hidden = true; document.body.style.overflow = ''; };
+      grid.querySelectorAll('.ev-card__btn').forEach((b) =>
+        b.addEventListener('click', () => abrir(b.dataset.id, b.dataset.t, b.dataset.d)));
+      document.getElementById('evModalX').addEventListener('click', cerrar);
+      modal.addEventListener('click', (e) => { if (e.target === modal) cerrar(); });
+
+      evForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!evForm.reportValidity()) return;
+        const fd = new FormData(evForm);
+        const g = (k) => (fd.get(k) || '').toString().trim();
+        const btn = evForm.querySelector('[type=submit]');
+        btn.disabled = true; btn.textContent = 'Enviando…';
+        try {
+          await crear(T.interesados, {
+            Nombre: g('nombre'),
+            WhatsApp: g('telefono'),
+            Correo: g('correo') || undefined,
+            Evento: idSel ? [idSel] : undefined,
+          });
+          evForm.hidden = true; evDone.hidden = false;
+        } catch (err) {
+          btn.disabled = false; btn.textContent = 'Quiero asistir';
+          alert('No pudimos registrarte. Intenta de nuevo.');
+          console.error(err);
+        }
+      });
+    })();
 
     // Cards de marcas → llevan al form con el interés pre-seleccionado
     document.querySelectorAll('[data-interes]').forEach((el) =>
@@ -299,6 +405,24 @@ const cabinas = [
 </Base>
 
 <style>
+  /* Próximos eventos (públicos) */
+  .grid-ev { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2.5rem; }
+  .ev-card { display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--ink-12); border-radius: var(--radius); overflow: hidden; }
+  .ev-card__media { margin: 0; aspect-ratio: 16/10; overflow: hidden; }
+  .ev-card__media img { width: 100%; height: 100%; object-fit: cover; }
+  .ev-card__body { display: flex; flex-direction: column; gap: .5rem; padding: 1.4rem; flex: 1; }
+  .ev-card__date { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-ink); font-weight: 600; }
+  .ev-card__place { font-size: .8rem; color: var(--ink-45); }
+  .ev-card__btn { margin-top: auto; align-self: flex-start; }
+
+  .ev-modal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 1.5rem; background: rgba(43,43,42,.55); backdrop-filter: blur(3px); }
+  .ev-modal__box { position: relative; width: 100%; max-width: 420px; background: var(--paper); border-radius: var(--radius); padding: 2rem; box-shadow: 0 30px 80px -20px rgba(43,43,42,.5); }
+  .ev-modal__x { position: absolute; top: .8rem; right: 1rem; background: none; border: 0; font-size: 1.6rem; line-height: 1; color: var(--ink-45); cursor: pointer; }
+  .ev-modal__x:hover { color: var(--ink); }
+  .ev-modal__done { text-align: center; padding: 1rem 0; }
+  .ev-modal .cfield { margin-bottom: 1rem; }
+  .ev-modal .cfield > span { color: var(--ink-70, rgba(43,43,42,.7)); }
+
   .hero { position: relative; overflow: clip; padding-block: clamp(3rem, 7vw, 5.5rem) clamp(3.5rem, 8vw, 6.5rem); }
   .hero__inner { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
   .hero .display { margin-top: 1.6rem; }

@@ -103,6 +103,53 @@ export default {
         return passthrough(air);
       }
 
+      // Eventos públicos para la web (sección "Eventos y Talleres").
+      // PÚBLICO (sin token) pero solo expone campos de marquesina —nunca el
+      // Nombre interno (que trae el cliente)— y solo Visibilidad=Público a
+      // futuro. Devuelve además el mapa espacio→nombre (Terraza/Roof).
+      if (clave === 'eventos-publicos') {
+        const cacheKey = new Request(url.toString());
+        const cache = caches.default;
+        const hit = await cache.match(cacheKey);
+        if (hit) return hit;
+
+        const pe = new URLSearchParams();
+        ['Titulo_Publico', 'Descripcion_Publica', 'Fecha_Inicio', 'Fecha_Fin', 'Espacio', 'Imagen']
+          .forEach((f) => pe.append('fields[]', f));
+        pe.set('filterByFormula', "AND({Visibilidad}='Público', IS_AFTER({Fecha_Fin}, NOW()))");
+        pe.set('pageSize', '100');
+
+        const ps = new URLSearchParams();
+        ps.append('fields[]', 'Nombre');
+        ps.set('pageSize', '100');
+
+        const [evRes, espRes] = [
+          await fetch(`https://api.airtable.com/v0/${BASES.prod}/tblsOvEhdkacWz5yZ?${pe}`, { headers: auth }),
+          await fetch(`https://api.airtable.com/v0/${BASES.prod}/tbltH53ZXqnDQdj5n?${ps}`, { headers: auth }),
+        ];
+        if (!evRes.ok || !espRes.ok) return json({ error: 'Airtable error' }, 502);
+
+        const espacios = {};
+        for (const r of (await espRes.json()).records) espacios[r.id] = r.fields.Nombre;
+        const eventos = (await evRes.json()).records
+          .map((r) => ({
+            id: r.id, // record id del evento — para ligar el "Me interesa" (RSVP)
+            titulo: r.fields.Titulo_Publico || 'Evento en Galería 9',
+            descripcion: r.fields.Descripcion_Publica || '',
+            inicio: r.fields.Fecha_Inicio || null,
+            fin: r.fields.Fecha_Fin || null,
+            espacios: (r.fields.Espacio || []).map((id) => espacios[id]).filter(Boolean),
+            imagen: (r.fields.Imagen || [])[0]?.url || null,
+          }))
+          .sort((a, b) => (a.inicio || '').localeCompare(b.inicio || ''));
+
+        const res = new Response(JSON.stringify({ eventos }), {
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=120', ...CORS },
+        });
+        ctx.waitUntil(cache.put(cacheKey, res.clone()));
+        return res;
+      }
+
       // Panel interno de ocupación (todas las unidades + rentas + espacios).
       // Datos internos (qué marca ocupa qué): protegido con token, sin caché.
       if (clave === 'ocupacion') {
