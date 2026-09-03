@@ -195,7 +195,7 @@ const cabinas = [
         <label class="cfield"><span>Tu nombre</span><input type="text" name="nombre" placeholder="Nombre" required /></label>
         <label class="cfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
         <label class="cfield"><span>Correo <i>(opcional)</i></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
-        <button type="submit" class="btn btn--invert" style="margin-top:.6rem;width:100%">Quiero asistir</button>
+        <button type="submit" class="btn" style="margin-top:.6rem;width:100%">Quiero asistir</button>
       </form>
       <div class="ev-modal__done" id="evDone" hidden>
         <div class="contacto__mark">✓</div>
@@ -348,9 +348,10 @@ const cabinas = [
 
       evForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!evForm.reportValidity()) return;
         const fd = new FormData(evForm);
         const g = (k) => (fd.get(k) || '').toString().trim();
+        // Bloqueo explícito (no solo reportValidity): nombre y WhatsApp obligatorios.
+        if (!g('nombre') || !g('telefono')) { evForm.reportValidity(); return; }
         const btn = evForm.querySelector('[type=submit]');
         btn.disabled = true; btn.textContent = 'Enviando…';
         try {
@@ -417,6 +418,14 @@ const cabinas = [
   .ev-modal__done { text-align: center; padding: 1rem 0; }
   .ev-modal .cfield { margin-bottom: 1rem; }
   .ev-modal .cfield > span { color: var(--ink-70, rgba(43,43,42,.7)); }
+  /* El modal es CLARO: los inputs de .cfield están hechos para la banda oscura
+     (texto/borde claros → invisibles aquí). Se re-visten para fondo claro. */
+  .ev-modal .cfield input, .ev-modal .cfield textarea {
+    color: var(--ink); background: var(--white);
+    border: 1px solid var(--ink-12);
+  }
+  .ev-modal .cfield input::placeholder { color: var(--ink-45); }
+  .ev-modal .cfield input:focus { border-color: var(--ink); }
 
   .hero { position: relative; overflow: clip; padding-block: clamp(3rem, 7vw, 5.5rem) clamp(3.5rem, 8vw, 6.5rem); }
   .hero__inner { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
