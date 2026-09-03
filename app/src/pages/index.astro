@@ -315,7 +315,7 @@ const cabinas = [
 
       const grid = document.getElementById('agendaGrid');
       grid.innerHTML = eventos.map((e, i) => `
-        <article class="ev-card reveal is-in" style="transition-delay:${i * 80}ms">
+        <article class="ev-card reveal in">
           ${e.imagen ? `<figure class="ev-card__media"><img src="${escEv(e.imagen)}" alt="${escEv(e.titulo)}" loading="lazy" /></figure>` : ''}
           <div class="ev-card__body">
             <span class="ev-card__date">${escEv(fmtEv(e.inicio, e.fin))}</span>
