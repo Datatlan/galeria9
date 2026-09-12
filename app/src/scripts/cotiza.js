@@ -237,7 +237,7 @@ leer('precios')
       if (card) card.hidden = !disponible;
       if (!disponible) input.checked = false;
       const label = card?.querySelector('.card__price');
-      if (disponible && label) label.textContent = `${money(e.precioHora)} / hora · ${e.cap}`;
+      if (disponible && label) label.textContent = `${money(e.precioHora)} / hora`;
     });
 
     // Extras: precio actualizado; los no disponibles desaparecen (y su qty a 0).
