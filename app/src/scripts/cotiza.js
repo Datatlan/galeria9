@@ -107,11 +107,38 @@ form.querySelectorAll('.xrow').forEach((rowEl) => {
   input.addEventListener('input', sync);
 });
 
+// ---- Fecha del evento: solo lunes a sábado (no domingos) ----
+const esDomingo = (v) => !!v && new Date(v + 'T00:00').getDay() === 0;
+form.querySelectorAll('input[type=date]').forEach((inp) => {
+  const field = inp.closest('.field');
+  const check = () => {
+    const bad = esDomingo(inp.value);
+    inp.setCustomValidity(bad ? 'Los eventos son de lunes a sábado.' : '');
+    field?.classList.toggle('invalid', bad);
+    let msg = field?.querySelector('.date-err');
+    if (bad && field && !msg) {
+      msg = document.createElement('span');
+      msg.className = 'date-err';
+      field.appendChild(msg);
+    }
+    if (msg) msg.textContent = bad ? 'Los eventos son de lunes a sábado — elige otro día.' : '';
+  };
+  inp.addEventListener('change', check);
+  inp.addEventListener('input', check);
+});
+
 // ---- Validación por paso ----
 function validateStep(n) {
   const panel = panels[n];
   const cards = panel.querySelectorAll('.cards input[type=checkbox]');
   if (cards.length && ![...cards].some((c) => c.checked)) { flashCards(panel); return false; }
+
+  // Ninguna fecha (ni la 2ª opcional) puede caer en domingo.
+  let sinDomingo = true;
+  panel.querySelectorAll('input[type=date]').forEach((i) => {
+    if (esDomingo(i.value)) { i.closest('.field')?.classList.add('invalid'); sinDomingo = false; }
+  });
+  if (!sinDomingo) return false;
 
   let ok = true;
   [...panel.querySelectorAll('input, select, textarea')]

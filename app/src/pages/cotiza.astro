@@ -68,7 +68,7 @@ const dataForClient = { espacios, extras };
             <legend class="panel__title">Fecha y aforo</legend>
             <div class="fields">
               <label class="field">
-                <span>Fecha contemplada</span>
+                <span>Fecha contemplada <span class="muted">(lun–sáb)</span></span>
                 <input type="date" name="fecha" required />
               </label>
               <label class="field">
@@ -264,6 +264,7 @@ const dataForClient = { espacios, extras };
   .panel-nav { display: flex; gap: 1rem; margin-top: 2.5rem; align-items: center; }
   #btnNext, #btnSend { margin-left: auto; }
   .field.invalid input, .field.invalid textarea, .card.invalid { border-color: #b4523f; }
+  .field .date-err { color: #b4523f; font-size: .78rem; margin-top: .35rem; letter-spacing: normal; }
 
   .summary { position: sticky; top: 100px; background: var(--sand); border: 1px solid var(--ink-12); border-radius: var(--radius); padding: 1.8rem; }
   .summary > .eyebrow { display: block; margin-bottom: 1.2rem; }
