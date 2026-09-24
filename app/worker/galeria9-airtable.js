@@ -116,7 +116,8 @@ export default {
         const pe = new URLSearchParams();
         ['Titulo_Publico', 'Descripcion_Publica', 'Fecha_Inicio', 'Fecha_Fin', 'Espacio', 'Imagen']
           .forEach((f) => pe.append('fields[]', f));
-        pe.set('filterByFormula', "AND({Visibilidad}='Público', IS_AFTER({Fecha_Fin}, NOW()))");
+        // Sin Fecha_Fin el evento igual cuenta: se usa Fecha_Inicio como referencia.
+        pe.set('filterByFormula', "AND({Visibilidad}='Público', IS_AFTER(IF({Fecha_Fin}, {Fecha_Fin}, {Fecha_Inicio}), NOW()))");
         pe.set('pageSize', '100');
 
         const ps = new URLSearchParams();
