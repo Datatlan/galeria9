@@ -114,7 +114,7 @@ export default {
         if (hit) return hit;
 
         const pe = new URLSearchParams();
-        ['Titulo_Publico', 'Descripcion_Publica', 'Fecha_Inicio', 'Fecha_Fin', 'Espacio', 'Imagen']
+        ['Titulo_Publico', 'Descripcion_Publica', 'Fecha_Inicio', 'Fecha_Fin', 'Espacio', 'Imagen', 'Tipo']
           .forEach((f) => pe.append('fields[]', f));
         // Sin Fecha_Fin el evento igual cuenta: se usa Fecha_Inicio como referencia.
         pe.set('filterByFormula', "AND({Visibilidad}='Público', IS_AFTER(IF({Fecha_Fin}, {Fecha_Fin}, {Fecha_Inicio}), NOW()))");
@@ -141,6 +141,7 @@ export default {
             fin: r.fields.Fecha_Fin || null,
             espacios: (r.fields.Espacio || []).map((id) => espacios[id]).filter(Boolean),
             imagen: (r.fields.Imagen || [])[0]?.url || null,
+            tipo: r.fields.Tipo || 'Evento', // 'Tester Day' → la web muestra 'Expón tu marca'
           }))
           .sort((a, b) => (a.inicio || '').localeCompare(b.inicio || ''));
 

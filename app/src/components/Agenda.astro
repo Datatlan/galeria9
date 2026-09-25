@@ -83,12 +83,19 @@ const { standalone = false } = Astro.props;
       <article class="ev-card reveal in">
         ${e.imagen ? `<figure class="ev-card__media"><img src="${escEv(e.imagen)}" alt="${escEv(e.titulo)}" loading="lazy" /></figure>` : ''}
         <div class="ev-card__body">
+          ${e.tipo === 'Tester Day' ? '<span class="ev-card__tag">Tester Day</span>' : ''}
           <span class="ev-card__date">${escEv(fmtEv(e.inicio, e.fin))}</span>
           <h3 class="h3">${escEv(e.titulo)}</h3>
           ${e.espacios.length ? `<span class="ev-card__place">${escEv(e.espacios.join(' · '))}</span>` : ''}
           ${e.descripcion ? `<p class="muted">${escEv(e.descripcion)}</p>` : ''}
-          <button type="button" class="btn ev-card__btn"
-            data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Me interesa</button>
+          ${e.tipo === 'Tester Day'
+            ? `<div class="ev-card__btns">
+                <button type="button" class="btn ev-card__btn"
+                  data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Quiero asistir</button>
+                <a class="btn btn--ghost" href="/tester-day?fecha=${encodeURIComponent(e.id)}">Expón tu marca</a>
+              </div>`
+            : `<button type="button" class="btn ev-card__btn"
+                data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Me interesa</button>`}
         </div>
       </article>`).join('');
     section.hidden = false;
@@ -199,6 +206,10 @@ const { standalone = false } = Astro.props;
   /* margin-top:auto pega el botón al fondo: misma distancia al borde inferior
      sin importar si el título es de 1 o 2 líneas. */
   .ev-card__btn { margin-top: auto; align-self: flex-start; }
+  /* Tester Day: dos botones (asistentes / marcas) pegados al fondo */
+  .ev-card__btns { margin-top: auto; display: flex; flex-wrap: wrap; gap: .5rem; }
+  .ev-card__btns .ev-card__btn { margin-top: 0; }
+  .ev-card__tag { align-self: flex-start; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--ink); background: var(--sand); border-radius: 999px; padding: .25em .75em; }
 
   /* Embebido (home, /espacios): carrusel horizontal con snap. /eventos queda en grid. */
   .agenda:not(.agenda--page) .grid-ev {

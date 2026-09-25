@@ -36,7 +36,8 @@ export function grupoObligatorio(form, name) {
 }
 
 // Conecta un <form> a Leads.
-//   build(g, fd) → { interes, mensaje?, detalle }   (g = valor de texto por nombre)
+//   build(g, fd) → { interes, mensaje?, detalle, extra? }   (g = valor de texto por nombre;
+//                  extra = campos adicionales del Lead, ej. { Evento: [recId] })
 //   validate(form) → boolean                         (validaciones extra)
 export function initLeadForm({ formId = 'f', doneId = 'done', build, validate }) {
   const form = document.getElementById(formId);
@@ -50,7 +51,7 @@ export function initLeadForm({ formId = 'f', doneId = 'done', build, validate })
     const btn = form.querySelector('[type=submit]');
     const label = btn.textContent;
     btn.disabled = true; btn.textContent = 'Enviando…';
-    const { interes, mensaje, detalle } = build(g, fd);
+    const { interes, mensaje, detalle, extra } = build(g, fd);
     try {
       await crear(T.leads, {
         Nombre: g('nombre'),
@@ -60,6 +61,7 @@ export function initLeadForm({ formId = 'f', doneId = 'done', build, validate })
         Mensaje: mensaje || undefined,
         Detalle: detalle || undefined,
         Estatus: 'Nuevo',
+        ...(extra || {}),
       });
       form.hidden = true;
       done.hidden = false;

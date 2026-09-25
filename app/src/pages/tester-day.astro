@@ -1,63 +1,115 @@
 ---
+// 04 · Tester Day (v2): la marca elige una fecha de Tester Day publicada en la
+// tabla Eventos (Tipo = Tester Day, Visibilidad = Público) y deja sus datos.
+// Cae en Leads (Interes = Tester Day) ligado a esa fecha (campo Evento), así
+// cada Tester Day muestra en Airtable las marcas que quieren exponer.
+// Acepta ?fecha=<recId> para llegar con la fecha ya elegida (desde la agenda).
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Tester Day — Galería 9" description="Miércoles 10am–2pm: comparte una prueba gratis de tu producto y crea conexiones reales.">
+<Base title="Tester Day — Galería 9" description="Comparte una prueba gratis de tu producto o servicio en Galería 9 y crea conexiones reales. Elige tu fecha.">
   <section class="section">
     <div class="wrap">
       <header class="mhead reveal">
         <span class="eyebrow">Market · Tester Day</span>
         <h1 class="h2" style="margin-top:1rem">Comparte una prueba.</h1>
-        <p class="lead">Un espacio para que las marcas den a probar sus productos gratis y creen conexiones reales con nuevas personas. Todos los miércoles, de 10:00 am a 2:00 pm.</p>
+        <p class="lead">Un espacio para que las marcas den a probar sus productos gratis y creen conexiones reales con nuevas personas.</p>
         <div class="mincluye">
           <span>Mesa y silla incluidas</span>
-          <span>4 horas de convivencia</span>
-          <span>Experiencias de máx. 10 min por cliente</span>
+          <span>Dinámicas express</span>
         </div>
       </header>
 
+      <aside class="promo reveal">
+        <span class="promo__t">Cómo funciona</span>
+        <p>Las dinámicas son express: máximo 15 minutos de interacción con cada cliente.</p>
+      </aside>
+
       <form id="f" class="mform reveal" novalidate>
         <div class="mform-two">
-          <label class="mfield mfield--wide"><span>Nombre de tu marca</span><input type="text" name="marca" placeholder="Tu marca" required /></label>
-          <label class="mfield"><span>Persona responsable</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
-          <label class="mfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
-          <label class="mfield mfield--wide"><span>¿Qué vas a dar a probar?</span><textarea name="producto" rows="2" placeholder="El producto o experiencia que ofrecerás" required></textarea></label>
-          <label class="mfield"><span>¿Cómo participas?</span>
-            <select name="ticket" required>
-              <option value="">Elige…</option>
-              <option value="externo">Externo — $499</option>
-              <option value="pp">Tengo paquete Punto Presencia — $299</option>
-            </select>
-          </label>
-          <label class="mfield"><span>Miércoles que te interesa <span class="muted">(opcional)</span></span><input type="date" name="fecha" /></label>
-          <label class="mfield mfield--wide"><span>¿Tienes una gran idea? <span class="muted">(opcional)</span></span><textarea name="idea" rows="2" placeholder="Compártela para que podamos hacerla realidad"></textarea></label>
+          <fieldset class="mfield mfield--wide opt-group">
+            <legend>¿En qué fecha quieres participar?</legend>
+            <div class="opt-cards" id="fechas">
+              <p class="mform-note">Cargando fechas…</p>
+            </div>
+          </fieldset>
+
+          <label class="mfield"><span>Nombre</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
+          <label class="mfield"><span>Celular / WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+          <label class="mfield"><span>Correo electrónico</span><input type="email" name="correo" placeholder="tu@correo.com" required /></label>
+          <label class="mfield"><span>Instagram</span><input type="text" name="instagram" placeholder="@tumarca" required /></label>
+          <label class="mfield mfield--wide"><span>¿Qué vendes o de qué trata tu marca?</span><textarea name="marca" rows="4" placeholder="Tu producto o servicio, en pocas palabras" required></textarea></label>
+          <label class="mfield mfield--wide"><span>¿Qué vas a regalar en el Tester Day?</span><textarea name="regalo" rows="4" placeholder="La prueba o experiencia express que darás" required></textarea></label>
         </div>
-        <p class="mform-note">Confirmamos participación <b>cada lunes</b> por WhatsApp.</p>
-        <div><button type="submit" class="btn">Enviar solicitud</button></div>
+        <div><button type="submit" class="btn">Quiero participar</button></div>
       </form>
 
       <div class="mdone" id="done" hidden>
         <div class="mdone__mark">✓</div>
         <h2 class="h2">¡Recibimos tu solicitud!</h2>
-        <p class="lead">Te confirmamos tu participación el lunes por WhatsApp.</p>
-        <a href="/" class="btn btn--ghost">Volver al inicio</a>
+        <p class="lead">Te confirmamos tu participación por WhatsApp.</p>
+        <div class="mdone__actions">
+          <button type="button" class="btn" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Conoce el espacio · Agenda una visita</button>
+          <a href="/" class="btn btn--ghost">Volver al inicio</a>
+        </div>
       </div>
     </div>
   </section>
 
   <script>
-    import { initSolicitud } from '../scripts/marketForm.js';
-    import { CAT } from '../config.js';
-    initSolicitud({
-      formId: 'f',
-      titulo: 'Tester Day',
-      catId: CAT.testerDay,
-      precioFrom: (g) => (g('ticket') === 'pp' ? 299 : 499),
-      notasFrom: (g) => [
-        `Participa: ${g('ticket') === 'pp' ? 'Punto Presencia ($299)' : 'Externo ($499)'}`,
-        `Producto: ${g('producto')}`,
-        g('fecha') && `Miércoles: ${g('fecha')}`,
-        g('idea') && `Idea: ${g('idea')}`,
-      ].filter(Boolean).join('\n'),
+    import '../scripts/calPopup.js';
+    import { leerEventosPublicos } from '../config.js';
+    import { initLeadForm, grupoObligatorio, lineas } from '../scripts/leadForm.js';
+
+    const form = document.getElementById('f');
+    const box = document.getElementById('fechas');
+    const esc = (s) => String(s ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+    const fmt = (ini, fin) => {
+      const a = new Date(ini);
+      const dia = a.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+      const h = (d) => d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+      return { dia, hora: `${h(a)}${fin ? ` – ${h(new Date(fin))}` : ''}` };
+    };
+
+    // Obligatorio solo cuando hay fechas publicadas; sin fechas, la marca igual
+    // puede dejar sus datos para que le avisen de la próxima.
+    let fechaOk = () => true;
+    let hayFechas = false;
+    (async () => {
+      let fechas = [];
+      try { fechas = (await leerEventosPublicos()).filter((e) => e.tipo === 'Tester Day'); } catch { fechas = []; }
+      hayFechas = fechas.length > 0;
+      if (!hayFechas) {
+        box.innerHTML = '<p class="mform-note">Aún no hay fechas publicadas. Déjanos tus datos y te avisamos de la próxima.</p>';
+        return;
+      }
+      const pre = new URLSearchParams(location.search).get('fecha');
+      box.innerHTML = fechas.map((e) => {
+        const { dia, hora } = fmt(e.inicio, e.fin);
+        return `<label class="opt-card">
+          <input type="radio" name="fecha" value="${esc(e.id)}" data-label="${esc(`${dia} · ${hora}`)}" ${e.id === pre ? 'checked' : ''} />
+          <span class="opt-card__check" aria-hidden="true"></span>
+          <span class="opt-card__sub" style="text-transform:capitalize">${esc(dia)}</span>
+          <span class="opt-card__d">${esc(hora)}</span>
+        </label>`;
+      }).join('');
+      fechaOk = grupoObligatorio(form, 'fecha');
+    })();
+
+    initLeadForm({
+      validate: () => fechaOk(),
+      build: (g) => {
+        const sel = form.querySelector('input[name=fecha]:checked');
+        return {
+          interes: 'Tester Day',
+          mensaje: g('regalo'),
+          detalle: lineas([
+            ['Fecha', sel?.dataset.label || (hayFechas ? '' : 'Sin fecha (avisar de la próxima)')],
+            ['Instagram', g('instagram')],
+            ['Marca / qué vende', g('marca')],
+          ]),
+          extra: sel ? { Evento: [sel.value] } : undefined,
+        };
+      },
     });
   </script>
 </Base>
