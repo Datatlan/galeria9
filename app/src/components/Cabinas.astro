@@ -1,0 +1,76 @@
+---
+// Cabinas — marcas residentes de bienestar. Estructura pareja:
+// nombre · lema · duración · contacto. Sin waLink = WhatsApp en texto plano.
+// Arigato 88 se quitó (ya no está en Galería 9).
+const cabinas = [
+  { n: 'Elsonidodefer', tipo: 'Studio', lema: 'Experiencias y programas de respiración y autoconocimiento', ic: 'self_improvement', wa: '33 3395 3558', waLink: '523333953558', ig: '@elsonidodefer', igLink: 'elsonidodefer', featured: true },
+  { n: 'Reprogramación Mental', lema: 'Sesiones y programas 1:1 — entrena tu mente, educa tu palabra y transforma tu inconsciente', dur: '60 min', ic: 'psychology', wa: '33 1803 0563', waLink: '523318030563' },
+  { n: 'Carolina', lema: 'El arte de volver a ti', desc: 'Masajes, talleres y experiencias de relajación', dur: '60 / 90 min', ic: 'volunteer_activism', wa: '33 3956 4990', waLink: '523339564990' },
+  { n: 'Manoela Mena', lema: 'Diseña tu mirada — hidratación en piel y servicios de belleza', dur: '20 min', ic: 'face_retouching_natural', wa: '33 2312 4894', waLink: '523323124894', ig: '@bymanoelamena', igLink: 'bymanoelamena' },
+  { n: 'Jar Almodovar', lema: 'Regeneración nutricional y hormonal', ic: 'nutrition', wa: '33 1000 0003', ig: '@jaralmodovar' },
+];
+---
+<section class="section cabinas" id="cabinas">
+  <div class="wrap">
+    <div class="two">
+      <div class="reveal">
+        <span class="eyebrow">Nueva transformación · Nuevo estilo de vida</span>
+        <h1 class="h2" style="margin-top:1.2rem">Nuevos<br/>hábitos.</h1>
+      </div>
+      <p class="lead reveal">Marcas residentes de bienestar, cada una con su especialidad. Escríbeles directo para agendar tu cita.</p>
+    </div>
+
+    <div class="cabgrid">
+      {cabinas.map((c, i) => (
+        <article class={`cab reveal ${c.featured ? 'cab--fer' : ''}`} style={`transition-delay:${i * 70}ms`}>
+          <span class="cab__ic"><span class="material-symbols-outlined">{c.ic}</span></span>
+          <h3 class="cab__name">{c.n}</h3>
+          <p class="cab__svc">{c.lema}</p>
+          {c.desc && <p class="cab__svc">{c.desc}</p>}
+          {c.dur && <span class="cab__dur">{c.dur}</span>}
+          <div class="cab__contact">
+            {c.waLink
+              ? <a href={`https://wa.me/${c.waLink}`} target="_blank" rel="noopener">WhatsApp · {c.wa}</a>
+              : <span>WhatsApp · {c.wa}</span>}
+            {c.ig && (c.igLink
+              ? <a class="cab__ig" href={`https://instagram.com/${c.igLink}`} target="_blank" rel="noopener">{c.ig}</a>
+              : <span class="cab__ig">{c.ig}</span>)}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .cabgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .cab {
+    display: flex; flex-direction: column; gap: .5rem;
+    padding: 1.6rem 1.4rem; min-height: 210px;
+    border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white);
+    transition: border-color .3s var(--ease), transform .3s var(--ease);
+  }
+  .cab:hover { border-color: var(--ink-45); transform: translateY(-3px); }
+  .cab__ic {
+    width: 42px; height: 42px; border-radius: 11px; background: var(--sand);
+    display: grid; place-items: center; color: var(--gold-ink); margin-bottom: .5rem;
+  }
+  .cab__ic .material-symbols-outlined { font-size: 22px; }
+  .cab--fer .cab__ic { background: rgba(255, 255, 255, .09); color: var(--gold); }
+  .cab__name { font-size: 1.4rem; font-weight: 300; margin: .2rem 0; }
+  .cab__svc { font-size: .88rem; color: var(--ink-70); line-height: 1.4; }
+  .cab__dur { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-ink); margin-top: .25rem; }
+  .cab--fer .cab__dur { color: var(--gold); }
+  .cab__contact { margin-top: auto; display: flex; flex-direction: column; gap: .2rem; font-size: .78rem; color: var(--ink-70); letter-spacing: .01em; }
+  .cab__contact a { transition: color .3s var(--ease); }
+  .cab__contact a:hover { color: var(--ink); text-decoration: underline; }
+  .cab--fer .cab__contact { color: rgba(242,242,242,.72); }
+  .cab--fer .cab__contact a:hover { color: var(--paper); }
+  .cab__ig { color: var(--gold-ink); }
+  .cab--fer .cab__ig { color: var(--gold); }
+  .cab--fer { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .cab--fer .cab__svc { color: rgba(242,242,242,.72); }
+
+  @media (max-width: 980px) { .cabgrid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 760px) { .cabgrid { grid-template-columns: 1fr; } }
+</style>

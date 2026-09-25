@@ -1,0 +1,120 @@
+---
+// Banda de contacto (form → Leads) + agenda de visita (Cal.com).
+// Cualquier elemento de la página con `data-interes` pre-selecciona el interés
+// del form al hacerle click (ej. las cards de /estrategias).
+---
+<section class="cta-band" id="contacto">
+  <div class="wrap contacto__grid">
+    <div class="contacto__copy reveal">
+      <span class="eyebrow" style="color:var(--gold)">Contacto</span>
+      <h2 class="h2" style="margin-top:1rem">Platiquemos.</h2>
+      <p class="lead">¿Una duda, una idea, una colaboración? Escríbenos y te respondemos muy pronto.</p>
+      <p class="contacto__alt">¿Ya sabes qué quieres? <a href="/cotiza" class="link-arrow contacto__alt-link">Cotiza tu evento →</a></p>
+      <p class="contacto__alt">¿Prefieres verla en persona? <button type="button" class="link-arrow contacto__alt-link cal-plain" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Agenda una visita →</button></p>
+    </div>
+
+    <form id="leadForm" class="contacto__form reveal" novalidate>
+      <div class="cfields">
+        <label class="cfield"><span>Tu nombre</span><input type="text" name="nombre" placeholder="Nombre" required /></label>
+        <label class="cfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+        <label class="cfield"><span>Correo <i>(opcional)</i></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
+        <label class="cfield"><span>Me interesa</span>
+          <select name="interes" required>
+            <option value="">Elige…</option>
+            <option>Evento</option>
+            <option>Punto Presencia</option>
+            <option>Pop Up</option>
+            <option>Tu Talento es un Arte</option>
+            <option>Tester Day</option>
+            <option>Invitado Especial</option>
+            <option>Cabinas · Bienestar</option>
+            <option>Otro</option>
+          </select>
+        </label>
+        <label class="cfield cfield--wide"><span>Tu mensaje</span><textarea name="mensaje" rows="3" placeholder="Cuéntanos…" required></textarea></label>
+      </div>
+      <button type="submit" class="btn btn--invert">Enviar mensaje</button>
+    </form>
+
+    <div class="contacto__done reveal" id="leadDone" hidden>
+      <div class="contacto__mark">✓</div>
+      <h2 class="h2">¡Recibido!</h2>
+      <p class="lead">Te contactamos muy pronto por WhatsApp.</p>
+      <button type="button" class="btn btn--ghost" style="margin-top:1.2rem" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Agenda una visita a Galería 9</button>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/calPopup.js';
+  import { T, crear } from '../config.js';
+  const lf = document.getElementById('leadForm');
+
+  // Cards con data-interes → pre-seleccionan el interés en el form
+  document.querySelectorAll('[data-interes]').forEach((el) =>
+    el.addEventListener('click', () => {
+      const sel = lf?.elements['interes'];
+      if (sel) sel.value = el.dataset.interes;
+    })
+  );
+  lf?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!lf.reportValidity()) return;
+    const fd = new FormData(lf);
+    const g = (k) => (fd.get(k) || '').toString().trim();
+    const btn = lf.querySelector('[type=submit]');
+    btn.disabled = true; btn.textContent = 'Enviando…';
+    try {
+      await crear(T.leads, {
+        Nombre: g('nombre'),
+        WhatsApp: g('telefono'),
+        Correo: g('correo') || undefined,
+        Interes: g('interes'),
+        Mensaje: g('mensaje'),
+        Estatus: 'Nuevo',
+      });
+      lf.hidden = true;
+      document.querySelector('.contacto__copy').hidden = true;
+      document.getElementById('leadDone').hidden = false;
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Enviar mensaje';
+      alert('No pudimos enviar tu mensaje. Escríbenos por WhatsApp.');
+      console.error(err);
+    }
+  });
+</script>
+
+<style>
+  .cta-band { background: var(--ink); color: var(--paper); padding-block: clamp(4rem, 8vw, 6.5rem); }
+  .cta-band .h2 { color: var(--paper); }
+  .cta-band .lead { color: rgba(242,242,242,.7); margin-top: 1.2rem; max-width: 40ch; }
+  .btn--invert { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+  .btn--invert:hover { background: transparent; color: var(--paper); }
+
+  .contacto__grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(2.5rem, 6vw, 5rem); align-items: start; }
+  .contacto__alt { margin-top: 2.2rem; font-size: .95rem; color: rgba(242,242,242,.55); }
+  .contacto__alt-link { color: var(--paper); border-color: rgba(242,242,242,.3); margin-left: .5rem; font-size: .78rem; }
+  .cal-plain { background: none; border: 0; padding: 0; font-family: inherit; cursor: pointer; }
+  .cfields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.2rem; margin-bottom: 1.6rem; }
+  .cfield { display: flex; flex-direction: column; gap: .45rem; }
+  .cfield--wide { grid-column: 1 / -1; }
+  .cfield > span { font-size: .78rem; letter-spacing: .06em; color: rgba(242,242,242,.6); }
+  .cfield i { font-style: normal; opacity: .6; }
+  .cfield input, .cfield select, .cfield textarea {
+    font-family: var(--sans); font-size: 1rem; color: var(--paper);
+    padding: .85em 1em; border: 1px solid rgba(242,242,242,.18); border-radius: var(--radius);
+    background: rgba(255,255,255,.06); transition: border-color .3s var(--ease); resize: vertical;
+  }
+  .cfield input::placeholder, .cfield textarea::placeholder { color: rgba(242,242,242,.35); }
+  .cfield select { color: var(--paper); }
+  .cfield select option { color: var(--ink); background: var(--paper); }
+  .cfield input:focus, .cfield select:focus, .cfield textarea:focus { outline: none; border-color: var(--gold); }
+  .contacto__done { grid-column: 1 / -1; text-align: center; padding-block: 2rem; }
+  .contacto__mark { width: 64px; height: 64px; border-radius: 50%; background: var(--gold); color: var(--ink); display: grid; place-items: center; font-size: 1.8rem; margin: 0 auto 1.4rem; }
+  .contacto__done .lead { margin-inline: auto; }
+
+  @media (max-width: 760px) {
+    .contacto__grid { grid-template-columns: 1fr; }
+    .cfields { grid-template-columns: 1fr; }
+  }
+</style>

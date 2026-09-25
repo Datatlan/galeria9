@@ -1,0 +1,51 @@
+---
+// Espacios rentables para EVENTOS (Terraza · Roof) + CTA al cotizador.
+const espacios = [
+  { n: 'Terraza', d: 'Un patio verde en planta baja. Íntimo, cálido, ideal para reuniones y talleres.', foto: '/fotos/evento-terraza.jpg' },
+  { n: 'Roof', d: 'Azotea con zona techada y cielo abierto. Para activaciones y celebraciones.', foto: '/fotos/evento-roof.jpg' },
+];
+---
+<section class="section espacios" id="espacios">
+  <div class="wrap">
+    <div class="two">
+      <div class="reveal">
+        <span class="eyebrow">Espacios y eventos</span>
+        <h1 class="h2" style="margin-top:1.2rem">Crea tu evento<br/>o taller.</h1>
+      </div>
+      <p class="lead reveal">Experiencias privadas y activaciones para tu marca personal o profesional. Renta por hora el escenario de tu celebración, taller o activación.</p>
+    </div>
+
+    <div class="grid-esp">
+      {espacios.map((e, i) => (
+        <article class="esp reveal" style={`transition-delay:${i * 80}ms`}>
+          <figure class="esp__photo">
+            <img src={e.foto} alt={`${e.n} · Galería 9`} loading="lazy" />
+          </figure>
+          <div class="esp__body">
+            <h3 class="h3">{e.n}</h3>
+            <p class="muted">{e.d}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+    <div class="esp-cta reveal">
+      <a href="/cotiza" class="btn">Cotiza tu evento</a>
+      <span class="muted">Estimado al instante, sin compromiso.</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .espacios { background: var(--sand); }
+  .grid-esp { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--ink-12); border: 1px solid var(--ink-12); }
+  .esp { background: var(--sand); display: flex; flex-direction: column; }
+  .esp__photo { margin: 0; overflow: hidden; aspect-ratio: 16 / 9; }
+  .esp__photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
+  .esp:hover .esp__photo img { transform: scale(1.04); }
+  .esp__body { padding: clamp(1.4rem, 2.6vw, 2.2rem); }
+  .esp__body .h3 { margin-bottom: .8rem; }
+  .esp-cta { display: flex; align-items: center; gap: 1.4rem; margin-top: clamp(1.8rem, 4vw, 2.6rem); flex-wrap: wrap; }
+  .esp-cta .muted { font-size: .88rem; }
+
+  @media (max-width: 760px) { .grid-esp { grid-template-columns: 1fr; } }
+</style>

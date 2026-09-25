@@ -1,0 +1,58 @@
+---
+// Estrategias para MARCAS (Expansión). Las cards con `data-interes` llevan al
+// form de contacto de la misma página con el interés pre-seleccionado; las que
+// tienen flujo propio (Eventos → cotizador, Pop Up → su form) van directo.
+const marcas = [
+  { n: 'Eventos', d: 'Activaciones, lanzamientos y experiencias privadas para tu marca en la Terraza o el Roof.', meta: 'Por hora', foto: '/fotos/terraza-2.jpg', href: '/cotiza' },
+  { n: 'Punto Presencia', d: 'Tu marca encuentra un espacio físico. Membresía de 6 meses para compartir, validar y expandir su comunidad.', meta: '6 meses', foto: '/fotos/punto-presencia.jpg' },
+  { n: 'Pop Up', d: 'Estrategia de 1 semana, movimiento digital y físico para la expansión de tu marca.', meta: 'Exhibición', foto: '/fotos/popup.jpg', href: '/pop-up' },
+  { n: 'Tu Talento es un Arte', d: 'Expresa tu marca como arte, estrategia de visibilidad por 1 semana, conecta con nuevas comunidades.', meta: 'Semanal', foto: '/fotos/tu-talento.png' },
+  { n: 'Tester Day', d: 'Regala pruebas o experiencias express y crea conexiones de valor con nuevas personas.', meta: 'Activación', foto: '/fotos/tester-day.jpg' },
+  { n: 'Invitado Especial', d: 'Exhibe en el corazón de Galería 9 y expande tu visibilidad.', meta: '6 días', foto: '/fotos/invitado.jpg' },
+];
+---
+<section class="section marcas" id="marcas">
+  <div class="wrap">
+    <div class="two">
+      <div class="reveal">
+        <span class="eyebrow">Comunicación y estrategias</span>
+        <h1 class="h2" style="margin-top:1.2rem">Expándete en<br/>Galería 9.</h1>
+      </div>
+      <p class="lead reveal">Estrategias de visibilidad y expansión para tu marca. Expresa tu talento, activa tu comunidad y comienza ahora.</p>
+    </div>
+
+    <div class="grid-marcas">
+      {marcas.map((m, i) => (
+        <a class="marca reveal" href={m.href || '#contacto'} data-interes={m.href ? undefined : m.n} style={`transition-delay:${(i % 2) * 80}ms`}>
+          <figure class="marca__media">
+            <img src={m.foto} alt={`${m.n} · Galería 9`} loading="lazy" />
+          </figure>
+          <div class="marca__body">
+            <div class="marca__top">
+              <h3 class="h3">{m.n}</h3>
+              <span class="marca__meta">{m.meta}</span>
+            </div>
+            <p class="muted">{m.d}</p>
+            <span class="marca__cta">Me interesa →</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid-marcas { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 1rem; }
+  .marca { display: flex; flex-direction: column; border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white); overflow: hidden; transition: border-color .3s var(--ease), transform .3s var(--ease); }
+  .marca:hover { border-color: var(--ink); transform: translateY(-3px); }
+  .marca__media { margin: 0; aspect-ratio: 16 / 8; overflow: hidden; }
+  .marca__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
+  .marca:hover .marca__media img { transform: scale(1.04); }
+  .marca__body { display: flex; flex-direction: column; gap: .6rem; padding: 1.6rem; flex: 1; }
+  .marca__top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .marca__meta { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); white-space: nowrap; }
+  .marca .muted { flex: 1; font-size: .92rem; }
+  .marca__cta { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--ink); margin-top: .3rem; }
+
+  @media (max-width: 760px) { .grid-marcas { grid-template-columns: 1fr; } }
+</style>

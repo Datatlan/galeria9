@@ -1,47 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import Agenda from '../components/Agenda.astro';
+import Contacto from '../components/Contacto.astro';
 
-// Espacios rentables para EVENTOS (el showcase de marcas vive en "Para marcas")
-const espacios = [
-  { n: 'Terraza', d: 'Un patio verde en planta baja. Íntimo, cálido, ideal para reuniones y talleres.', cap: 'Hasta 40', foto: '/fotos/evento-terraza.jpg' },
-  { n: 'Roof', d: 'Azotea con zona techada y cielo abierto. Para activaciones y celebraciones.', cap: 'Hasta 60', foto: '/fotos/evento-roof.jpg' },
-];
-
-const pilares = [
-  { t: 'Bienestar', lema: 'Date una pausa', d: 'Entrena tu mente, cuerpo y emoción. Hábitos de belleza, relajación, reprogramación y respiración.' },
-  { t: 'Market', lema: 'Invierte en ti', d: 'Market de marcas, eventos, activaciones y talleres.' },
-  { t: 'Eventos', lema: 'Celébrate en gratitud', d: 'Encuentros y celebraciones diseñados a tu medida.' },
-];
-
-// Producto estrella del Market — card destacada de ancho completo.
-// Por ahora todos los CTA de marcas llevan al form de contacto (pre-llenando
-// el interés); los forms dedicados (/pop-up, /tu-talento, /tester-day) se
-// irán habilitando poco a poco.
-const puntoPresencia = {
-  n: 'Punto Presencia',
-  d: 'Tu marca encuentra un espacio físico. Membresía de 6 meses para compartir, validar y expandir la comunidad de tu marca.',
-  meta: 'Mensual · 6 meses',
-  foto: '/fotos/punto-presencia.jpg',
-};
-
-// Formatos de showcase para MARCAS
-const marcas = [
-  { n: 'Pop Up', d: 'Estrategia de 1 semana, movimiento digital y físico para la expansión de tu marca.', meta: 'Exhibición', foto: '/fotos/popup.jpg', href: '/pop-up' },
-  { n: 'Tu Talento es un Arte', d: 'Expresa tu marca como arte, estrategia de visibilidad por 1 semana, conecta con nuevas comunidades.', meta: 'Semanal', foto: '/fotos/tu-talento.png' },
-  { n: 'Tester Day', d: 'Regala pruebas o experiencias express y crea conexiones de valor con nuevas personas.', meta: 'Activación', foto: '/fotos/tester-day.jpg' },
-  { n: 'Invitado Especial', d: 'Exhibe en el corazón de Galería 9 y expande tu visibilidad.', meta: '6 días', foto: '/fotos/invitado.jpg' },
-];
-
-// Cabinas — estructura pareja: nombre · lema · duración · contacto.
-// Jar Almodovar sigue con placeholder (sin waLink = texto plano).
-// Arigato 88 se quitó (ya no está en Galería 9).
-const cabinas = [
-  { n: 'Elsonidodefer', tipo: 'Studio', lema: 'Experiencias y programas de respiración y autoconocimiento', ic: 'self_improvement', wa: '33 3395 3558', waLink: '523333953558', ig: '@elsonidodefer', igLink: 'elsonidodefer', featured: true },
-  { n: 'Reprogramación Mental', lema: 'Sesiones y programas 1:1 — entrena tu mente, educa tu palabra y transforma tu inconsciente', dur: '60 min', ic: 'psychology', wa: '33 1803 0563', waLink: '523318030563' },
-  { n: 'Carolina', lema: 'El arte de volver a ti', desc: 'Masajes, talleres y experiencias de relajación', dur: '60 / 90 min', ic: 'volunteer_activism', wa: '33 3956 4990', waLink: '523339564990' },
-  { n: 'Manoela Mena', lema: 'Diseña tu mirada — hidratación en piel y servicios de belleza', dur: '20 min', ic: 'face_retouching_natural', wa: '33 2312 4894', waLink: '523323124894', ig: '@bymanoelamena', igLink: 'bymanoelamena' },
-  { n: 'Jar Almodovar', lema: 'Regeneración nutricional y hormonal', ic: 'nutrition', wa: '33 1000 0003', ig: '@jaralmodovar' },
+// Las 3 puertas del home: cada una lleva a su página.
+const puertas = [
+  { t: 'Transformación', sub: 'Consciencia y hábitos', d: 'Hábitos conscientes para un nuevo estilo de vida.', foto: '/fotos/evento-roof.jpg', href: '/habitos' },
+  { t: 'Conexión', sub: 'Espacios y eventos', d: 'Experiencias privadas y activaciones para tu marca personal o profesional.', foto: '/fotos/evento-terraza.jpg', href: '/espacios' },
+  { t: 'Expansión', sub: 'Comunicación y estrategias', d: 'Expresa tu talento, con la estrategia y el acompañamiento de una agencia.', foto: '/fotos/tu-talento.png', href: '/estrategias' },
 ];
 ---
 <Base>
@@ -54,7 +20,7 @@ const cabinas = [
         <p class="lead hero__lead reveal">Galería 9 es un espacio de expansión en donde marcas y personas se expresan y comparten su esencia a través de la conexión con su talento.</p>
         <div class="hero__cta reveal">
           <a href="/cotiza" class="btn">Cotiza tu evento</a>
-          <a href="/#experiencia" class="link-arrow">Conoce la casa →</a>
+          <a href="/#puertas" class="link-arrow">Conoce la casa →</a>
         </div>
       </div>
       <figure class="hero__photo reveal">
@@ -63,34 +29,23 @@ const cabinas = [
     </div>
   </section>
 
-  <hr class="hairline" />
-
-  <!-- EXPERIENCIA -->
-  <section class="section" id="experiencia">
-    <div class="wrap">
-      <div class="two">
-        <div class="reveal">
-          <span class="eyebrow">Centro de negocios</span>
-          <h2 class="h2" style="margin-top:1.2rem">Nuevo estilo de vida. Nueva transformación.</h2>
-        </div>
-        <p class="lead reveal">No somos una tienda ni un salón de eventos. Somos una casa curada donde el bienestar, las marcas locales y las celebraciones conviven — y se potencian entre sí. Además de los programas y estrategias que te apoyan en tu expansión, encuentras hábitos nuevos que sostienen toda tu transformación.</p>
-      </div>
-
-      <div class="exp-body">
-        <figure class="exp-photo reveal">
-          <img src="/fotos/cabina-arigato.png" alt="Cabina Arigato 88 en Galería 9" loading="lazy" />
-          <figcaption>Cabina Arigato 88 · Masajes terapéuticos</figcaption>
-        </figure>
-        <div class="pilares">
-          {pilares.map((p, i) => (
-            <article class="pilar reveal" style={`transition-delay:${i * 90}ms`}>
-              <span class="pilar__num">{String(i + 1).padStart(2, '0')}</span>
-              <h3 class="h3">{p.t} <span class="pilar__lema">{p.lema}</span></h3>
-              <p class="muted">{p.d}</p>
-            </article>
-          ))}
-        </div>
-      </div>
+  <!-- LAS 3 PUERTAS -->
+  <section class="puertas" id="puertas">
+    <div class="wrap puertas__grid">
+      {puertas.map((p, i) => (
+        <a class="puerta reveal" href={p.href} style={`transition-delay:${i * 90}ms`}>
+          <figure class="puerta__media">
+            <img src={p.foto} alt={`${p.t} · Galería 9`} loading="lazy" />
+          </figure>
+          <div class="puerta__body">
+            <span class="puerta__num">{String(i + 1).padStart(2, '0')}</span>
+            <h2 class="puerta__t">{p.t}</h2>
+            <span class="puerta__sub">{p.sub}</span>
+            <p class="muted">{p.d}</p>
+            <span class="puerta__cta">Conoce más →</span>
+          </div>
+        </a>
+      ))}
     </div>
   </section>
 
@@ -104,206 +59,13 @@ const cabinas = [
     </div>
   </section>
 
-  <!-- CABINAS -->
-  <section class="section cabinas" id="cabinas">
-    <div class="wrap">
-      <div class="two">
-        <div class="reveal">
-          <span class="eyebrow">Nueva transformación · Nuevo estilo de vida</span>
-          <h2 class="h2" style="margin-top:1.2rem">Nuevos<br/>hábitos.</h2>
-        </div>
-        <p class="lead reveal">Marcas residentes de bienestar, cada una con su especialidad. Escríbeles directo para agendar tu cita.</p>
-      </div>
-
-      <div class="cabgrid">
-        {cabinas.map((c, i) => (
-          <article class={`cab reveal ${c.featured ? 'cab--fer' : ''}`} style={`transition-delay:${i * 70}ms`}>
-            <span class="cab__ic"><span class="material-symbols-outlined">{c.ic}</span></span>
-            <h3 class="cab__name">{c.n}</h3>
-            <p class="cab__svc">{c.lema}</p>
-            {c.desc && <p class="cab__svc">{c.desc}</p>}
-            {c.dur && <span class="cab__dur">{c.dur}</span>}
-            <div class="cab__contact">
-              {c.waLink
-                ? <a href={`https://wa.me/${c.waLink}`} target="_blank" rel="noopener">WhatsApp · {c.wa}</a>
-                : <span>WhatsApp · {c.wa}</span>}
-              {c.ig && (c.igLink
-                ? <a class="cab__ig" href={`https://instagram.com/${c.igLink}`} target="_blank" rel="noopener">{c.ig}</a>
-                : <span class="cab__ig">{c.ig}</span>)}
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- ESPACIOS -->
-  <section class="section espacios" id="espacios">
-    <div class="wrap">
-      <div class="two">
-        <div class="reveal">
-          <span class="eyebrow">Una nueva forma de hacer negocios</span>
-          <h2 class="h2" style="margin-top:1.2rem">Crea tu evento<br/>o taller.</h2>
-        </div>
-        <p class="lead reveal">Espacios disponibles — renta por hora el escenario de tu celebración, taller o activación.</p>
-      </div>
-
-      <div class="grid-esp">
-        {espacios.map((e, i) => (
-          <article class="esp reveal" style={`transition-delay:${i * 80}ms`}>
-            <figure class="esp__photo">
-              <img src={e.foto} alt={`${e.n} · Galería 9`} loading="lazy" />
-            </figure>
-            <div class="esp__body">
-              <div class="esp__top">
-                <h3 class="h3">{e.n}</h3>
-              </div>
-              <p class="muted">{e.d}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-      <div class="esp-cta reveal">
-        <a href="/cotiza" class="btn">Empieza aquí</a>
-        <span class="muted">Estimado al instante, sin compromiso.</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRÓXIMOS EVENTOS (públicos) -->
+  <!-- PRÓXIMOS EVENTOS (carrusel + "Ver todos") -->
   <Agenda />
 
-  <!-- MARCAS -->
-  <section class="section marcas" id="marcas">
-    <div class="wrap">
-      <div class="two">
-        <div class="reveal">
-          <span class="eyebrow">Para marcas</span>
-          <h2 class="h2" style="margin-top:1.2rem">Expándete en<br/>Galería 9.</h2>
-        </div>
-        <p class="lead reveal">Estrategias de visibilidad y expansión. Toma acción, activa tu marca y comienza ahora.</p>
-      </div>
-
-      <a class="pp-card reveal" href="/#contacto" data-interes="Punto Presencia">
-        <figure class="pp-card__media">
-          <img src={puntoPresencia.foto} alt="Punto Presencia · el Market de Galería 9" loading="lazy" />
-        </figure>
-        <div class="pp-card__body">
-          <span class="marca__meta">{puntoPresencia.meta}</span>
-          <h3 class="h2" style="font-size:clamp(1.6rem,3vw,2.2rem)">{puntoPresencia.n}</h3>
-          <p class="muted">{puntoPresencia.d}</p>
-          <span class="marca__cta">Me interesa →</span>
-        </div>
-      </a>
-
-      <div class="grid-marcas">
-        {marcas.map((m, i) => (
-          <a class="marca reveal" href={m.href || '/#contacto'} data-interes={m.n} style={`transition-delay:${i * 80}ms`}>
-            {m.foto && (
-              <figure class="marca__media">
-                <img src={m.foto} alt={`${m.n} · Galería 9`} loading="lazy" />
-              </figure>
-            )}
-            <div class="marca__body">
-              <div class="marca__top">
-                <h3 class="h3">{m.n}</h3>
-                <span class="marca__meta">{m.meta}</span>
-              </div>
-              <p class="muted">{m.d}</p>
-              <span class="marca__cta">Me interesa →</span>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACTO -->
-  <section class="cta-band" id="contacto">
-    <div class="wrap contacto__grid">
-      <div class="contacto__copy reveal">
-        <span class="eyebrow" style="color:var(--gold)">Contacto</span>
-        <h2 class="h2" style="margin-top:1rem">Platiquemos.</h2>
-        <p class="lead">¿Una duda, una idea, una colaboración? Escríbenos y te respondemos muy pronto.</p>
-        <p class="contacto__alt">¿Ya sabes qué quieres? <a href="/cotiza" class="link-arrow contacto__alt-link">Cotiza tu evento →</a></p>
-        <p class="contacto__alt">¿Prefieres verla en persona? <button type="button" class="link-arrow contacto__alt-link cal-plain" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Agenda una visita →</button></p>
-      </div>
-
-      <form id="leadForm" class="contacto__form reveal" novalidate>
-        <div class="cfields">
-          <label class="cfield"><span>Tu nombre</span><input type="text" name="nombre" placeholder="Nombre" required /></label>
-          <label class="cfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
-          <label class="cfield"><span>Correo <i>(opcional)</i></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
-          <label class="cfield"><span>Me interesa</span>
-            <select name="interes" required>
-              <option value="">Elige…</option>
-              <option>Evento</option>
-              <option>Punto Presencia</option>
-              <option>Pop Up</option>
-              <option>Tu Talento es un Arte</option>
-              <option>Tester Day</option>
-              <option>Invitado Especial</option>
-              <option>Cabinas · Bienestar</option>
-              <option>Otro</option>
-            </select>
-          </label>
-          <label class="cfield cfield--wide"><span>Tu mensaje</span><textarea name="mensaje" rows="3" placeholder="Cuéntanos…" required></textarea></label>
-        </div>
-        <button type="submit" class="btn btn--invert">Enviar mensaje</button>
-      </form>
-
-      <div class="contacto__done reveal" id="leadDone" hidden>
-        <div class="contacto__mark">✓</div>
-        <h2 class="h2">¡Recibido!</h2>
-        <p class="lead">Te contactamos muy pronto por WhatsApp.</p>
-        <button type="button" class="btn btn--ghost" style="margin-top:1.2rem" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Agenda una visita a Galería 9</button>
-      </div>
-    </div>
-  </section>
-
-  <script>
-    import '../scripts/calPopup.js';
-    import { T, crear } from '../config.js';
-    const lf = document.getElementById('leadForm');
-
-
-    // Cards de marcas → llevan al form con el interés pre-seleccionado
-    document.querySelectorAll('[data-interes]').forEach((el) =>
-      el.addEventListener('click', () => {
-        const sel = lf?.elements['interes'];
-        if (sel) sel.value = el.dataset.interes;
-      })
-    );
-    lf?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!lf.reportValidity()) return;
-      const fd = new FormData(lf);
-      const g = (k) => (fd.get(k) || '').toString().trim();
-      const btn = lf.querySelector('[type=submit]');
-      btn.disabled = true; btn.textContent = 'Enviando…';
-      try {
-        await crear(T.leads, {
-          Nombre: g('nombre'),
-          WhatsApp: g('telefono'),
-          Correo: g('correo') || undefined,
-          Interes: g('interes'),
-          Mensaje: g('mensaje'),
-          Estatus: 'Nuevo',
-        });
-        lf.hidden = true;
-        document.querySelector('.contacto__copy').hidden = true;
-        document.getElementById('leadDone').hidden = false;
-      } catch (err) {
-        btn.disabled = false; btn.textContent = 'Enviar mensaje';
-        alert('No pudimos enviar tu mensaje. Escríbenos por WhatsApp.');
-        console.error(err);
-      }
-    });
-  </script>
+  <Contacto />
 </Base>
 
 <style>
-
   .hero { position: relative; overflow: clip; padding-block: clamp(3rem, 7vw, 5.5rem) clamp(3.5rem, 8vw, 6.5rem); }
   .hero__inner { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
   .hero .display { margin-top: 1.6rem; }
@@ -312,74 +74,24 @@ const cabinas = [
   .hero__photo { margin: 0; overflow: hidden; border-radius: var(--radius); max-height: min(72vh, 620px); }
   .hero__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: end; margin-bottom: clamp(3rem, 6vw, 5rem); }
-
-  .exp-body { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
-  .exp-photo { margin: 0; }
-  .exp-photo img { width: 100%; max-height: 520px; object-fit: cover; display: block; border-radius: var(--radius); }
-  .exp-photo figcaption {
-    margin-top: .7rem; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--ink-45);
-  }
-  .pilares { display: grid; grid-template-columns: 1fr; gap: clamp(1.5rem, 3vw, 2.4rem); }
-  .pilar { border-top: 1px solid var(--ink); padding-top: 1.4rem; }
-  .pilar__num { font-size: .8rem; letter-spacing: .2em; color: var(--gold-ink); }
-  .pilar h3 { margin: 1.2rem 0 .8rem; }
-  .pilar__lema { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); margin-left: .8em; white-space: nowrap; }
-
-  .cabgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-  .cab {
-    display: flex; flex-direction: column; gap: .5rem;
-    padding: 1.6rem 1.4rem; min-height: 210px;
-    border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white);
+  /* Las 3 puertas */
+  .puertas { background: var(--sand); padding-block: clamp(3.5rem, 8vw, 6rem); }
+  .puertas__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .puerta {
+    display: flex; flex-direction: column; background: var(--white);
+    border: 1px solid var(--ink-12); border-radius: var(--radius); overflow: hidden;
     transition: border-color .3s var(--ease), transform .3s var(--ease);
   }
-  .cab:hover { border-color: var(--ink-45); transform: translateY(-3px); }
-  .cab__ic {
-    width: 42px; height: 42px; border-radius: 11px; background: var(--sand);
-    display: grid; place-items: center; color: var(--gold-ink); margin-bottom: .5rem;
-  }
-  .cab__ic .material-symbols-outlined { font-size: 22px; }
-  .cab--fer .cab__ic { background: rgba(255, 255, 255, .09); color: var(--gold); }
-  .cab__name { font-size: 1.4rem; font-weight: 300; margin: .2rem 0; }
-  .cab__svc { font-size: .88rem; color: var(--ink-70); line-height: 1.4; }
-  .cab__dur { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-ink); margin-top: .25rem; }
-  .cab--fer .cab__dur { color: var(--gold); }
-  .cab__contact { margin-top: auto; display: flex; flex-direction: column; gap: .2rem; font-size: .78rem; color: var(--ink-70); letter-spacing: .01em; }
-  .cab__contact a { transition: color .3s var(--ease); }
-  .cab__contact a:hover { color: var(--ink); text-decoration: underline; }
-  .cab--fer .cab__contact { color: rgba(242,242,242,.72); }
-  .cab--fer .cab__contact a:hover { color: var(--paper); }
-  .cab__ig { color: var(--gold-ink); }
-  .cab--fer .cab__ig { color: var(--gold); }
-  .cab__cta { margin-top: .6rem; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
-  .cab--fer { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .cab--fer .cab__svc { color: rgba(242,242,242,.72); }
-
-  /* Punto Presencia — card destacada de ancho completo */
-  .pp-card {
-    display: grid; grid-template-columns: 1.15fr .85fr; margin-bottom: 1rem;
-    border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white);
-    overflow: hidden; transition: border-color .3s var(--ease), transform .3s var(--ease);
-  }
-  .pp-card:hover { border-color: var(--ink); transform: translateY(-3px); }
-  .pp-card__media { margin: 0; overflow: hidden; min-height: 300px; }
-  .pp-card__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
-  .pp-card:hover .pp-card__media img { transform: scale(1.04); }
-  .pp-card__body { display: flex; flex-direction: column; gap: .8rem; padding: clamp(1.6rem, 3vw, 2.6rem); justify-content: center; }
-  .pp-card__body .muted { font-size: .95rem; max-width: 44ch; }
-
-  .grid-marcas { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 1rem; }
-  .marca { display: flex; flex-direction: column; border: 1px solid var(--ink-12); border-radius: var(--radius); background: var(--white); overflow: hidden; transition: border-color .3s var(--ease), transform .3s var(--ease); }
-  .marca:hover { border-color: var(--ink); transform: translateY(-3px); }
-  .marca__media { margin: 0; aspect-ratio: 16 / 8; overflow: hidden; }
-  .marca__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
-  .marca:hover .marca__media img { transform: scale(1.04); }
-  .marca__body { display: flex; flex-direction: column; gap: .6rem; padding: 1.6rem; flex: 1; }
-  .marca__top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
-  .marca__meta { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); white-space: nowrap; }
-  .marca .muted { flex: 1; font-size: .92rem; }
-  .marca__cta { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--ink); margin-top: .3rem; }
+  .puerta:hover { border-color: var(--ink); transform: translateY(-4px); }
+  .puerta__media { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; }
+  .puerta__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
+  .puerta:hover .puerta__media img { transform: scale(1.05); }
+  .puerta__body { display: flex; flex-direction: column; gap: .45rem; padding: clamp(1.4rem, 2.4vw, 2rem); flex: 1; }
+  .puerta__num { font-size: .75rem; letter-spacing: .2em; color: var(--gold-ink); }
+  .puerta__t { font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 300; line-height: 1.1; margin: .2rem 0 0; }
+  .puerta__sub { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
+  .puerta .muted { font-size: .92rem; margin-top: .4rem; flex: 1; }
+  .puerta__cta { margin-top: .6rem; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--ink); }
 
   /* Interludio full-bleed "El lugar" — velo uniforme + contenido centrado */
   .lugar { position: relative; height: clamp(300px, 44vh, 440px); overflow: hidden; background: var(--ink); }
@@ -399,62 +111,9 @@ const cabinas = [
   }
   .lugar__link:hover { border-color: var(--paper); }
 
-  .espacios { background: var(--sand); }
-  .grid-esp { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--ink-12); border: 1px solid var(--ink-12); }
-  .esp { background: var(--sand); display: flex; flex-direction: column; }
-  .esp__photo { margin: 0; overflow: hidden; aspect-ratio: 16 / 9; }
-  .esp__photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
-  .esp:hover .esp__photo img { transform: scale(1.04); }
-  .esp__body { padding: clamp(1.4rem, 2.6vw, 2.2rem); }
-  .esp__top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: .8rem; }
-  .esp__cap { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-ink); white-space: nowrap; }
-  .esp-cta { display: flex; align-items: center; gap: 1.4rem; margin-top: clamp(1.8rem, 4vw, 2.6rem); flex-wrap: wrap; }
-  .esp-cta .muted { font-size: .88rem; }
-
-  .cta-band { background: var(--ink); color: var(--paper); padding-block: clamp(4rem, 8vw, 6.5rem); }
-  .cta-band .h2 { color: var(--paper); }
-  .cta-band .lead { color: rgba(242,242,242,.7); margin-top: 1.2rem; max-width: 40ch; }
-  .btn--invert { background: var(--paper); color: var(--ink); border-color: var(--paper); }
-  .btn--invert:hover { background: transparent; color: var(--paper); }
-
-  .contacto__grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(2.5rem, 6vw, 5rem); align-items: start; }
-  .contacto__alt { margin-top: 2.2rem; font-size: .95rem; color: rgba(242,242,242,.55); }
-  .contacto__alt-link { color: var(--paper); border-color: rgba(242,242,242,.3); margin-left: .5rem; font-size: .78rem; }
-  .cal-plain { background: none; border: 0; padding: 0; font-family: inherit; cursor: pointer; }
-  .cfields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.2rem; margin-bottom: 1.6rem; }
-  .cfield { display: flex; flex-direction: column; gap: .45rem; }
-  .cfield--wide { grid-column: 1 / -1; }
-  .cfield > span { font-size: .78rem; letter-spacing: .06em; color: rgba(242,242,242,.6); }
-  .cfield i { font-style: normal; opacity: .6; }
-  .cfield input, .cfield select, .cfield textarea {
-    font-family: var(--sans); font-size: 1rem; color: var(--paper);
-    padding: .85em 1em; border: 1px solid rgba(242,242,242,.18); border-radius: var(--radius);
-    background: rgba(255,255,255,.06); transition: border-color .3s var(--ease); resize: vertical;
-  }
-  .cfield input::placeholder, .cfield textarea::placeholder { color: rgba(242,242,242,.35); }
-  .cfield select { color: var(--paper); }
-  .cfield select option { color: var(--ink); background: var(--paper); }
-  .cfield input:focus, .cfield select:focus, .cfield textarea:focus { outline: none; border-color: var(--gold); }
-  .contacto__done { grid-column: 1 / -1; text-align: center; padding-block: 2rem; }
-  .contacto__mark { width: 64px; height: 64px; border-radius: 50%; background: var(--gold); color: var(--ink); display: grid; place-items: center; font-size: 1.8rem; margin: 0 auto 1.4rem; }
-  .contacto__done .lead { margin-inline: auto; }
-
-  @media (max-width: 980px) { .cabgrid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 900px) { .puertas__grid { grid-template-columns: 1fr; } .puerta__media { aspect-ratio: 16 / 9; } }
   @media (max-width: 760px) {
-    .two { grid-template-columns: 1fr; align-items: start; }
     .hero__inner { grid-template-columns: 1fr; }
     .hero__photo { max-height: 340px; order: -1; }
-    .exp-body { grid-template-columns: 1fr; }
-    .exp-photo { max-height: 380px; }
-    .grid-esp { grid-template-columns: 1fr; }
-    .pp-card { grid-template-columns: 1fr; }
-    .pp-card__media { min-height: 220px; }
-    .grid-marcas { grid-template-columns: 1fr; }
-    .contacto__grid { grid-template-columns: 1fr; }
-    .cfields { grid-template-columns: 1fr; }
-    .cabgrid { grid-template-columns: 1fr; }
   }
 </style>
-
-<!-- Cards de eventos: inyectadas por JS → estilos globales (sin scope Astro) -->
-

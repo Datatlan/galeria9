@@ -15,7 +15,15 @@ const { standalone = false } = Astro.props;
       </div>
       <div class="reveal">
         <p class="lead">Talleres, activaciones y encuentros abiertos en Galería 9. Aparta tu lugar.</p>
-        {!standalone && <a href="/eventos" class="link-arrow agenda__all">Ver todos los eventos →</a>}
+        {!standalone && (
+          <div class="agenda__actions">
+            <a href="/eventos" class="link-arrow">Ver todos los eventos →</a>
+            <div class="agenda__nav" id="agendaNav" hidden>
+              <button type="button" class="agenda__arrow" data-dir="-1" aria-label="Eventos anteriores">←</button>
+              <button type="button" class="agenda__arrow" data-dir="1" aria-label="Más eventos">→</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
     <div class="grid-ev" id="agendaGrid"></div>
@@ -85,6 +93,15 @@ const { standalone = false } = Astro.props;
       </article>`).join('');
     section.hidden = false;
 
+    // Embebido: carrusel horizontal; flechas solo si hay más tarjetas de las que caben.
+    if (!standalone) {
+      const nav = document.getElementById('agendaNav');
+      const sync = () => { nav.hidden = grid.scrollWidth <= grid.clientWidth + 4; };
+      nav.querySelectorAll('.agenda__arrow').forEach((b) =>
+        b.addEventListener('click', () => grid.scrollBy({ left: Number(b.dataset.dir) * grid.clientWidth * 0.9, behavior: 'smooth' })));
+      sync(); window.addEventListener('resize', sync);
+    }
+
     // Modal "Me interesa"
     const modal = document.getElementById('evModal');
     const evForm = document.getElementById('evForm');
@@ -132,7 +149,14 @@ const { standalone = false } = Astro.props;
   /* Lo estático del componente (con scope). Las CARDS se inyectan por JS, así
      que sus estilos van en el bloque is:global de abajo. */
   .grid-ev { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.8rem; margin-top: 2.5rem; }
-  .agenda__all { display: inline-flex; margin-top: 1.2rem; }
+  .agenda__actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.2rem; }
+  .agenda__nav { display: flex; gap: .5rem; }
+  .agenda__nav[hidden] { display: none; }
+  .agenda__arrow {
+    width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--ink-12); background: var(--white);
+    color: var(--ink); font-size: 1rem; cursor: pointer; transition: border-color .3s var(--ease), background .3s var(--ease);
+  }
+  .agenda__arrow:hover { border-color: var(--ink); }
   .agenda--page { min-height: 60vh; }
   .agenda__empty { margin-top: 2.5rem; max-width: 46ch; }
 
@@ -175,4 +199,15 @@ const { standalone = false } = Astro.props;
   /* margin-top:auto pega el botón al fondo: misma distancia al borde inferior
      sin importar si el título es de 1 o 2 líneas. */
   .ev-card__btn { margin-top: auto; align-self: flex-start; }
+
+  /* Embebido (home, /espacios): carrusel horizontal con snap. /eventos queda en grid. */
+  .agenda:not(.agenda--page) .grid-ev {
+    grid-template-columns: none; grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 2 * 1.8rem) / 3);
+    overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+    padding: 6px 2px 1rem; scrollbar-width: thin;
+  }
+  .agenda:not(.agenda--page) .ev-card { scroll-snap-align: start; }
+  @media (max-width: 900px) { .agenda:not(.agenda--page) .grid-ev { grid-auto-columns: calc((100% - 1.8rem) / 1.6); } }
+  @media (max-width: 600px) { .agenda:not(.agenda--page) .grid-ev { grid-auto-columns: 85%; } }
 </style>
