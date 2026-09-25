@@ -5,7 +5,7 @@ Staging comparte la base de Airtable de producción: los envíos desde `staging.
 
 ---
 
-## 01 · Eventos — CERRADO (pendiente de construir)
+## 01 · Eventos — CONSTRUIDO en staging
 
 **Objetivo:** recopilar los datos del evento sin pedir presupuesto ni mostrar cotizaciones o tarifas internas. No dispara reserva: el equipo confirma disponibilidad y aparta el espacio manualmente.
 
@@ -36,7 +36,7 @@ Staging comparte la base de Airtable de producción: los envíos desde `staging.
 
 ---
 
-## 02 · Punto Presencia — CERRADO (pendiente de construir)
+## 02 · Punto Presencia — CONSTRUIDO en staging
 
 **Página nueva `/punto-presencia`**; la tarjeta Punto Presencia de /estrategias apunta ahí (hoy manda al contacto genérico).
 
@@ -63,3 +63,51 @@ Staging comparte la base de Airtable de producción: los envíos desde `staging.
 
 **Pendiente de preguntar al cliente**
 - **Plan Básico:** el catálogo tiene 3 planes (Básico, Visibilidad, Expansión) y el form solo ofrece Visibilidad y Expansión. ¿Se retira Básico? Si sí, sacarlo del catálogo de Airtable.
+
+---
+
+## 03 · Tu Talento es un Arte / Invitado Especial — CONSTRUIDO en staging
+
+Un solo componente (`components/SolicitudTalento.astro`) usado en **/tu-talento** y **/invitado-especial** (página nueva). El origen se manda como `Interes` del Lead ("Tu Talento es un Arte" / "Invitado Especial") y también va en `Detalle`.
+
+**Campos:** nombre · WhatsApp · correo · página web (opcional) · Instagram (opcional) · giro o talento (largo) · concepto y piezas a exhibir (largo, va en `Mensaje`).
+
+**Cambio de comportamiento:** Tu Talento **dejaba de ser consistente** — creaba una Orden en Borrador + Line_Item (script `marketForm.js`). Ahora crea un Lead, como el resto del sitio. La nota de requisitos (logo, QR, pago) se quitó: eso se pide en el onboarding.
+
+---
+
+## 04 · Tester Day — PENDIENTE (Luis confirma con el cliente)
+
+Idea: mostrar las fechas de Tester Day y que la marca llene "Quiero participar" para una fecha concreta.
+- **A) Fechas automáticas:** el sitio calcula los próximos ~6 miércoles (la página actual dice "todos los miércoles, 10:00 am a 2:00 pm"). Sin Worker ni Airtable.
+- **B) Fechas en Airtable:** Fer da de alta cada fecha y puede cancelar o poner cupo. Requiere una lectura nueva en el Worker.
+
+**Campos (del brief):** nombre · WhatsApp · correo · Instagram · ¿qué vendes o de qué trata tu marca? (largo) · ¿qué vas a regalar? (largo).
+**Info visible:** "Las dinámicas son express: máximo 15 minutos de interacción con cada cliente."
+`/tester-day` sigue en su versión vieja (crea Orden en Borrador) hasta cerrar esta decisión; la tarjeta de /estrategias manda al contacto.
+
+---
+
+## 05 · Agencia (Expresa tu talento + agencia) — CONSTRUIDO en staging
+
+Servicio nuevo. Página **/agencia** con diagnóstico breve → Lead con `Interes = Agencia` (la opción se creó sola en Airtable al primer envío).
+
+**Campos:** nombre · WhatsApp · correo · giro de negocio o talento · link de Instagram.
+
+**Pendiente de confirmar:** el brief se cortaba en "Datos de contacto". Si hay preguntas de diagnóstico adicionales, se agregan aquí.
+
+---
+
+## Reacomodo de las 3 puertas del home
+
+- Transformación → **/habitos**
+- Conexión → **/estrategias** (las 6 tarjetas: Eventos, Punto Presencia, Pop Up, Tu Talento, Tester Day, Invitado)
+- Expansión → **/agencia**
+
+A dónde lleva cada tarjeta de /estrategias: Eventos → /cotiza · Punto Presencia → /punto-presencia · Pop Up → /pop-up · Tu Talento → /tu-talento · Invitado → /invitado-especial · Tester Day → contacto (hasta cerrar el 04).
+
+## Reglas comunes
+
+- Correo **obligatorio** en todos (el brief no lo marca opcional).
+- Todo lo que se crea desde `staging.` o local lleva `test_record = true`.
+- "Cotiza tu evento" → "Solicita tu evento" en todo el sitio. Se borró el cotizador viejo (`cotiza.js`, `data/catalogo.js`).
