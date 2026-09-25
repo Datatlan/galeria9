@@ -92,7 +92,7 @@ const { standalone = false } = Astro.props;
             ? `<div class="ev-card__btns">
                 <button type="button" class="btn ev-card__btn"
                   data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Quiero asistir</button>
-                <a class="btn btn--ghost" href="/tester-day?fecha=${encodeURIComponent(e.id)}">Expón tu marca</a>
+                <a class="link-arrow ev-card__alt" href="/tester-day?fecha=${encodeURIComponent(e.id)}">Expón tu marca →</a>
               </div>`
             : `<button type="button" class="btn ev-card__btn"
                 data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Me interesa</button>`}
@@ -207,7 +207,7 @@ const { standalone = false } = Astro.props;
      sin importar si el título es de 1 o 2 líneas. */
   .ev-card__btn { margin-top: auto; align-self: flex-start; }
   /* Tester Day: dos botones (asistentes / marcas) pegados al fondo */
-  .ev-card__btns { margin-top: auto; display: flex; flex-wrap: wrap; gap: .5rem; }
+  .ev-card__btns { margin-top: auto; display: flex; flex-direction: column; align-items: flex-start; gap: .9rem; }
   .ev-card__btns .ev-card__btn { margin-top: 0; }
   .ev-card__tag { align-self: flex-start; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--ink); background: var(--sand); border-radius: 999px; padding: .25em .75em; }
 
