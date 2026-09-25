@@ -89,9 +89,9 @@ const { standalone = false } = Astro.props;
           ${e.descripcion ? `<p class="muted">${escEv(e.descripcion)}</p>` : ''}
           ${e.tipo === 'Tester Day'
             ? `<div class="ev-card__btns">
+                <a class="link-arrow ev-card__alt" href="/tester-day?fecha=${encodeURIComponent(e.id)}">Expón tu marca →</a>
                 <button type="button" class="btn ev-card__btn"
                   data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Quiero asistir</button>
-                <a class="link-arrow ev-card__alt" href="/tester-day?fecha=${encodeURIComponent(e.id)}">Expón tu marca →</a>
               </div>`
             : `<button type="button" class="btn ev-card__btn"
                 data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Me interesa</button>`}
