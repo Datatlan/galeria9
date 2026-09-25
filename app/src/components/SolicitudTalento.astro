@@ -1,0 +1,59 @@
+---
+// 03 · Tu Talento es un Arte / Invitado Especial (v2): un solo formulario para
+// ambas secciones. `origen` se manda como Interés del Lead para que el equipo
+// sepa desde dónde llegó la solicitud.
+const { origen, eyebrow, titulo, lead, incluye = [] } = Astro.props;
+---
+<section class="section">
+  <div class="wrap">
+    <header class="mhead reveal">
+      <span class="eyebrow">{eyebrow}</span>
+      <h1 class="h2" style="margin-top:1rem">{titulo}</h1>
+      <p class="lead">{lead}</p>
+      {incluye.length > 0 && (
+        <div class="mincluye">{incluye.map((i) => <span>{i}</span>)}</div>
+      )}
+    </header>
+
+    <form id="f" class="mform reveal" novalidate data-origen={origen}>
+      <div class="mform-two">
+        <label class="mfield"><span>Nombre</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
+        <label class="mfield"><span>Celular / WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+        <label class="mfield mfield--wide"><span>Correo electrónico</span><input type="email" name="correo" placeholder="tu@correo.com" required /></label>
+        <label class="mfield"><span>Página web <span class="muted">(opcional)</span></span><input type="text" name="web" placeholder="tumarca.com" /></label>
+        <label class="mfield"><span>Instagram <span class="muted">(opcional)</span></span><input type="text" name="instagram" placeholder="@tumarca" /></label>
+        <label class="mfield mfield--wide"><span>Describe tu giro de negocio o tu talento</span><textarea name="giro" rows="4" placeholder="Quién eres, qué haces y qué te distingue" required></textarea></label>
+        <label class="mfield mfield--wide"><span>Cuéntanos tu concepto y las piezas que te gustaría exhibir</span><textarea name="concepto" rows="6" placeholder="La idea de tu exhibición, qué piezas traerías, formatos, cantidades…" required></textarea></label>
+      </div>
+      <div><button type="submit" class="btn">Enviar solicitud</button></div>
+    </form>
+
+    <div class="mdone" id="done" hidden>
+      <div class="mdone__mark">✓</div>
+      <h2 class="h2">¡Recibimos tu solicitud!</h2>
+      <p class="lead">Revisamos tu propuesta y te contactamos muy pronto por WhatsApp.</p>
+      <div class="mdone__actions">
+        <button type="button" class="btn" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Conoce el espacio · Agenda una visita</button>
+        <a href="/" class="btn btn--ghost">Volver al inicio</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/calPopup.js';
+  import { initLeadForm, lineas } from '../scripts/leadForm.js';
+  const origen = document.getElementById('f').dataset.origen;
+  initLeadForm({
+    build: (g) => ({
+      interes: origen,
+      mensaje: g('concepto'),
+      detalle: lineas([
+        ['Origen', origen],
+        ['Web', g('web')],
+        ['Instagram', g('instagram')],
+        ['Giro / talento', g('giro')],
+      ]),
+    }),
+  });
+</script>

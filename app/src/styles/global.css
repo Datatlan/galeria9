@@ -141,3 +141,39 @@ main > .section:first-child { padding-top: clamp(2.5rem, 6vw, 4rem); }
 .mhead { max-width: 620px; margin-bottom: clamp(2rem, 5vw, 3rem); }
 
 @media (max-width: 640px) { .mform-two { grid-template-columns: 1fr; } }
+
+/* ==========================================================================
+   Formularios v2 — tarjetas seleccionables (radio/checkbox con check) y promo
+   ========================================================================== */
+.opt-group { border: 0; padding: 0; margin: 0; min-width: 0; }
+.opt-group legend { font-size: .82rem; letter-spacing: .04em; color: var(--ink-70); margin-bottom: .5rem; padding: 0; }
+.opt-cards { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+.opt-card {
+  position: relative; display: flex; flex-direction: column; gap: .35rem;
+  padding: 1.1rem 3rem 1.2rem 1.2rem; border: 1px solid var(--ink-12); border-radius: var(--radius);
+  background: var(--white); cursor: pointer; transition: border-color .25s var(--ease), box-shadow .25s var(--ease);
+}
+.opt-card:hover { border-color: var(--ink-45); }
+.opt-card input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.opt-card__check {
+  position: absolute; top: 1rem; right: 1rem; width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--ink-45); display: grid; place-items: center; transition: background .2s var(--ease), border-color .2s var(--ease);
+}
+.opt-card__check::after { content: "✓"; font-size: .75rem; line-height: 1; color: var(--paper); opacity: 0; transition: opacity .2s var(--ease); }
+.opt-card:has(input:checked) { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.opt-card:has(input:checked) .opt-card__check { background: var(--ink); border-color: var(--ink); }
+.opt-card:has(input:checked) .opt-card__check::after { opacity: 1; }
+.opt-card:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 2px; }
+.opt-card__t { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--ink); }
+.opt-card__sub { font-size: 1.05rem; color: var(--ink); }
+.opt-card__d { font-size: .86rem; color: var(--ink-70); line-height: 1.5; }
+.opt-group.invalid .opt-card { border-color: #b4523f; }
+.mfield-err { color: #b4523f; font-size: .78rem; }
+.mfield.invalid input { border-color: #b4523f; }
+
+.promo { max-width: 640px; margin-bottom: 2rem; padding: 1.1rem 1.3rem; background: var(--sand); border-left: 3px solid var(--gold); border-radius: var(--radius); }
+.promo__t { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); font-weight: 600; }
+.promo p { margin-top: .4rem; font-size: .95rem; color: var(--ink); line-height: 1.55; }
+.mdone__actions { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; }
+
+@media (max-width: 640px) { .opt-cards, .mform-two { grid-template-columns: 1fr; } }

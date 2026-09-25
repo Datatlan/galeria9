@@ -87,12 +87,18 @@ export async function crear(tableId, fields) {
   return rec[0];
 }
 
+// Staging y local comparten la base de producción: todo lo que se crea desde
+// ahí se marca test_record (todas las tablas lo tienen) para poder filtrarlo.
+const ES_PRUEBA = typeof location !== 'undefined'
+  && (location.hostname.startsWith('staging.') || ['localhost', '127.0.0.1'].includes(location.hostname));
+
 // Crea VARIOS registros (hasta 50) en una sola llamada. Devuelve el array.
 export async function crearMuchos(tableId, listaFields) {
+  const marca = ES_PRUEBA ? { test_record: true } : {};
   const res = await fetch(`${WORKER}?b=${BASE}&t=${tableId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ records: listaFields.map((fields) => ({ fields })), typecast: true }),
+    body: JSON.stringify({ records: listaFields.map((fields) => ({ fields: { ...fields, ...marca } })), typecast: true }),
   });
   if (!res.ok) {
     const txt = await res.text().catch(() => '');

@@ -1,0 +1,73 @@
+---
+// 02 · Punto Presencia (v2): el cliente elige plan (Visibilidad / Expansión)
+// y cae en Leads. En la confirmación puede agendar su visita (Cal.com) —
+// agregado nuestro al brief del cliente.
+import Base from '../layouts/Base.astro';
+
+const planes = [
+  { v: 'Visibilidad', sub: 'Expande tu visibilidad', d: 'Dale a tu marca un punto físico y un punto de entrega. Crea tus eventos, participa en un open house, obtén visibilidad en las redes de Galería 9, valida tu producto y empieza a crear comunidad.' },
+  { v: 'Expansión', sub: 'Tu marca, con apoyo creativo', d: 'Incluye los beneficios de Visibilidad y suma tu propia agencia de creación de contenido: contenido digital para tus redes e Instagram personalizado especialmente para tu marca.' },
+];
+---
+<Base title="Punto Presencia — Galería 9" description="Tu marca encuentra un espacio físico en Galería 9. Elige tu plan: Visibilidad o Expansión.">
+  <section class="section">
+    <div class="wrap">
+      <header class="mhead reveal">
+        <span class="eyebrow">Market · Punto Presencia</span>
+        <h1 class="h2" style="margin-top:1rem">Punto Presencia.</h1>
+        <p class="lead">Tu marca encuentra un espacio físico. Membresía de 6 meses para compartir, validar y expandir la comunidad de tu marca.</p>
+      </header>
+
+      <form id="f" class="mform reveal" novalidate>
+        <div class="mform-two">
+          <label class="mfield"><span>Nombre</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
+          <label class="mfield"><span>Celular / WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+          <label class="mfield"><span>Correo electrónico</span><input type="email" name="correo" placeholder="tu@correo.com" required /></label>
+          <label class="mfield"><span>Instagram de la marca</span><input type="text" name="instagram" placeholder="@tumarca" required /></label>
+
+          <fieldset class="mfield mfield--wide opt-group">
+            <legend>¿Qué plan te interesa?</legend>
+            <div class="opt-cards">
+              {planes.map((p) => (
+                <label class="opt-card">
+                  <input type="radio" name="plan" value={p.v} />
+                  <span class="opt-card__check" aria-hidden="true"></span>
+                  <span class="opt-card__t">{p.v}</span>
+                  <span class="opt-card__sub">{p.sub}</span>
+                  <span class="opt-card__d">{p.d}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+        <div><button type="submit" class="btn">Enviar solicitud</button></div>
+      </form>
+
+      <div class="mdone" id="done" hidden>
+        <div class="mdone__mark">✓</div>
+        <h2 class="h2">¡Recibimos tu solicitud!</h2>
+        <p class="lead">El equipo se pondrá en contacto contigo para agendar una visita — o si gustas, agenda una visita de una vez.</p>
+        <div class="mdone__actions">
+          <button type="button" class="btn" data-cal-link="galeria-9-raembd/visita-galeria-9" data-cal-namespace="visita" data-cal-config='{"layout":"month_view","theme":"light"}'>Agendar visita</button>
+          <a href="/" class="btn btn--ghost">Volver al inicio</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/calPopup.js';
+    import { initLeadForm, grupoObligatorio, lineas } from '../scripts/leadForm.js';
+    const planOk = grupoObligatorio(document.getElementById('f'), 'plan');
+    initLeadForm({
+      validate: () => planOk(),
+      build: (g) => ({
+        interes: 'Punto Presencia',
+        detalle: lineas([
+          ['Plan', g('plan')],
+          ['Instagram', g('instagram')],
+        ]),
+      }),
+    });
+  </script>
+</Base>

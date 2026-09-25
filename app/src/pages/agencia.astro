@@ -1,0 +1,50 @@
+---
+// 05 · Agencia (v2): servicio nuevo "Expresa tu talento + agencia". Formulario
+// de diagnóstico breve (distinto al de Punto Presencia) → Leads, Interes = Agencia.
+// Es la tercera puerta del home (Expansión).
+import Base from '../layouts/Base.astro';
+---
+<Base title="Expresa tu talento + agencia — Galería 9" description="Un diagnóstico breve para conocer tu marca y cómo acompañarla con estrategia y creación de contenido.">
+  <section class="section">
+    <div class="wrap">
+      <header class="mhead reveal">
+        <span class="eyebrow">Expansión · Comunicación y estrategias</span>
+        <h1 class="h2" style="margin-top:1rem">Expresa tu talento<br/>+ agencia.</h1>
+        <p class="lead">Un diagnóstico breve para conocer tu marca. Déjanos tus datos y te contactamos para platicar cómo acompañarte con estrategia y creación de contenido.</p>
+      </header>
+
+      <form id="f" class="mform reveal" novalidate>
+        <div class="mform-two">
+          <label class="mfield"><span>Nombre</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
+          <label class="mfield"><span>Celular / WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+          <label class="mfield mfield--wide"><span>Correo electrónico</span><input type="email" name="correo" placeholder="tu@correo.com" required /></label>
+          <label class="mfield mfield--wide"><span>Giro de negocio o talento</span><input type="text" name="giro" placeholder="Ej. Joyería artesanal, coaching, repostería…" required /></label>
+          <label class="mfield mfield--wide"><span>Link de Instagram</span><input type="text" name="instagram" placeholder="instagram.com/tumarca" required /></label>
+        </div>
+        <div><button type="submit" class="btn">Enviar</button></div>
+      </form>
+
+      <div class="mdone" id="done" hidden>
+        <div class="mdone__mark">✓</div>
+        <h2 class="h2">¡Recibimos tus datos!</h2>
+        <p class="lead">Te contactamos muy pronto para platicar de tu marca.</p>
+        <div class="mdone__actions">
+          <a href="/" class="btn btn--ghost">Volver al inicio</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { initLeadForm, lineas } from '../scripts/leadForm.js';
+    initLeadForm({
+      build: (g) => ({
+        interes: 'Agencia',
+        detalle: lineas([
+          ['Giro / talento', g('giro')],
+          ['Instagram', g('instagram')],
+        ]),
+      }),
+    });
+  </script>
+</Base>
