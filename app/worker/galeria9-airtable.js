@@ -113,9 +113,11 @@ export default {
         const hit = await cache.match(cacheKey);
         if (hit) return hit;
 
+        // SIN lista fields[] a proposito: Airtable responde 422 a TODA la consulta si
+        // se pide un campo que no existe (o se renombro), y la agenda se cae. La
+        // frontera de privacidad no es esta consulta sino el mapeo de abajo: solo
+        // esos datos de marquesina salen del Worker (nunca el Nombre interno).
         const pe = new URLSearchParams();
-        ['Titulo_Publico', 'Descripcion_Publica', 'Fecha_Inicio', 'Fecha_Fin', 'Espacio', 'Imagen', 'Tipo']
-          .forEach((f) => pe.append('fields[]', f));
         // Sin Fecha_Fin el evento igual cuenta: se usa Fecha_Inicio como referencia.
         pe.set('filterByFormula', "AND({Visibilidad}='Público', IS_AFTER(IF({Fecha_Fin}, {Fecha_Fin}, {Fecha_Inicio}), NOW()))");
         pe.set('pageSize', '100');
