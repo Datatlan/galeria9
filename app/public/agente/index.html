@@ -670,8 +670,18 @@
   }
   function aviso(msg){ $("err").textContent = msg || ""; $("err").hidden = !msg; }
 
+  // Enter en un campo de una línea NO envía el form (el navegador lo haría en cualquier paso);
+  // en textarea sí deja hacer salto de línea.
+  $("f").addEventListener("keydown", function(e){
+    if (e.key === "Enter" && e.target.tagName === "INPUT") e.preventDefault();
+  });
+  var enviando = false, enviado = false;
+
   $("f").addEventListener("submit", function(e){
     e.preventDefault();
+    // solo se envía desde el paso del plan, con el botón Enviar, y una sola vez
+    if (order[step] !== "plan" || enviando) return;
+    if (enviado) { go(order.indexOf("gracias")); return; }
     aviso("");
     if (!v("cName") || !v("cCompany") || (!v("cPhone") && !v("cEmail"))) {
       aviso("Faltan tus datos de contacto: nombre, empresa y teléfono o correo."); go(order.indexOf("datos")); return;
@@ -683,7 +693,7 @@
     var fields = collect();
     Object.keys(fields).forEach(function(k){ if (fields[k] === "" || fields[k] == null) delete fields[k]; });
     if (ES_PRUEBA) fields.test_record = true;
-    var btn = $("submit"); btn.disabled = true; btn.textContent = "Enviando…";
+    var btn = $("submit"); btn.disabled = true; btn.textContent = "Enviando…"; enviando = true;
 
     fetch(WORKER + "?b=" + BASE + "&t=" + TABLA, {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -695,12 +705,12 @@
         // los archivos van después: si alguno falla, la solicitud ya quedó guardada
         return Promise.all(files.map(function(x){ return subir(id, x[0], x[1]).catch(function(err){ console.warn("No se subió", x[1].name, err); }); }));
       })
-      .then(function(){ go(order.indexOf("gracias")); })
+      .then(function(){ enviado = true; go(order.indexOf("gracias")); })
       .catch(function(err){
         console.error(err);
         aviso("No pudimos enviar tu solicitud. Revisa tu conexión e intenta de nuevo.");
       })
-      .finally(function(){ btn.disabled = false; btn.textContent = "Enviar"; });
+      .finally(function(){ enviando = false; btn.disabled = false; btn.textContent = enviado ? "Enviado ✓" : "Enviar"; });
   });
 
 
