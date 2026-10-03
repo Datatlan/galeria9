@@ -151,7 +151,6 @@
     .side{position:fixed;inset:0;z-index:30;background:rgba(13,27,42,.55);display:none;align-items:center;justify-content:center;padding:16px;overflow:auto}
     body.peeking .side{display:flex;flex-direction:column}
     .side .cap{color:#fff}
-    .peek{display:inline-flex;align-items:center;gap:6px;position:fixed;right:14px;bottom:86px;z-index:35;border:0;border-radius:999px;background:var(--ink);color:#fff;font:inherit;font-weight:700;font-size:14px;padding:11px 16px;box-shadow:0 12px 30px -12px rgba(13,27,42,.6);cursor:pointer}
     .bar .steps{display:none}
     .r2,.r3,.plans{grid-template-columns:1fr}
     .hint,.where{margin-left:0}
@@ -194,7 +193,17 @@
   .plan ul{font-weight:300}
   .sum .r.t{font-weight:500}
   .cap{letter-spacing:.32em;font-weight:500;color:var(--azul-ink)}
-  .peek{border-radius:2px;letter-spacing:.12em;text-transform:uppercase;font-size:12px;font-weight:500}
+  /* celular: "Ver el chat" va en la barra de abajo, junto al número de paso; Anterior/Siguiente en su propio renglón */
+  @media (max-width:960px){
+    .peek{display:inline-flex;align-items:center;gap:6px;order:1;border:1px solid var(--ink);background:transparent;color:var(--ink);font:inherit;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;border-radius:2px;cursor:pointer}
+    .peek::before{content:"";width:9px;height:14px;border:1.5px solid currentColor;border-radius:2px}
+    .nav{gap:10px 8px;padding:12px 0 14px}
+    .nav .pg{order:0;flex:1 1 auto}
+    .nav .err{order:2}
+    #prev,#next,#submit{order:3;flex:1 1 0;padding:13px 10px}
+    body.peeking .nav{z-index:40}
+    body.peeking .peek{background:var(--ink);color:var(--bg)}
+  }
   .done h2{font-weight:200;font-size:30px}
   .eyebrow{display:block;font-size:11px;letter-spacing:.32em;text-transform:uppercase;font-weight:500;color:var(--azul-ink);margin-bottom:10px}
   section.intro h1,section.thanks h1{font-size:34px;font-weight:200;letter-spacing:-.01em;margin:0 0 12px;line-height:1.1}
@@ -383,6 +392,7 @@
         <div class="nav">
           <span class="pg" id="pg">Paso 1 de 6</span>
           <span class="err" id="err" role="alert" hidden></span>
+          <button class="peek" type="button" id="peek">Ver dónde aparece</button>
           <button class="ghost" type="button" id="prev">← Anterior</button>
           <button class="btn" type="button" id="next">Siguiente →</button>
           <button class="btn" type="submit" id="submit" hidden>Enviar</button>
@@ -426,7 +436,6 @@
       </div></div>
     </aside>
   </div>
-  <button class="peek" type="button" id="peek">Ver dónde aparece</button>
 
 <script>
 (function(){
