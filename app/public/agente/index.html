@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alta de asistente · Galería 9</title>
+<style>
+  :root{
+    /* Galería 9 (BrandingKit_V1): tinta, papel, arena y dorado. Los nombres --azul* se conservan
+       como alias de "acento activo" para no reescribir cada regla. */
+    --ink:#2b2b2a;--soft:rgba(43,43,42,.72);--muted:rgba(43,43,42,.5);--line:rgba(43,43,42,.14);--bg:#f2f2f2;--paper:#fff;
+    --azul:#2b2b2a;--azul-ink:#8a7a52;--azul-wash:#e4dfd8;--teal:#8a7a52;--gold:#c2b494;
+    --font:"Helvetica Neue",Helvetica,"Inter",Arial,sans-serif;
+    /* colores de la marca que llena el form (los cambia la sección Marca) */
+    --b-primary:#2b2b2a;--b-accent:#8a7a52;--b-bg:#f2f2f2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .bar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .bar svg{width:26px;height:26px;flex:none}
+  .bar b{font-size:15px;letter-spacing:-.01em}
+  .bar .crumb{color:var(--muted);font-size:14px}
+  .bar .steps{margin-left:auto;display:flex;gap:4px}
+  .bar .steps a{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;text-decoration:none;color:var(--muted);background:var(--bg)}
+  .bar .steps a.on{background:var(--azul);color:#fff}
+
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;max-width:1120px;margin:0 auto;padding:24px 24px 0}
+  .intro{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+  .intro h1{margin:0 0 6px;font-size:21px;letter-spacing:-.02em}
+  .intro p{margin:0;color:var(--soft);font-size:14.5px;line-height:1.5}
+
+  section{display:none;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+  section.on{display:block}
+  .where{display:flex;gap:10px;align-items:flex-start;margin:10px 0 18px 36px;padding:10px 12px;border-radius:10px;background:var(--azul-wash);color:var(--azul-ink);font-size:13px;line-height:1.45}
+  .where svg{width:16px;height:16px;flex:none;margin-top:1px}
+  .where b{color:var(--ink)}
+  /* botones siempre abajo: la columna llena la ventana y la barra se pega al fondo */
+  .grid > div:first-child{display:flex;flex-direction:column;min-height:calc(100vh - 83px)}
+  form{display:flex;flex-direction:column;flex:1}
+  .nav{display:flex;align-items:center;gap:10px;margin-top:auto;position:sticky;bottom:0;z-index:5;background:var(--bg);padding:14px 0 20px;border-top:1px solid var(--line)}
+  .nav .pg{color:var(--muted);font-size:13px;margin-right:auto}
+  .ghost{border:1.5px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-weight:650;font-size:15px;border-radius:12px;padding:11px 18px;cursor:pointer}
+  .ghost:hover{border-color:var(--azul);color:var(--azul-ink)}
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+  .plan{position:relative;display:block;border:1.5px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;background:#fff;margin:0;transition:border-color .15s,box-shadow .15s}
+  .plan:has(input:checked){border-color:var(--azul);box-shadow:0 10px 26px -18px rgba(37,99,235,.7);background:linear-gradient(#fff,#f7faff)}
+  .plan input{position:absolute;top:16px;right:16px;accent-color:var(--azul)}
+  .plan b{display:block;font-size:16px;color:var(--ink)}
+  .plan .pr{display:block;margin:6px 0 10px;font-size:13px;color:var(--muted);font-weight:500}
+  .plan .pr strong{font-size:24px;color:var(--ink);letter-spacing:-.02em}
+  .plan ul{margin:0;padding-left:18px;font-size:13px;font-weight:500;color:var(--soft);line-height:1.6}
+  .seg .save{font-size:11px;font-weight:700;color:var(--teal);margin-left:2px}
+  .sum{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;font-size:14px}
+  .sum .r{display:flex;justify-content:space-between;gap:10px;padding:3px 0;color:var(--soft)}
+  .sum .r.t{color:var(--ink);font-weight:800;font-size:16px;padding-top:8px}
+  .sum .r .off{color:var(--teal);font-weight:700}
+  .sum p{margin:10px 0 0;color:var(--muted);font-size:12.5px;line-height:1.45}
+  .m-pb{align-self:center;margin:0 auto 8px;padding:4px 10px;border-radius:999px;background:#e4dfd8;border:1px solid rgba(43,43,42,.14);color:#8a7a52;font-size:9.5px;font-weight:500;letter-spacing:.04em}
+  .m-pb b{color:#2b2b2a;font-weight:600}
+  .m-pb[hidden]{display:none}
+  .ghost[hidden],.btn[hidden],.add[hidden],.item .x[hidden]{display:none}
+  .sh{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .num{width:26px;height:26px;border-radius:50%;background:var(--azul-wash);color:var(--azul-ink);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+  section.on .num{background:var(--azul);color:#fff}
+  h2{margin:0;font-size:17px;letter-spacing:-.01em}
+  .hint{margin:4px 0 16px 36px;color:var(--muted);font-size:13.5px;line-height:1.45}
+  .f{margin-bottom:14px}
+  label,.lbl{display:block;font-size:12.5px;font-weight:650;color:var(--soft);margin:0 0 5px}
+  .opt{font-weight:500;color:var(--muted)}
+  input[type=text],input[type=url],input[type=tel],input[type=email],textarea{width:100%;font:inherit;font-size:14.5px;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+  textarea{resize:vertical;line-height:1.45}
+  input:focus,textarea:focus{outline:none;border-color:var(--azul)}
+  .row{display:grid;gap:12px}.r2{grid-template-columns:1fr 1fr}.r3{grid-template-columns:repeat(3,1fr)}
+  .color{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px}
+  .color input{width:34px;height:30px;border:0;padding:0;background:none;cursor:pointer}
+  .color span{font-size:13px;color:var(--soft)}
+  .seg{display:flex;flex-wrap:wrap;gap:8px}
+  .seg label{margin:0;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;border:1.5px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer;color:var(--ink)}
+  .seg label:has(input:checked){border-color:var(--azul);background:var(--azul-wash);color:var(--azul-ink)}
+  .seg input{accent-color:var(--azul)}
+  /* campo de archivo: el input nativo cubre la caja invisible (así funciona clic y arrastrar) */
+  .drop{position:relative;display:flex;align-items:center;gap:12px;margin:0;padding:12px 14px;border:1px dashed rgba(43,43,42,.32);border-radius:2px;background:#fbfaf8;cursor:pointer;transition:border-color .3s,background .3s}
+  .drop:hover,.drop.over{border-color:var(--ink);background:#fff}
+  .drop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+  .drop .ic{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:2px;background:var(--azul-wash);color:var(--ink);overflow:hidden}
+  .drop .ic svg{width:18px;height:18px}
+  .drop .ic img{width:100%;height:100%;object-fit:contain;background:#fff}
+  .drop .dt{min-width:0;display:flex;flex-direction:column}
+  .drop .dt b{font-size:11.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+  .drop .dt small{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .drop.has{border-style:solid;background:#fff}
+  .item{position:relative;border:1px dashed var(--line);border-radius:12px;padding:14px 14px 2px;margin-bottom:10px;background:#fbfcfe}
+  .item .x{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer}
+  .item .x:hover{background:var(--bg);color:var(--ink)}
+  .add{border:1.5px dashed var(--azul);background:var(--azul-wash);color:var(--azul-ink);font:inherit;font-weight:650;font-size:13.5px;border-radius:10px;padding:9px 14px;cursor:pointer;margin-bottom:14px}
+  .btn{border:0;background:var(--azul);color:#fff;font:inherit;font-weight:700;font-size:15px;border-radius:12px;padding:12px 22px;cursor:pointer}
+  .btn:hover{background:var(--azul-ink)}
+  .done{display:none;text-align:center;padding:40px 20px}
+  .done h2{font-size:22px;margin-bottom:8px}
+  .done p{color:var(--soft);margin:0}
+
+  /* ---------- vista previa ---------- */
+  .side{position:sticky;top:76px;align-self:start}
+  .cap{display:block;text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px}
+  /* el celular se diseña a 340×720 y se escala para caber completo (proporción de teléfono real) */
+  .pw{--s:.7;width:calc(340px * var(--s));height:calc(720px * var(--s));margin:0 auto}
+  .phone{width:340px;height:720px;transform:scale(var(--s));transform-origin:top left;border-radius:44px;background:#0d1b2a;padding:12px;box-shadow:0 30px 60px -30px rgba(13,27,42,.55)}
+  .screen{position:relative;width:100%;height:100%;border-radius:33px;overflow:hidden;background:var(--b-bg);display:flex;flex-direction:column;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#2b2b2a}
+
+  /* zonas: la activa se resalta, el resto se atenúa */
+  [data-zone]{transition:opacity .25s,filter .25s,box-shadow .25s;position:relative}
+  .screen.focus [data-zone],.screen.focus .m-form,.screen.focus .m-ai{opacity:.12;filter:saturate(.3) blur(.4px);transition:opacity .25s,filter .25s}
+  .screen.focus [data-zone].hl{opacity:1;filter:none;z-index:2}
+
+  .m-chat{flex:1;min-height:0;display:flex;flex-direction:column;background:#fff;margin-top:26px}
+  .m-head{display:flex;align-items:center;gap:9px;padding:11px 12px;background:linear-gradient(140deg,var(--b-primary),var(--b-accent));color:#fff}
+  .m-av{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.94);display:grid;place-items:center;flex:none;overflow:hidden;color:var(--b-primary);font-weight:800;font-size:14px}
+  .m-av img{width:100%;height:100%;object-fit:contain}
+  .m-head .tt{min-width:0;flex:1}
+  .m-head b{display:block;font-size:13.5px}
+  .m-head small{display:block;font-size:10.5px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-topics{padding:8px 0 8px 12px;border-bottom:1px solid #e6e9ef}
+  .m-topics .tl{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#64748b;font-weight:700;margin-bottom:5px}
+  .m-trow{display:flex;gap:5px;overflow:hidden;-webkit-mask-image:linear-gradient(to right,#000 80%,transparent);mask-image:linear-gradient(to right,#000 80%,transparent)}
+  .m-pill{flex:none;border:1px solid #dbe1ea;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:600;white-space:nowrap}
+  .m-log{flex:1;min-height:0;overflow:hidden;padding:12px 12px 6px;display:flex;flex-direction:column;gap:8px}
+  .m-msg{max-width:86%;padding:8px 11px;border-radius:12px;font-size:12px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
+  .m-bot{align-self:flex-start;background:#f1eee8;border-bottom-left-radius:4px}
+  .m-user{align-self:flex-end;background:var(--b-primary);color:#fff;border-bottom-right-radius:4px}
+  .m-chips{display:flex;flex-wrap:wrap;gap:5px}
+  .m-chip{border:1px solid #dbe1ea;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--b-primary)}
+  .m-kb{display:none;flex-direction:column;gap:8px}
+  .m-link{display:table;margin-top:7px;background:var(--b-primary);color:#fff;border-radius:999px;padding:5px 11px;font-weight:600;font-size:11px}
+  .screen.kb .m-start{display:none}
+  .screen.kb .m-kb{display:flex}
+  .m-handoff{display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:6px 12px 8px;font-size:10.5px;color:#64748b}
+  .m-handoff span.b{display:inline-flex;align-items:center;gap:4px;border:1px solid #dbe1ea;border-radius:999px;padding:3px 9px;font-weight:700;color:#2b2b2a}
+  .m-form{display:flex;gap:6px;padding:8px 10px;border-top:1px solid #e6e9ef}
+  .m-in{flex:1;border:1.5px solid #dbe1ea;border-radius:10px;padding:8px 10px;font-size:11.5px;color:#94a3b8}
+  .m-go{width:34px;border-radius:10px;background:var(--b-primary);opacity:.5}
+  .m-foot{padding:9px 12px 16px;text-align:center;font-size:10.5px;display:flex;flex-wrap:wrap;justify-content:center;gap:3px 12px;opacity:.9}
+  .m-foot span:empty{display:none}
+  .m-ai{font-size:9px;color:#94a3b8;padding:0 12px 6px}
+
+  /* pantallas angostas: la vista previa pasa a un panel que se abre con un botón */
+  .peek{display:none}
+  @media (max-width:960px){
+    .grid{grid-template-columns:1fr;padding:16px 14px 0}
+    .grid > div:first-child{min-height:calc(100vh - 75px)}
+    .side{position:fixed;inset:0;z-index:30;background:rgba(13,27,42,.55);display:none;align-items:center;justify-content:center;padding:16px;overflow:auto}
+    body.peeking .side{display:flex;flex-direction:column}
+    .side .cap{color:#fff}
+    .peek{display:inline-flex;align-items:center;gap:6px;position:fixed;right:14px;bottom:86px;z-index:35;border:0;border-radius:999px;background:var(--ink);color:#fff;font:inherit;font-weight:700;font-size:14px;padding:11px 16px;box-shadow:0 12px 30px -12px rgba(13,27,42,.6);cursor:pointer}
+    .bar .steps{display:none}
+    .r2,.r3,.plans{grid-template-columns:1fr}
+    .hint,.where{margin-left:0}
+  }
+
+  /* ---------- tema Galería 9 (va al final para ganarle a los estilos base) ---------- */
+  body{font-weight:300;letter-spacing:.01em}
+  .bar{padding:10px 24px}
+  .bar img{height:38px;width:auto;flex:none}
+  .bar b{font-size:13px;font-weight:500;letter-spacing:.22em;text-transform:uppercase}
+  .bar .crumb{font-size:13px;letter-spacing:.04em}
+  .bar .steps a{font-weight:500;background:transparent;border:1px solid var(--line)}
+  .bar .steps a.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+  .intro,section,.item,.plan,.color,input[type=text],input[type=url],input[type=tel],input[type=email],textarea{border-radius:2px}
+  .intro,section{border-color:var(--line)}
+  .intro h1{font-size:28px;font-weight:200;letter-spacing:-.01em;margin-bottom:8px}
+  h2{font-weight:400;font-size:19px}
+  .num{background:var(--azul-wash);color:var(--ink);font-weight:500}
+  section.on .num{background:var(--ink);color:var(--bg)}
+  label,.lbl{font-weight:400;letter-spacing:.04em;color:var(--soft)}
+  input[type=text],input[type=url],input[type=tel],input[type=email],textarea{border-width:1px;font-weight:400}
+  input:focus,textarea:focus{border-color:var(--ink)}
+  .color{border-width:1px}
+  .seg label{border-width:1px;font-weight:400;letter-spacing:.02em}
+  .seg label:has(input:checked){border-color:var(--ink);background:var(--azul-wash);color:var(--ink)}
+  .seg input,.plan input{accent-color:var(--ink)}
+  .item{background:#fbfaf8;border-color:var(--line)}
+  .add{border:1px dashed var(--ink);background:transparent;color:var(--ink);font-weight:500;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;border-radius:2px;padding:10px 16px}
+  .add:hover{background:var(--ink);color:var(--bg)}
+  .btn,.ghost{font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;border-radius:2px;padding:14px 24px;transition:background .4s,color .4s}
+  .btn{background:var(--ink);border:1px solid var(--ink);color:var(--bg)}
+  .btn:hover{background:transparent;color:var(--ink)}
+  .ghost{border:1px solid var(--ink);background:transparent}
+  .ghost:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .nav .pg{letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+  .plan{border-width:1px}
+  .plan:has(input:checked){border-color:var(--ink);box-shadow:none;background:#fff}
+  .plan b{font-weight:500;letter-spacing:.12em;text-transform:uppercase;font-size:13px}
+  .plan .pr strong{font-weight:300;font-size:30px}
+  .plan ul{font-weight:300}
+  .sum .r.t{font-weight:500}
+  .cap{letter-spacing:.32em;font-weight:500;color:var(--azul-ink)}
+  .peek{border-radius:2px;letter-spacing:.12em;text-transform:uppercase;font-size:12px;font-weight:500}
+  .done h2{font-weight:200;font-size:30px}
+  .eyebrow{display:block;font-size:11px;letter-spacing:.32em;text-transform:uppercase;font-weight:500;color:var(--azul-ink);margin-bottom:10px}
+  section.intro h1,section.thanks h1{font-size:34px;font-weight:200;letter-spacing:-.01em;margin:0 0 12px;line-height:1.1}
+  section.intro p,section.thanks p{color:var(--soft);font-size:15px;line-height:1.6;margin:0 0 12px}
+  section.intro p.sub{color:var(--ink);margin:18px 0 14px;padding-top:16px;border-top:1px solid var(--line)}
+  section.thanks{text-align:left;padding:32px 28px}
+  .thanks .mark{width:56px;height:56px;border-radius:50%;background:var(--gold);color:var(--ink);display:grid;place-items:center;font-size:24px;margin-bottom:20px}
+  .next{margin:6px 0 0;padding-left:20px;color:var(--soft);font-size:14.5px;line-height:1.6}
+  .next li{margin-bottom:8px}
+  .next b{color:var(--ink);font-weight:500}
+  section.home{padding:26px 28px 22px}
+  section.home h1{font-size:34px;font-weight:200;letter-spacing:-.015em;line-height:1.08;margin:0 0 14px;max-width:22ch}
+  section.home .lead{font-size:14px;line-height:1.55;color:var(--soft);margin:0 0 16px;max-width:60ch}
+  .sl{display:block;font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;font-weight:500;color:var(--azul-ink);margin-bottom:8px}
+  .share{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:var(--azul-wash);padding:10px 14px;margin-bottom:18px}
+  .share .sl{margin:0}
+  .share .url{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);padding:5px 11px;font-size:13px;color:var(--soft)}
+  .share .url b{color:var(--ink);font-weight:500}
+  .share .url svg{width:14px;height:14px;color:var(--azul-ink)}
+  .share .where2{flex:1 1 220px;font-size:12.5px;line-height:1.4;color:var(--soft)}
+  .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:14px}
+  .feats b{display:block;font-weight:500;font-size:13.5px;margin-bottom:3px}
+  .feats span{font-size:12.5px;color:var(--soft);line-height:1.45}
+  .how ol{margin:0;padding-left:20px;font-size:13.5px;color:var(--soft);line-height:1.6}
+  .how b{color:var(--ink);font-weight:500}
+  @media (max-width:960px){ .feats{grid-template-columns:1fr} section.home h1{font-size:30px} }
+  .bar .steps a.home-btn{width:auto;padding:0 9px;margin-right:6px;border-radius:13px}
+  .bar .steps a.home-btn svg{width:15px;height:15px}
+  .err{flex-basis:100%;order:-1;color:#a3341f;font-size:13px;letter-spacing:.01em}
+  .err[hidden]{display:none}
+  .nav{flex-wrap:wrap}
+  .btn:disabled{opacity:.5;cursor:wait}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <img src="g9-logo.png" alt="Galería 9">
+    <b>Galería 9</b><span class="crumb">/ Alta de tu asistente</span>
+    <nav class="steps" id="steps"></nav>
+  </div>
+
+  <div class="grid">
+    <div>
+      <form id="f" autocomplete="off" novalidate>
+        <section data-sec="home" id="s-home" class="home">
+          <span class="eyebrow">Galería 9 · Agente de marca</span>
+          <h1>Tu marca, atendiendo a tus clientes a cualquier hora.</h1>
+          <p class="lead">Creamos y hospedamos una página de chat para tu marca. Tus clientes preguntan y el asistente responde con tu información, los lleva a tus links y los pasa a tu WhatsApp cuando hace falta.</p>
+          <div class="share">
+            <span class="sl">Tu enlace</span>
+            <span class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>…/c/<b>tumarca</b></span>
+            <span class="where2">Listo para tu bio de Instagram, WhatsApp, un QR en tu display o tus tarjetas.</span>
+          </div>
+          <div class="feats">
+            <div><b>Nosotros lo hospedamos</b><span>No necesitas sitio web ni instalar nada. Tu asistente vive en su propia página.</span></div>
+            <div><b>Un enlace para compartir</b><span>Lo usas cuando lo necesites: en redes, mensajes o impreso.</span></div>
+            <div><b>Responde con tu información</b><span>Servicios, precios, horarios y links. Lo que no sabe, lo pasa a una persona.</span></div>
+          </div>
+          <div class="how">
+            <span class="sl">Cómo funciona</span>
+            <ol>
+              <li><b>Llenas un formulario corto</b> con tu marca y tu información.</li>
+              <li><b>Lo configuramos y lo probamos</b> por ti.</li>
+              <li><b>Te entregamos tu enlace</b> y empiezas a compartirlo.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section data-sec="datos" id="s-datos" class="intro">
+          <span class="eyebrow">Agente de marca · Galería 9</span>
+          <h1>Arma tu agente de marca</h1>
+          <p>Un asistente que contesta a tus clientes con la información de tu marca, a cualquier hora. Son 8 pasos cortos: en cada uno verás a la derecha <b>en qué parte del chat aparece</b> lo que llenas. Con esto nuestro equipo configura y publica tu asistente; no tienes que instalar nada.</p>
+          <p class="sub">Empecemos por tus datos, para saber con quién hablamos.</p>
+          <div class="row r2">
+            <div class="f"><label for="cName">Tu nombre</label><input type="text" id="cName" placeholder="Nombre y apellido"></div>
+            <div class="f"><label for="cCompany">Empresa o marca</label><input type="text" id="cCompany" placeholder="Nombre de tu negocio"></div>
+          </div>
+          <div class="row r2">
+            <div class="f"><label for="cPhone">Teléfono / WhatsApp</label><input type="tel" id="cPhone" placeholder="33 1234 5678"></div>
+            <div class="f"><label for="cEmail">Correo</label><input type="email" id="cEmail" placeholder="tu@correo.com"></div>
+          </div>
+        </section>
+
+        <section data-sec="marca" id="s-marca">
+          <div class="sh"><span class="num">1</span><h2>Marca</h2></div>
+          <p class="hint">Cómo se presenta tu asistente: nombre, leyenda, logo, colores y la forma en que responde.</p>
+          <div class="row r2">
+            <div class="f"><label for="name">Nombre de la marca</label><input type="text" id="name" data-bind="name" placeholder="Tu marca"></div>
+            <div class="f"><label for="tagline">Leyenda <span class="opt">(una línea)</span></label><input type="text" id="tagline" data-bind="tagline" placeholder="Qué haces, en pocas palabras"></div>
+          </div>
+          <div class="f"><label for="logo">Logo <span class="opt">(PNG, JPG o SVG, máx. 5 MB)</span></label><label class="drop"><input type="file" id="logo" accept="image/*"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></span><span class="dt"><b>Elegir archivo</b><small>o arrástralo aquí</small></span></label></div>
+          <div class="f"><span class="lbl">Colores</span>
+            <div class="row r3">
+              <div class="color"><input type="color" id="cPrimary" value="#2b2b2a"><span>Principal</span></div>
+              <div class="color"><input type="color" id="cAccent" value="#8a7a52"><span>Acento</span></div>
+              <div class="color"><input type="color" id="cBg" value="#f2f2f2"><span>Fondo</span></div>
+            </div>
+          </div>
+          <div class="f"><span class="lbl">Tono de respuesta</span>
+            <div class="seg">
+              <label><input type="radio" name="tone" value="Cercano y cálido" checked>Cercano y cálido</label>
+              <label><input type="radio" name="tone" value="Profesional">Profesional</label>
+              <label><input type="radio" name="tone" value="Breve y directo">Breve y directo</label>
+            </div>
+          </div>
+        </section>
+
+        <section data-sec="quick" id="s-quick">
+          <div class="sh"><span class="num">2</span><h2>Quick Actions</h2></div>
+          <p class="hint">Los temas del carrusel "Pregunta sobre". Al tocar uno, el asistente responde con tu mensaje predefinido y, si quieres, un botón con link (agenda, tienda, cotizador…).</p>
+          <div id="topics"></div>
+          <button class="add" type="button" id="addTopic">+ Agregar tema</button>
+        </section>
+
+        <section data-sec="saludo" id="s-saludo">
+          <div class="sh"><span class="num">3</span><h2>Saludo</h2></div>
+          <p class="hint">El primer mensaje que ve el visitante al abrir el chat. Dile quién eres y en qué le puedes ayudar.</p>
+          <div class="f"><label for="hello">Mensaje de bienvenida</label><textarea id="hello" data-bind="hello" rows="3" placeholder="Hola, soy el asistente de Tu marca. Pregúntame por…"></textarea></div>
+        </section>
+
+        <section data-sec="inicio" id="s-inicio">
+          <div class="sh"><span class="num">4</span><h2>Preguntas de inicio</h2></div>
+          <p class="hint">Botones que aparecen bajo el saludo, antes de que el visitante escriba. Al tocarlos se envían como pregunta. Piensa en lo que más te preguntan.</p>
+          <div id="qs"></div>
+          <button class="add" type="button" id="addQ">+ Agregar pregunta</button>
+        </section>
+
+        <section data-sec="contacto" id="s-contacto">
+          <div class="sh"><span class="num">5</span><h2>Contacto</h2></div>
+          <p class="hint">WhatsApp es el botón "Continúa por" del chat, para cuando el visitante prefiere hablar con una persona. Lo demás aparece al pie de la página.</p>
+          <div class="row r2">
+            <div class="f"><label for="wa">WhatsApp</label><input type="tel" id="wa" data-bind="wa" placeholder="33 1234 5678"></div>
+            <div class="f"><label for="ig">Instagram</label><input type="text" id="ig" data-bind="ig" placeholder="@tumarca"></div>
+          </div>
+          <div class="row r2">
+            <div class="f"><label for="email">Correo</label><input type="email" id="email" data-bind="email" placeholder="hola@tumarca.com"></div>
+            <div class="f"><label for="web">Sitio web</label><input type="url" id="web" data-bind="web" placeholder="https://tumarca.com"></div>
+          </div>
+          <div class="f"><label for="place">Ubicación <span class="opt">(opcional · en el chat aparece como "Ubicación" y abre Google Maps)</span></label><input type="text" id="place" data-bind="place" placeholder="Dirección o link de Google Maps"></div>
+        </section>
+
+        <section data-sec="kb" id="s-kb">
+          <div class="sh"><span class="num">6</span><h2>Knowledge Base</h2></div>
+          <p class="hint">De aquí sale todo lo que tu asistente sabe. Nosotros lo convertimos en su base de conocimiento: servicios, precios de referencia, horarios, políticas, preguntas frecuentes.</p>
+          <div class="row r2">
+            <div class="f"><label for="kbFile">Archivo con tu información <span class="opt">(PDF, Word…)</span></label><label class="drop"><input type="file" id="kbFile" accept=".pdf,.doc,.docx,.md,.txt"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></span><span class="dt"><b>Elegir archivo</b><small>o arrástralo aquí</small></span></label></div>
+            <div class="f"><label for="kbLink">o link a tu wiki</label><input type="url" id="kbLink" placeholder="Notion, Google Docs, Drive…"></div>
+          </div>
+          <div class="f"><label for="noSay">Información que no debe dar</label><textarea id="noSay" rows="3" placeholder="Ej. precios cerrados, confirmar reservas, descuentos no publicados…"></textarea></div>
+        </section>
+
+        <section data-sec="links" id="s-links">
+          <div class="sh"><span class="num">7</span><h2>Enlaces</h2></div>
+          <p class="hint"></p>
+          <div id="links"></div>
+          <button class="add" type="button" id="addLink">+ Agregar enlace</button>
+        </section>
+
+        <section data-sec="plan" id="s-plan">
+          <div class="sh"><span class="num">8</span><h2>Elige tu plan</h2></div>
+          <p class="hint"></p>
+          <div class="plans" id="plans"></div>
+          <span class="lbl">Forma de pago</span>
+          <div class="seg" id="periods"></div>
+          <div class="sum" id="sum"></div>
+        </section>
+
+        <section data-sec="gracias" id="s-gracias" class="thanks">
+          <div class="mark">✓</div>
+          <span class="eyebrow">Solicitud enviada</span>
+          <h1>¡Gracias<span id="tName"></span>!</h1>
+          <p>Recibimos la información de tu asistente. Esto es lo que sigue:</p>
+          <ol class="next">
+            <li><b>Revisamos tu información</b> y te escribimos por WhatsApp si nos falta algo.</li>
+            <li><b>Te confirmamos el costo de configuración</b> y te mandamos el link de pago.</li>
+            <li><b>Configuramos y probamos tu asistente</b> con tu marca y tu información.</li>
+            <li><b>Te entregamos tu link</b> para compartirlo en tu Instagram, WhatsApp o un QR.</li>
+          </ol>
+        </section>
+
+        <div class="nav">
+          <span class="pg" id="pg">Paso 1 de 6</span>
+          <span class="err" id="err" role="alert" hidden></span>
+          <button class="ghost" type="button" id="prev">← Anterior</button>
+          <button class="btn" type="button" id="next">Siguiente →</button>
+          <button class="btn" type="submit" id="submit" hidden>Enviar</button>
+        </div>
+      </form>
+
+    </div>
+
+    <aside class="side" id="side">
+      <span class="cap">Dónde aparece</span>
+      <div class="pw" id="pw"><div class="phone">
+        <div class="screen" id="screen">
+          <div class="m-chat">
+            <div class="m-head" data-zone="marca">
+              <div class="m-av" id="mAv">TM</div>
+              <div class="tt"><b id="mName">Tu marca</b><small id="mTag">Qué haces, en pocas palabras</small></div>
+            </div>
+            <div class="m-topics" data-zone="quick">
+              <span class="tl">Pregunta sobre</span>
+              <div class="m-trow" id="mPills"></div>
+            </div>
+            <div class="m-log">
+              <div class="m-start">
+                <div class="m-msg m-bot" data-zone="saludo" id="mHello">Hola, soy el asistente de Tu marca. Pregúntame lo que necesites.</div>
+                <div class="m-chips" data-zone="inicio" id="mChips" style="margin-top:8px"></div>
+              </div>
+              <div class="m-kb">
+                <div class="m-msg m-user" data-zone="kb">¿Tienen estacionamiento?</div>
+                <div class="m-msg m-bot" data-zone="kb">Sí, contamos con estacionamiento para clientes a un costado del local. Si vienes en fin de semana te recomendamos llegar temprano.</div>
+                <div class="m-msg m-user" data-zone="kb">¿Puedo apartar una cita?</div>
+                <div class="m-msg m-bot" data-zone="kblink">Claro, puedes elegir día y hora aquí:<span class="m-link">Agendar cita →</span></div>
+              </div>
+            </div>
+            <div class="m-handoff" data-zone="contacto">¿Prefieres una persona? <span class="b">WhatsApp</span></div>
+            <div class="m-form"><div class="m-in">Escribe tu pregunta…</div><div class="m-go"></div></div>
+            <div class="m-ai">Respuestas con IA · confirma con el equipo</div>
+            <div class="m-pb" data-zone="plan" id="mPb">Powered by <b>Galería 9</b></div>
+          </div>
+          <div class="m-foot" data-zone="contacto2" id="mFoot"><span id="fWa"></span><span id="fIg"></span><span id="fMail"></span><span id="fWeb"></span><span id="fPlace"></span></div>
+        </div>
+      </div></div>
+    </aside>
+  </div>
+  <button class="peek" type="button" id="peek">Ver dónde aparece</button>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var SECS = {
+    marca:    { zones:["marca"], note:"<b>Encabezado del chat.</b> Tu nombre, leyenda y logo. Los colores pintan el encabezado, tus mensajes y botones; el tono define cómo redacta las respuestas." },
+    quick:    { zones:["quick"], note:"<b>Carrusel \"Pregunta sobre\".</b> Se desliza de lado. Al tocar un tema, el asistente responde con tu mensaje y, si quieres, un botón a tu link (agenda, tienda, cotizador…)." },
+    saludo:   { zones:["saludo"], note:"<b>Primer mensaje.</b> Lo primero que lee el visitante al abrir el chat. Dile quién eres y en qué le puedes ayudar." },
+    inicio:   { zones:["inicio"], note:"<b>Botones bajo el saludo.</b> Se envían como pregunta al tocarlos y desaparecen cuando el visitante escribe. Piensa en lo que más te preguntan." },
+    contacto: { zones:["contacto","contacto2"], note:"<b>Contacto.</b> WhatsApp es el botón \"¿Prefieres una persona?\" del chat; Instagram, correo, sitio y ubicación van al pie de la página." },
+    links:    { zones:["kblink"], note:"<b>Enlaces.</b> Cuando la respuesta está en tu sitio (reservar, comprar, cotizar), el asistente manda al visitante al link correcto. Dinos cada enlace y para qué sirve.", kb:true },
+    kb:       { zones:["kb","kblink"], note:"<b>Respuestas.</b> Todo lo que el asistente contesta sale de aquí: servicios, precios de referencia, horarios, políticas. Si algo no está, lo dice y ofrece pasar con una persona.", kb:true },
+  };
+  SECS.home = { zones:[] };
+  SECS.datos = { zones:[] };
+  SECS.gracias = { zones:[] };
+  SECS.plan = { zones:["plan","marca"], note:"<b>Tu plan.</b> Los dos incluyen tu información, links, botón a WhatsApp y actualizaciones. La diferencia es cuánto lo usan tus clientes y si el chat muestra \"Powered by Galería 9\"." };
+  var order = ["home","datos","marca","quick","saludo","inicio","contacto","kb","links","plan","gracias"];
+  var NSEC = 8; // pasos con número; "datos" es la portada y "gracias" el cierre
+
+  // ----- planes y forma de pago (precios + IVA; ajustar aquí) -----
+  var PLANES = [
+    { id:"Esencial", precio:990, items:["Hasta 1,000 mensajes al mes","1 actualización de información al mes","Tus colores con \"Powered by Galería 9\""] },
+    { id:"Marca propia", precio:1690, items:["Hasta 3,000 mensajes al mes","3 actualizaciones al mes","Solo tu marca: avatar, nombre y colores","Contactos a Airtable, Sheets o correo"] },
+  ];
+  var PERIODOS = [ // meses que cubre y meses que se pagan
+    { id:"Mensual", meses:1, paga:1 },
+    { id:"Semestral", meses:6, paga:5 },   // supuesto: 1 mes gratis (no está definido en el modelo de negocio)
+    { id:"Anual", meses:12, paga:10 },     // 2 meses gratis (docs/03)
+  ];
+  var SETUP = "$2,500 – $3,500";
+  var money = function(n){ return "$" + n.toLocaleString("es-MX"); };
+  PLANES.forEach(function(p, i){
+    var l = document.createElement("label"); l.className = "plan";
+    l.innerHTML = '<input type="radio" name="plan" value="' + p.id + '"' + (i === 0 ? " checked" : "") + '><b>' + p.id + '</b>' +
+      '<span class="pr"><strong>' + money(p.precio) + '</strong> /mes + IVA</span><ul>' + p.items.map(function(t){ return "<li>" + t + "</li>"; }).join("") + "</ul>";
+    $("plans").appendChild(l);
+  });
+  PERIODOS.forEach(function(p, i){
+    var l = document.createElement("label");
+    var gratis = p.meses - p.paga;
+    l.innerHTML = '<input type="radio" name="periodo" value="' + p.id + '"' + (i === 0 ? " checked" : "") + '>' + p.id +
+      (gratis ? '<span class="save">' + gratis + (gratis === 1 ? " mes" : " meses") + ' gratis</span>' : "");
+    $("periods").appendChild(l);
+  });
+  function sel(name){ return (document.querySelector("input[name=" + name + "]:checked") || {}).value; }
+  function summary(){
+    var p = PLANES.filter(function(x){ return x.id === sel("plan"); })[0], per = PERIODOS.filter(function(x){ return x.id === sel("periodo"); })[0];
+    var bruto = p.precio * per.meses, total = p.precio * per.paga;
+    var h = '<div class="r"><span>' + p.id + ' · ' + money(p.precio) + ' × ' + per.meses + (per.meses === 1 ? " mes" : " meses") + '</span><span>' + money(bruto) + '</span></div>';
+    var g = per.meses - per.paga;
+    if (bruto > total) h += '<div class="r"><span>' + g + (g === 1 ? ' mes gratis' : ' meses gratis') + '</span><span class="off">−' + money(bruto - total) + '</span></div>';
+    h += '<div class="r t"><span>Pagas ' + per.id.toLowerCase() + '</span><span>' + money(total) + ' + IVA</span></div>';
+    if (per.meses > 1) h += '<div class="r"><span>Equivale a</span><span>' + money(Math.round(total / per.meses)) + ' /mes</span></div>';
+    h += '<div class="r"><span>Configuración inicial (una vez)</span><span>' + SETUP + ' + IVA</span></div>';
+    h += '<p>No se cobra nada al enviar. Revisamos tu información, te confirmamos el costo de configuración y te mandamos el link de pago.</p>';
+    $("sum").innerHTML = h;
+    $("mPb").hidden = p.id !== "Esencial";
+  }
+  $("plans").addEventListener("change", summary);
+  $("periods").addEventListener("change", summary);
+  summary();
+
+  // descripción de cada tarjeta: qué es y dónde aparece
+  order.forEach(function(k){
+    var h = document.querySelector('section[data-sec="' + k + '"] .hint');
+    if (h) h.innerHTML = SECS[k].note.replace(/<\/?b>/g, "");
+  });
+
+  // pasos en la barra: casita (home) y luego 1–9
+  var hb = document.createElement("a"); hb.href = "#"; hb.className = "home-btn"; hb.dataset.k = "home"; hb.title = "Inicio"; hb.setAttribute("aria-label", "Inicio");
+  hb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/></svg>';
+  hb.onclick = function(e){ e.preventDefault(); go(0); };
+  $("steps").appendChild(hb);
+  order.forEach(function(k, i){
+    if (k === "home" || k === "datos") return; // portada e intro no llevan número
+    var a = document.createElement("a"); a.href = "#"; a.textContent = k === "gracias" ? "9" : i - 1; a.dataset.k = k;
+    a.onclick = function(e){ e.preventDefault(); go(i); };
+    $("steps").appendChild(a);
+  });
+
+  // ----- un paso a la vez; resalta su zona en el celular -----
+  var step = 0;
+  function go(i){
+    step = Math.max(0, Math.min(order.length - 1, i));
+    var k = order[step], s = SECS[k], scr = $("screen");
+    document.querySelectorAll("section").forEach(function(el){ el.classList.toggle("on", el.dataset.sec === k); });
+    document.querySelectorAll("#steps a").forEach(function(a){ a.classList.toggle("on", a.dataset.k === k || (a.dataset.k === "home" && k === "datos")); });
+    scr.classList.toggle("focus", s.zones.length > 0); // portada y cierre: chat completo, sin opacar
+    scr.classList.toggle("kb", !!s.kb);
+    scr.querySelectorAll("[data-zone]").forEach(function(z){ z.classList.toggle("hl", s.zones.indexOf(z.dataset.zone) >= 0); });
+    $("pg").textContent = k === "home" ? "Agente de marca" : k === "datos" ? "Bienvenida" : k === "gracias" ? "Enviado" : "Paso " + (step - 1) + " de " + NSEC;
+    $("prev").hidden = step === 0;
+    $("next").textContent = k === "home" ? "Crear mi asistente →" : k === "datos" ? "Comenzar →" : "Siguiente →";
+    $("next").hidden = k === "plan" || k === "gracias";
+    $("submit").hidden = k !== "plan";
+    if (!document.body.classList.contains("peeking")) $("peek").textContent = s.zones.length ? "Ver dónde aparece" : "Ver el chat";
+    if (k === "gracias") { var n = v("cName").split(" ")[0]; $("tName").textContent = n ? ", " + n : ""; }
+    window.scrollTo(0, 0);
+  }
+  $("prev").onclick = function(){ go(step - 1); };
+  $("next").onclick = function(){ go(step + 1); };
+  go(0);
+
+  // ----- el celular se escala para caber completo en la altura de la ventana -----
+  function fit(){
+    var narrow = window.matchMedia("(max-width:960px)").matches;
+    var s = narrow ? Math.min(.9, (window.innerHeight - 120) / 720) : Math.min(.8, (window.innerHeight - 130) / 720);
+    $("pw").style.setProperty("--s", Math.max(.5, s).toFixed(3));
+  }
+  window.addEventListener("resize", fit); fit();
+
+  // ----- listas (temas y enlaces) -----
+  function field(label, cls, ph, multiline){
+    var w = document.createElement("div"); w.className = "f";
+    var l = document.createElement("label"); l.textContent = label; w.appendChild(l);
+    var i = document.createElement(multiline ? "textarea" : "input");
+    if (multiline) i.rows = 2; else i.type = "text";
+    i.className = cls; if (ph) i.placeholder = ph; w.appendChild(i); return w;
+  }
+  // Listas: arrancan con una tarjeta y se agregan hasta 5. La primera no se puede quitar.
+  var MAX = 5;
+  function sync(listId, btnId){
+    var list = $(listId), n = list.children.length;
+    $(btnId).hidden = n >= MAX;
+    [].forEach.call(list.children, function(box, i){ var x = box.querySelector(".x"); if (x) x.hidden = n === 1; });
+  }
+  function removable(box, listId, btnId){
+    var x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "×"; x.setAttribute("aria-label","Quitar");
+    x.onclick = function(){ box.remove(); sync(listId, btnId); paint(); }; box.appendChild(x);
+  }
+  function addTopic(){
+    var box = document.createElement("div"); box.className = "item";
+    box.appendChild(field("Tema (lo que dice la pastilla)", "tLabel", "Ej. Agenda"));
+    box.appendChild(field("Mensaje predefinido", "tText", "Lo que responde el asistente al tocarlo", true));
+    var r = document.createElement("div"); r.className = "row r2";
+    r.appendChild(field("Botón (opcional)", "tCta", "Ej. Ver agenda")); r.appendChild(field("Link del botón", "tUrl", "https://…"));
+    box.appendChild(r); removable(box, "topics", "addTopic"); $("topics").appendChild(box); sync("topics", "addTopic");
+  }
+  function addLink(){
+    var box = document.createElement("div"); box.className = "item";
+    var r = document.createElement("div"); r.className = "row r2";
+    r.appendChild(field("URL", "lUrl", "https://…")); r.appendChild(field("Para qué sirve", "lWhat", "Ej. reservar una cita"));
+    box.appendChild(r); removable(box, "links", "addLink"); $("links").appendChild(box); sync("links", "addLink");
+  }
+  function addQ(){
+    var box = document.createElement("div"); box.className = "item";
+    var n = $("qs").children.length + 1;
+    box.appendChild(field("Pregunta", "q", n === 1 ? "Ej. ¿Dónde están?" : ""));
+    removable(box, "qs", "addQ"); $("qs").appendChild(box); sync("qs", "addQ");
+  }
+  $("addTopic").onclick = function(){ addTopic(); paint(); };
+  $("addLink").onclick = function(){ addLink(); };
+  $("addQ").onclick = function(){ addQ(); paint(); };
+  addTopic(); addLink(); addQ();
+
+  // ----- reflejar textos en la vista previa -----
+  function v(id){ return $(id).value.trim(); }
+  function initials(s){ return (s || "Tu marca").split(/\s+/).slice(0,2).map(function(w){ return w[0]; }).join("").toUpperCase(); }
+  var logoSrc = null;
+  function paint(){
+    var name = v("name") || "Tu marca";
+    $("mName").textContent = name;
+    $("mTag").textContent = v("tagline") || "Qué haces, en pocas palabras";
+    if (logoSrc) $("mAv").innerHTML = '<img alt="" src="' + logoSrc + '">'; else $("mAv").textContent = initials(v("name"));
+    var root = document.documentElement.style;
+    root.setProperty("--b-primary", $("cPrimary").value); root.setProperty("--b-accent", $("cAccent").value); root.setProperty("--b-bg", $("cBg").value);
+    $("mHello").textContent = v("hello") || ("Hola, soy el asistente de " + name + ". Pregúntame lo que necesites.");
+
+    var pills = [].slice.call(document.querySelectorAll("#topics .tLabel")).map(function(i){ return i.value.trim(); }).filter(Boolean);
+    if (!pills.length) pills = ["Tema 1","Tema 2","Tema 3"];
+    $("mPills").innerHTML = ""; pills.forEach(function(p){ var s = document.createElement("span"); s.className = "m-pill"; s.textContent = p; $("mPills").appendChild(s); });
+
+    var qs = [].slice.call(document.querySelectorAll(".q")).map(function(i){ return i.value.trim(); }).filter(Boolean);
+    if (!qs.length) qs = ["¿Dónde están?","¿Cuánto cuesta…?"];
+    $("mChips").innerHTML = ""; qs.forEach(function(q){ var s = document.createElement("span"); s.className = "m-chip"; s.textContent = q; $("mChips").appendChild(s); });
+
+    $("fWa").textContent = v("wa") ? "WhatsApp " + v("wa") : "";
+    $("fIg").textContent = v("ig") ? "@" + v("ig").replace(/^@/, "") : "";
+    $("fMail").textContent = v("email");
+    $("fWeb").textContent = v("web").replace(/^https?:\/\//, "");
+    $("fPlace").innerHTML = v("place") ? '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Ubicación' : "";
+    if (!$("mFoot").textContent.trim()) { $("fIg").textContent = "@tumarca"; $("fMail").textContent = "hola@tumarca.com"; }
+  }
+  $("f").addEventListener("input", paint);
+  $("f").addEventListener("change", paint);
+  $("logo").addEventListener("change", function(){
+    var f = this.files && this.files[0]; if (!f) return;
+    var rd = new FileReader(); rd.onload = function(){ logoSrc = rd.result; paint(); }; rd.readAsDataURL(f);
+  });
+  paint();
+
+  // ----- enviar (prototipo: arma el registro y muestra la confirmación) -----
+  function collect(){
+    var topics = [].slice.call(document.querySelectorAll("#topics .item")).map(function(b){
+      var q = function(c){ return b.querySelector("." + c).value.trim(); };
+      return q("tLabel") ? "• " + q("tLabel") + "\n  Mensaje: " + q("tText") + (q("tCta") ? "\n  Botón: " + q("tCta") + " → " + q("tUrl") : "") : "";
+    }).filter(Boolean).join("\n\n");
+    var links = [].slice.call(document.querySelectorAll("#links .item")).map(function(b){
+      var u = b.querySelector(".lUrl").value.trim(), w = b.querySelector(".lWhat").value.trim();
+      return u ? "• " + u + (w ? " — " + w : "") : "";
+    }).filter(Boolean).join("\n");
+    return {
+      Nombre: v("cCompany"), Estatus: "Nuevo",
+      Contacto_Nombre: v("cName"), Contacto_Telefono: v("cPhone"), Contacto_Correo: v("cEmail"),
+      Marca_Nombre: v("name"), Leyenda: v("tagline"),
+      Color_Principal: $("cPrimary").value, Color_Acento: $("cAccent").value, Color_Fondo: $("cBg").value,
+      Tono: (document.querySelector("input[name=tone]:checked") || {}).value,
+      Quick_Actions: topics, Saludo: v("hello"),
+      Preguntas_Inicio: [].slice.call(document.querySelectorAll(".q")).map(function(i){ return i.value.trim(); }).filter(Boolean).join("\n"),
+      WhatsApp: v("wa"), Instagram: v("ig"), Correo: v("email"), Sitio_Web: v("web"), Ubicacion: v("place"),
+      KB_Link: v("kbLink"), Enlaces: links, No_Dar: v("noSay"),
+      Plan: sel("plan"), Forma_Pago: sel("periodo"),
+    };
+  }
+  // ----- envío real: Worker de Galería 9 → Airtable (Leads_SmartAgent) -----
+  var WORKER = "https://galeria9-airtable.datatlan.workers.dev";
+  var BASE = "appSkdHwrlulZ2iJc", TABLA = "tblD0FURZQFH6vkJC"; // Galeria9 - Admin / Leads_SmartAgent
+  // staging y local comparten la base de producción: lo que se crea ahí va marcado como prueba
+  var ES_PRUEBA = location.hostname.indexOf("staging.") === 0 || ["localhost", "127.0.0.1"].indexOf(location.hostname) >= 0;
+  var MAX_MB = 5;
+
+  function b64(file){
+    return new Promise(function(ok, err){
+      var r = new FileReader(); r.onload = function(){ ok(String(r.result).split(",")[1]); }; r.onerror = err; r.readAsDataURL(file);
+    });
+  }
+  function subir(recId, campo, file){
+    return b64(file).then(function(data){
+      return fetch(WORKER + "?lead_upload=" + recId + "&f=" + campo, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentType: file.type || "application/octet-stream", file: data, filename: file.name }),
+      });
+    }).then(function(r){ if (!r.ok) throw new Error("upload " + r.status); });
+  }
+  function aviso(msg){ $("err").textContent = msg || ""; $("err").hidden = !msg; }
+
+  $("f").addEventListener("submit", function(e){
+    e.preventDefault();
+    aviso("");
+    if (!v("cName") || !v("cCompany") || (!v("cPhone") && !v("cEmail"))) {
+      aviso("Faltan tus datos de contacto: nombre, empresa y teléfono o correo."); go(order.indexOf("datos")); return;
+    }
+    var files = [["logo", $("logo").files[0]], ["kb", $("kbFile").files[0]]].filter(function(x){ return x[1]; });
+    var grande = files.filter(function(x){ return x[1].size > MAX_MB * 1048576; })[0];
+    if (grande) { aviso("“" + grande[1].name + "” pesa más de " + MAX_MB + " MB. Sube uno más ligero."); return; }
+
+    var fields = collect();
+    Object.keys(fields).forEach(function(k){ if (fields[k] === "" || fields[k] == null) delete fields[k]; });
+    if (ES_PRUEBA) fields.test_record = true;
+    var btn = $("submit"); btn.disabled = true; btn.textContent = "Enviando…";
+
+    fetch(WORKER + "?b=" + BASE + "&t=" + TABLA, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ records: [{ fields: fields }], typecast: true }),
+    })
+      .then(function(r){ if (!r.ok) return r.text().then(function(t){ throw new Error("Worker " + r.status + ": " + t); }); return r.json(); })
+      .then(function(j){
+        var id = j.records && j.records[0] && j.records[0].id;
+        // los archivos van después: si alguno falla, la solicitud ya quedó guardada
+        return Promise.all(files.map(function(x){ return subir(id, x[0], x[1]).catch(function(err){ console.warn("No se subió", x[1].name, err); }); }));
+      })
+      .then(function(){ go(order.indexOf("gracias")); })
+      .catch(function(err){
+        console.error(err);
+        aviso("No pudimos enviar tu solicitud. Revisa tu conexión e intenta de nuevo.");
+      })
+      .finally(function(){ btn.disabled = false; btn.textContent = "Enviar"; });
+  });
+
+
+  // campos de archivo: muestran el nombre elegido (y miniatura si es imagen)
+  document.querySelectorAll(".drop").forEach(function(box){
+    var inp = box.querySelector("input"), b = box.querySelector(".dt b"), sm = box.querySelector(".dt small"), ic = box.querySelector(".ic"), icon = ic.innerHTML;
+    inp.addEventListener("dragenter", function(){ box.classList.add("over"); });
+    ["dragleave","drop"].forEach(function(ev){ inp.addEventListener(ev, function(){ box.classList.remove("over"); }); });
+    inp.addEventListener("change", function(){
+      var f = inp.files && inp.files[0];
+      box.classList.toggle("has", !!f);
+      if (!f) { b.textContent = "Elegir archivo"; sm.textContent = "o arrástralo aquí"; ic.innerHTML = icon; return; }
+      b.textContent = "Cambiar archivo";
+      sm.textContent = f.name + " · " + (f.size > 1048576 ? (f.size / 1048576).toFixed(1) + " MB" : Math.ceil(f.size / 1024) + " KB");
+      if (/^image\//.test(f.type)) { var rd = new FileReader(); rd.onload = function(){ ic.innerHTML = '<img alt="" src="' + rd.result + '">'; }; rd.readAsDataURL(f); }
+    });
+  });
+
+  // pantallas angostas
+  $("peek").onclick = function(){
+    var on = document.body.classList.toggle("peeking");
+    this.textContent = on ? "Volver al formulario" : (SECS[order[step]].zones.length ? "Ver dónde aparece" : "Ver el chat");
+  };
+  $("side").addEventListener("click", function(e){ if (e.target === this) $("peek").click(); });
+})();
+</script>
+</body>
+</html>

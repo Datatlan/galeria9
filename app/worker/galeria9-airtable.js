@@ -20,6 +20,11 @@
  *     sube el archivo al campo Archivos del item (límite Airtable: 5 MB)
  *     y marca Recibido.
  *
+ * AGENTE DE MARCA (form /agente):
+ *   · POST ?lead_upload=<recLead>&f=logo|kb  → sube el logo o el archivo de
+ *     información al lead recién creado en Leads_SmartAgent (máx 5 MB, solo
+ *     registros creados hace < 30 min).
+ *
  * DEPLOY: Cloudflare dashboard → Workers → galeria9-airtable → Edit code →
  *         pegar esto → Deploy. (El secreto AIRTABLE_TOKEN no cambia.)
  */
@@ -41,6 +46,14 @@ const OCUPACION_KEY = 'g9-ocupacion-x7Kd2Qw9';
 const ONB = {
   table: 'tblIOBv4kM0YOCb6S',
   archivosField: 'fld4OuCZqGfUIjp7Y', // Archivos (attachments)
+};
+
+// Leads del Agente de marca (form /agente): el form crea el registro por la
+// escritura genérica y luego sube logo / archivo de información aquí.
+const LEADS_SA = {
+  table: 'tblD0FURZQFH6vkJC', // Leads_SmartAgent
+  files: { logo: 'fldpnxRcv75ghOr01', kb: 'fldBtEDzftfCJlDZo' }, // Logo, KB_Archivo
+  windowMin: 30, // solo se aceptan archivos para registros creados hace < 30 min
 };
 
 // ── Whitelist de lecturas ───────────────────────────────────────────────────
@@ -265,6 +278,40 @@ export default {
           body: JSON.stringify({ fields: { Estatus: 'Recibido' }, typecast: true }),
         }));
       }
+      return passthrough(air);
+    }
+
+    // ── AGENTE DE MARCA: subir logo / archivo de información ──────────────
+    // POST ?lead_upload=<recLead>&f=logo|kb  body {contentType, file(base64), filename}
+    // Solo a Leads_SmartAgent, solo esos dos campos y solo si el registro se
+    // creó hace menos de LEADS_SA.windowMin minutos (el form sube justo después
+    // de crearlo); así nadie puede adjuntar archivos a leads viejos.
+    const lu = url.searchParams.get('lead_upload');
+    if (lu) {
+      const field = LEADS_SA.files[url.searchParams.get('f') || ''];
+      if (!REC_RE.test(lu) || !field) return json({ error: 'Parámetros inválidos' }, 400);
+
+      const rec = await fetch(`https://api.airtable.com/v0/${BASES.prod}/${LEADS_SA.table}/${lu}`, { headers: auth });
+      if (!rec.ok) return json({ error: 'Registro no encontrado' }, 404);
+      const { createdTime } = await rec.json();
+      if (Date.now() - Date.parse(createdTime) > LEADS_SA.windowMin * 60_000)
+        return json({ error: 'Fuera de tiempo' }, 403);
+
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'JSON inválido' }, 400); }
+      const { contentType, file, filename } = body || {};
+      if (typeof file !== 'string' || typeof filename !== 'string' || typeof contentType !== 'string')
+        return json({ error: 'Falta archivo' }, 400);
+      if (file.length > 7_500_000) return json({ error: 'Archivo demasiado grande (máx 5 MB)' }, 413);
+
+      const air = await fetch(
+        `https://content.airtable.com/v0/${BASES.prod}/${lu}/${field}/uploadAttachment`,
+        {
+          method: 'POST',
+          headers: { ...auth, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contentType, file, filename: filename.slice(0, 200) }),
+        },
+      );
       return passthrough(air);
     }
 
