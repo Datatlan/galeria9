@@ -229,7 +229,6 @@
   .btn:disabled{opacity:.5;cursor:wait}
   /* escritorio ancho: la barra se alinea con el contenido y la tarjeta llena hasta los botones (sin hueco) */
   .bar{padding-inline:max(24px, calc((100vw - 1120px) / 2 + 24px))}
-  section.on{flex:1}
   .nav{border-top:0;padding-top:16px}
 </style>
 </head>
@@ -533,8 +532,12 @@
   // ----- el celular se escala para caber completo en la altura de la ventana -----
   function fit(){
     var narrow = window.matchMedia("(max-width:960px)").matches;
-    var s = narrow ? Math.min(.9, (window.innerHeight - 120) / 720) : Math.min(.8, (window.innerHeight - 130) / 720);
+    var s = narrow ? Math.min(.9, (window.innerHeight - 120) / 720) : Math.min(.86, (window.innerHeight - 130) / 720);
     $("pw").style.setProperty("--s", Math.max(.5, s).toFixed(3));
+    // escritorio: la columna mide lo mismo que el celular, así los botones quedan a la altura
+    // de su base (no brincan entre pasos) y la tarjeta conserva su alto natural
+    var col = document.querySelector(".grid > div:first-child");
+    col.style.minHeight = narrow ? "" : Math.round($("side").getBoundingClientRect().height) + "px";
   }
   window.addEventListener("resize", fit); fit();
 
