@@ -227,6 +227,10 @@
   .err[hidden]{display:none}
   .nav{flex-wrap:wrap}
   .btn:disabled{opacity:.5;cursor:wait}
+  /* escritorio ancho: la barra se alinea con el contenido y la tarjeta llena hasta los botones (sin hueco) */
+  .bar{padding-inline:max(24px, calc((100vw - 1120px) / 2 + 24px))}
+  section.on{flex:1}
+  .nav{border-top:0;padding-top:16px}
 </style>
 </head>
 <body>
