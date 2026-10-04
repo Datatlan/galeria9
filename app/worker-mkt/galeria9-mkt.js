@@ -3,8 +3,10 @@
  * Separado de galeria9-airtable (el proxy del sitio): trabajo de fondo + secretos propios.
  *
  * FLUJOS
- *  1. Alta al newsletter   — form del sitio → POST /subscribe → Kit: etiqueta "Newsletter"
- *                            + secuencia "G9 · Bienvenida newsletter" (solo la primera vez).
+ *  1. Newsletter           — la lista vive en Airtable (Newsletter_Suscriptores). La sincronización
+ *                            sube los Activos a Kit con "Newsletter" (+ bienvenida si son nuevos y no
+ *                            tienen Sin_bienvenida) y les quita la etiqueta a las Bajas.
+ *                            El form del sitio (POST /subscribe) da de alta al momento en Kit y en la tabla.
  *  2. Orden de PP aprobada — sincronización Airtable → Kit (cron cada 15 min o /sync):
  *                            etiqueta "PP vigente" + plan, campos de la estancia y link de
  *                            onboarding; si la orden es nueva (≤ 21 días) entra a la secuencia
@@ -43,6 +45,7 @@ const T = {
   contactos: 'tblju1OLYmhR5441S',
   onboarding: 'tblIOBv4kM0YOCb6S',
   eventos: 'tblsOvEhdkacWz5yZ',
+  newsletter: 'tbl0Xgg81Hg5qN7JG', // Newsletter_Suscriptores
 };
 const PP = { recD3eUbIWZoEYYsH: 'PP Básico', recdqFTfNetKW8vta: 'PP Visibilidad', recW9OwaFUUzSc4vE: 'PP Expansión' };
 const TAGS = { vigente: 'PP vigente', newsletter: 'Newsletter', prueba: 'Prueba interna' };
@@ -123,11 +126,65 @@ async function subscribe(request, env) {
     const seq = await kit.findSequence(SEQ.newsletter);
     if (seq) await kit.addToSequence(seq.id, email);
   }
+  // La lista vive en Airtable: registra el alta si ese correo no estaba
+  const existe = await airList(env, T.newsletter, { filterByFormula: `LOWER({Correo})='${email.replace(/'/g, "\\'")}'`, fields: ['Correo'] });
+  if (!existe.length) {
+    const prueba = !origin.startsWith('https://galeria9.pages.dev');
+    await airCreate(env, T.newsletter, { Correo: email, Nombre: nombre || undefined, Estatus: 'Activo', Origen: 'Sitio', En_Kit: true, Notas: `Alta desde ${origen}`, ...(prueba ? { test_record: true } : {}) });
+  }
   return json({ ok: true, nuevo: !yaTenia }, 200, cors);
 }
 
-// ── 2. Sincronización de PP ─────────────────────────────────────────────────
+// ── Sincronización (cron y /sync): Punto Presencia + newsletter ─────────────
 async function sync(env, { live }) {
+  return { pp: await syncPP(env, { live }), newsletter: await syncNewsletter(env, { live }) };
+}
+
+// Newsletter: la tabla Newsletter_Suscriptores manda.
+//   Activo (o sin estatus) → Kit con "Newsletter"; si es nuevo y no tiene Sin_bienvenida, recibe la bienvenida.
+//   Baja → se le quita "Newsletter". El Worker marca En_Kit.
+//   Quien está en Kit pero no en la tabla no se toca.
+async function syncNewsletter(env, { live }) {
+  const test = env.INCLUDE_TEST === '1' ? '' : 'NOT({test_record})';
+  const filas = await airList(env, T.newsletter, { filterByFormula: test, fields: ['Correo', 'Nombre', 'Estatus', 'Origen', 'Sin_bienvenida', 'En_Kit'] });
+  const kit = kitClient(env);
+  const tag = await kit.findTag(TAGS.newsletter);
+  const enKit = new Set((await kit.tagSubscribers(tag.id)).map((e) => e.toLowerCase()));
+
+  const validas = filas.filter((f) => EMAIL_RE.test(f.fields.Correo || ''));
+  const activos = validas.filter((f) => f.fields.Estatus !== 'Baja');
+  const nuevos = activos.filter((f) => !enKit.has(f.fields.Correo.toLowerCase()));
+  const bajas = validas.filter((f) => f.fields.Estatus === 'Baja' && enKit.has(f.fields.Correo.toLowerCase()));
+  const bienvenida = nuevos.filter((f) => !f.fields.Sin_bienvenida);
+  const rep = {
+    modo: live ? 'live' : 'simulación',
+    en_tabla: filas.length,
+    activos: activos.length,
+    nuevos_en_kit: nuevos.map((f) => f.fields.Nombre || f.fields.Correo.split('@')[0]),
+    reciben_bienvenida: bienvenida.length,
+    bajas: bajas.length,
+    correos_invalidos: filas.length - validas.length,
+  };
+  if (!live) return rep;
+
+  const seq = await kit.findSequence(SEQ.newsletter);
+  for (const f of nuevos) {
+    const nombre = (f.fields.Nombre || '').trim().split(' ')[0] || null;
+    await kit.upsert(f.fields.Correo, nombre, { origen: (f.fields.Origen || 'Manual').toLowerCase() });
+    await kit.addTag(tag.id, f.fields.Correo);
+    if (seq && !f.fields.Sin_bienvenida) await kit.addToSequence(seq.id, f.fields.Correo);
+  }
+  for (const f of bajas) await kit.removeTag(tag.id, f.fields.Correo);
+
+  // Refleja en Airtable quién está en Kit
+  const enKitAhora = (f) => f.fields.Estatus !== 'Baja';
+  const cambios = validas.filter((f) => !!f.fields.En_Kit !== enKitAhora(f)).map((f) => ({ id: f.id, fields: { En_Kit: enKitAhora(f) } }));
+  await airUpdate(env, T.newsletter, cambios);
+  return rep;
+}
+
+// ── 2. Sincronización de PP ─────────────────────────────────────────────────
+async function syncPP(env, { live }) {
   const hoy = hoyMX();
   const marcas = await ppVigentes(env, hoy);
   const conCorreo = marcas.filter((m) => m.email);
@@ -531,6 +588,24 @@ async function airList(env, table, { filterByFormula, fields }) {
     offset = j.offset || '';
   } while (offset);
   return out;
+}
+async function airCreate(env, table, fields) {
+  const res = await fetch(`https://api.airtable.com/v0/${BASE}/${table}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ records: [{ fields }], typecast: true }),
+  });
+  if (!res.ok) throw new Error(`Airtable crear ${table} → ${res.status}: ${(await res.text()).slice(0, 300)}`);
+}
+async function airUpdate(env, table, records) {
+  for (let i = 0; i < records.length; i += 10) {
+    const res = await fetch(`https://api.airtable.com/v0/${BASE}/${table}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${env.AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ records: records.slice(i, i + 10) }),
+    });
+    if (!res.ok) throw new Error(`Airtable actualizar ${table} → ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  }
 }
 async function porIds(env, table, ids, fields) {
   if (!ids.length) return {};
