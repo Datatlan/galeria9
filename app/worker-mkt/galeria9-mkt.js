@@ -21,7 +21,8 @@
  *   GET  /img/<recEvento>                  público: imagen estable de un evento público
  *   GET  /status?k=                        simulación de la sincronización (no escribe)
  *   GET  /sync?k=                          sincroniza ya
- *   GET  /setup?k=[&prueba=a@x.com,b@y.com] crea campos, etiquetas y secuencias en Kit;
+ *   GET  /setup?k=[&prueba=a@x.com,b@y.com] crea campos, etiquetas y secuencias en Kit
+ *                                          (si ya existen, actualiza sus correos a la plantilla actual);
  *                                          etiqueta "Prueba interna" a esos correos
  *   GET  /demo/tester-day?k=&aud=prueba|pp[&evento=rec…]   campaña de Tester Day ya
  *   GET  /demo/agenda?k=&aud=prueba|newsletter            campaña de agenda ya
@@ -257,7 +258,7 @@ async function testerDayContenido(env, eventoId) {
   const site = siteUrl(env);
   const html = layout(env, {
     preheader: `${e.fechaTexto}, ${e.horario}. Como marca de Punto Presencia tienes precio preferente.`,
-    eyebrow: 'Tester Day',
+    eyebrow: `Tester Day · ${e.fechaCorta}`,
     titulo: `Lleva tu marca al Tester Day del ${e.fechaCorta}`,
     cuerpo: `
       <p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
@@ -353,11 +354,15 @@ async function setup(env, prueba) {
   for (const n of Object.values(TAGS)) tags[n] = (await kit.tag(n)).id;
   const seqs = {};
   for (const [k, name] of Object.entries(SEQ)) {
+    const mail = k === 'pp' ? correoBienvenidaPP(env) : correoBienvenidaNewsletter(env);
     let s = await kit.findSequence(name);
     if (!s) {
       s = await kit.createSequence({ name, active: true, time_zone: TZ, send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] });
-      const mail = k === 'pp' ? correoBienvenidaPP(env) : correoBienvenidaNewsletter(env);
       await kit.createSequenceEmail(s.id, { ...mail, delay_value: 0, delay_unit: 'hours', published: true, position: 0 });
+    } else {
+      // ya existe: deja su primer correo igual a la plantilla actual del código
+      const [primero] = await kit.sequenceEmails(s.id);
+      if (primero) await kit.updateSequenceEmail(s.id, primero.id, mail);
     }
     seqs[name] = s.id;
   }
@@ -377,7 +382,7 @@ function correoBienvenidaNewsletter(env) {
     preview_text: 'Talleres, pláticas y marcas en Providencia, Guadalajara',
     content: layout(env, {
       portada: 'hero-newsletter.jpg',
-      eyebrow: 'Galería 9',
+      eyebrow: 'Newsletter',
       titulo: 'Gracias por sumarte',
       cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
         <p>Desde ahora te contamos primero lo que pasa en Galería 9: talleres, pláticas, Tester Days y las marcas que nos visitan.</p>
@@ -422,10 +427,15 @@ function layout(env, { preheader = '', eyebrow, titulo, cuerpo, imagen, portada,
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f2">
 <tr><td align="center" style="padding:28px 14px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#2b2b2a">
-  <tr><td style="padding:26px 28px 18px"><img src="${site}/logo.png" height="44" alt="Galería 9" style="display:block;height:44px;width:auto;border:0"></td></tr>
+  <tr><td style="padding:16px 28px 14px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td valign="middle" style="width:30px"><img src="${site}/logo.png" height="38" alt="Galería 9" style="display:block;height:38px;width:auto;border:0"></td>
+      <td valign="middle" style="padding-left:12px;font-size:12px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:#2b2b2a;white-space:nowrap">Galería 9</td>
+      ${eyebrow ? `<td valign="middle" align="right" style="font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#8a7a52">${esc(eyebrow)}</td>` : ''}
+    </tr></table>
+  </td></tr>
   ${portada ? `<tr><td style="padding:0"><img src="${site}/email/${portada}" width="560" alt="" style="display:block;width:100%;max-width:560px;height:auto;border:0"></td></tr>` : ''}
   <tr><td style="padding:24px 28px 0">
-    ${eyebrow ? `<div style="font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#8a7a52;margin:0 0 8px">${esc(eyebrow)}</div>` : ''}
     <div style="font-size:28px;font-weight:200;line-height:1.15;margin:0 0 16px">${esc(titulo)}</div>
   </td></tr>
   ${imagen ? `<tr><td style="padding:0 28px 14px"><img src="${imagen}" width="504" alt="" style="display:block;width:100%;max-width:504px;height:auto;border:0"></td></tr>` : ''}
@@ -525,6 +535,8 @@ function kitClient(env) {
     findSequence: async (name) => (await all('/sequences', 'sequences')).find((s) => s.name === name) || null,
     createSequence: async (body) => (await call('POST', '/sequences', body)).sequence,
     createSequenceEmail: async (id, body) => (await call('POST', `/sequences/${id}/emails`, body)).email,
+    sequenceEmails: (id) => all(`/sequences/${id}/emails`, 'emails'),
+    updateSequenceEmail: (id, emailId, body) => call('PUT', `/sequences/${id}/emails/${emailId}`, body),
     addToSequence: (id, email) => call('POST', `/sequences/${id}/subscribers`, { email_address: email }),
     broadcast: async (body) => (await call('POST', '/broadcasts', body)).broadcast,
     async ensureFields() {
