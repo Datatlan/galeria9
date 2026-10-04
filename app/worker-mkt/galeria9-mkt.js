@@ -63,8 +63,6 @@ const NUEVA_DIAS = 21; // una orden aprobada "es nueva" (recibe bienvenida) si s
 const ORIGINS = ['https://galeria9.pages.dev', 'https://staging.galeria9.pages.dev', 'http://localhost:4321', 'http://localhost:8797'];
 const TZ = 'America/Mexico_City';
 const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
-const WA = 'https://wa.me/523318030563';
-const IG = 'https://instagram.com/galeria9providencia';
 
 export default {
   async scheduled(event, env, ctx) {
@@ -255,25 +253,15 @@ async function testerDayContenido(env, eventoId) {
   const evs = (await eventosPublicos(env, hoy, 120)).filter((e) => e.tipo === 'Tester Day');
   const e = eventoId ? evs.find((x) => x.id === eventoId) : evs[0];
   if (!e) return { error: 'No hay Tester Day público próximo' };
-  const site = siteUrl(env);
-  const html = layout(env, {
-    preheader: `${e.fechaTexto}, ${e.horario}. Como marca de Punto Presencia tienes precio preferente.`,
-    eyebrow: `Tester Day · ${e.fechaCorta}`,
-    titulo: `Lleva tu marca al Tester Day del ${e.fechaCorta}`,
-    cuerpo: `
-      <p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
-      <p>El <b>${esc(e.fechaTexto)}</b>, de ${esc(e.horario)}, tenemos Tester Day en Galería 9. ${esc(e.descripcion || '')}</p>
-      <p>Como marca de <b>Punto Presencia</b> tienes precio preferente para participar.</p>`,
-    imagen: e.imagen ? `${workerUrl(env)}/img/${e.id}` : null,
-    portada: e.imagen ? null : 'hero-tester.jpg',
-    iconos: [
-      ['reloj', 'Dinámicas express', 'Máximo 15 min por cliente'],
-      ['precio', 'Precio preferente', 'Por ser marca de Punto Presencia'],
-      ['bolsa', 'Tu producto', 'Frente a clientes nuevos'],
-    ],
-    cta: { texto: 'Quiero participar', url: `${site}/tester-day` },
+  const c = await plantilla(env, 'tester-day', {
+    fecha_corta: e.fechaCorta,
+    fecha_texto: e.fechaTexto,
+    horario: e.horario,
+    descripcion: e.descripcion,
+    imagen: e.imagen ? `${workerUrl(env)}/img/${e.id}` : '',
+    portada: e.imagen ? '' : 'hero-tester.jpg',
   });
-  return { asunto: `Tester Day ${e.fechaCorta}: lleva tu marca`, preview: 'Precio preferente para marcas de Punto Presencia', html, nombre: `Tester Day ${e.fecha}` };
+  return { ...c, nombre: `Tester Day ${e.fecha}` };
 }
 
 async function agenda(env, { aud }) {
@@ -284,29 +272,18 @@ async function agendaContenido(env) {
   const hoy = hoyMX();
   const evs = (await eventosPublicos(env, hoy, 31)).slice(0, 8);
   if (!evs.length) return { error: 'No hay eventos públicos en los próximos 31 días' };
-  const site = siteUrl(env);
   const mes = new Intl.DateTimeFormat('es-MX', { month: 'long', timeZone: TZ }).format(new Date());
-  const items = evs.map((e) => `
-    <tr>
-      <td valign="top" width="112" style="padding:0 16px 22px 0;width:112px">${e.imagen
-        ? `<a href="${site}/eventos"><img src="${workerUrl(env)}/img/${e.id}" width="112" alt="" style="display:block;width:112px;height:auto;border:0"></a>`
-        : `<div style="width:112px;height:112px;background:#f7f5f1"></div>`}</td>
-      <td valign="top" style="padding:0 0 22px">
-      <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8a7a52;margin:0 0 4px"><img src="${site}/email/ic-calendario.png" width="14" height="14" alt="" style="vertical-align:-2px;margin-right:6px;border:0">${esc(e.fechaCorta)} · ${esc(e.horario)}</div>
-      <div style="font-size:19px;font-weight:300;color:#2b2b2a;margin:0 0 4px">${esc(e.titulo)}</div>
-      ${e.descripcion ? `<div style="font-size:14px;color:#6b6b69;line-height:1.5">${esc(e.descripcion)}</div>` : ''}
-      </td>
-    </tr>`).join('');
-  const html = layout(env, {
-    preheader: `Lo que viene en Galería 9: ${evs.map((e) => e.titulo).slice(0, 3).join(', ')}.`,
-    portada: 'hero-agenda.jpg',
-    eyebrow: `Agenda · ${mes}`,
-    titulo: 'Lo que viene en Galería 9',
-    cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %} esto es lo que tenemos en las próximas semanas.</p>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px">${items}</table>`,
-    cta: { texto: 'Ver la agenda completa', url: `${site}/eventos` },
+  const c = await plantilla(env, 'agenda', {
+    mes,
+    eventos: evs.map((e) => ({
+      titulo: e.titulo,
+      fecha_corta: e.fechaCorta,
+      horario: e.horario,
+      descripcion: e.descripcion,
+      imagen: e.imagen ? `${workerUrl(env)}/img/${e.id}` : '',
+    })),
   });
-  return { asunto: `Agenda Galería 9 · ${mes}`, preview: 'Talleres, pláticas y eventos de las próximas semanas', html, nombre: `Agenda ${hoy.slice(0, 7)}` };
+  return { ...c, nombre: `Agenda ${hoy.slice(0, 7)}` };
 }
 
 // Crea la campaña en Kit y la manda ya. aud=prueba → solo "Prueba interna".
@@ -332,19 +309,21 @@ async function preview(env, t) {
   const ej = { first_name: 'Mariana', marca: 'Barro & Sal', plan_pp: 'Visibilidad', inicio_estancia_texto: '1 de octubre de 2026',
     fin_estancia_texto: '31 de marzo de 2027', link_onboarding: `${siteUrl(env)}/onboarding` };
   const piezas = {
-    newsletter: () => ({ asunto: correoBienvenidaNewsletter(env).subject, html: correoBienvenidaNewsletter(env).content }),
-    pp: () => ({ asunto: correoBienvenidaPP(env).subject, html: correoBienvenidaPP(env).content }),
+    newsletter: () => plantilla(env, 'bienvenida-newsletter', {}),
+    pp: () => plantilla(env, 'bienvenida-pp', {}),
     tester: () => testerDayContenido(env),
     agenda: () => agendaContenido(env),
   };
   const keys = t && piezas[t] ? [t] : Object.keys(piezas);
+  const kitEjemplo = (h) => String(h || '')
+    .replace(/\{% if subscriber\.first_name %\}(.*?)\{% else %\}.*?\{% endif %\}/gs, '$1')
+    .replace(/\{\{\s*subscriber\.(\w+)\s*\}\}/g, (_, f) => esc(ej[f] || ''));
   let out = '';
   for (const k of keys) {
-    const c = await piezas[k]();
-    const html = (c.html || `<p>${esc(c.error)}</p>`)
-      .replace(/\{% if subscriber\.first_name %\}(.*?)\{% else %\}.*?\{% endif %\}/gs, '$1')
-      .replace(/\{\{\s*subscriber\.(\w+)\s*\}\}/g, (_, f) => esc(ej[f] || ''));
-    out += `<div style="max-width:620px;margin:30px auto 6px;font:13px system-ui;color:#555"><b>${esc(k)}</b> · Asunto: ${esc(c.asunto || '')}</div>${html}`;
+    let c;
+    try { c = await piezas[k](); } catch (err) { c = { error: String(err.message || err) }; }
+    const html = c.html ? kitEjemplo(c.html) : `<p style="text-align:center;font:14px system-ui">${esc(c.error)}</p>`;
+    out += `<div style="max-width:620px;margin:30px auto 6px;font:13px system-ui;color:#555"><b>${esc(k)}</b> · Asunto: ${esc(kitEjemplo(c.asunto))}</div>${html}`;
   }
   return new Response(`<!doctype html><meta charset="utf-8"><title>Plantillas G9</title><body style="margin:0;background:#ddd">${out}</body>`,
     { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
@@ -358,13 +337,14 @@ async function setup(env, prueba) {
   for (const n of Object.values(TAGS)) tags[n] = (await kit.tag(n)).id;
   const seqs = {};
   for (const [k, name] of Object.entries(SEQ)) {
-    const mail = k === 'pp' ? correoBienvenidaPP(env) : correoBienvenidaNewsletter(env);
+    const c = await plantilla(env, k === 'pp' ? 'bienvenida-pp' : 'bienvenida-newsletter', {});
+    const mail = { subject: c.asunto, preview_text: c.preview, content: c.html };
     let s = await kit.findSequence(name);
     if (!s) {
       s = await kit.createSequence({ name, active: true, time_zone: TZ, send_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] });
       await kit.createSequenceEmail(s.id, { ...mail, delay_value: 0, delay_unit: 'hours', published: true, position: 0 });
     } else {
-      // ya existe: deja su primer correo igual a la plantilla actual del código
+      // ya existe: deja su primer correo igual a la plantilla publicada
       const [primero] = await kit.sequenceEmails(s.id);
       if (primero) await kit.updateSequenceEmail(s.id, primero.id, mail);
     }
@@ -379,91 +359,75 @@ async function setup(env, prueba) {
   return { ok: true, etiquetas: tags, secuencias: seqs, prueba_interna: etiquetados };
 }
 
-function correoBienvenidaNewsletter(env) {
-  const site = siteUrl(env);
-  return {
-    subject: 'Gracias por sumarte a Galería 9',
-    preview_text: 'Talleres, pláticas y marcas en Providencia, Guadalajara',
-    content: layout(env, {
-      portada: 'hero-newsletter.jpg',
-      eyebrow: 'Newsletter',
-      titulo: 'Ya eres parte de la comunidad',
-      cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
-        <p>Desde ahora te contamos primero lo que pasa en Galería 9: talleres, pláticas, Tester Days y las marcas que nos visitan.</p>
-        <p>Cada mes te llega la agenda. Mientras, puedes ver lo que viene esta semana.</p>`,
-      iconos: [
-        ['calendario', 'Talleres y pláticas', 'Bienestar, creatividad y comunidad'],
-        ['bolsa', 'Marcas locales', 'Producto hecho aquí, en piso'],
-        ['destello', 'Tester Days', 'Prueba antes que nadie'],
-      ],
-      cta: { texto: 'Ver la agenda', url: `${site}/eventos` },
-    }),
-  };
+// ── Plantillas (viven en el sitio: app/public/email/plantillas/ del repo) ──
+// Cada archivo: un comentario de encabezado (asunto, preview, eyebrow, titulo, portada,
+// icono ×3, boton) + el cuerpo HTML; se inserta en marco.html. Ver LEEME.md en esa carpeta.
+async function plantilla(env, nombre, datos) {
+  const base = `${siteUrl(env)}/email/plantillas`;
+  const [marco, pieza] = await Promise.all([leerPlantilla(`${base}/marco.html`), leerPlantilla(`${base}/${nombre}.html`)]);
+  const ctx = { site: siteUrl(env), ...datos };
+  const { meta, cuerpo } = separarEncabezado(pieza);
+  const r = (v) => render(v || '', [ctx]);
+  const uno = (k) => r(meta[k] && meta[k][0]);
+  const iconos = (meta.icono || []).map((l) => {
+    const [icono, titulo, texto] = l.split('|').map((x) => r(x.trim()));
+    return { icono, titulo, texto };
+  });
+  const [btnTexto, btnUrl] = String((meta.boton && meta.boton[0]) || '').split('|').map((x) => r(x.trim()));
+  const preview = uno('preview');
+  const html = render(sinComentarioInicial(marco), [{
+    site: ctx.site,
+    preview,
+    eyebrow: uno('eyebrow'),
+    titulo: uno('titulo'),
+    portada: uno('portada'),
+    contenido: render(cuerpo, [ctx]),
+    hay_iconos: iconos.length > 0,
+    iconos,
+    boton: btnTexto ? { texto: btnTexto, url: btnUrl } : null,
+  }]);
+  return { asunto: uno('asunto'), preview, html };
 }
 
-function correoBienvenidaPP(env) {
-  return {
-    subject: 'Tu lugar en Punto Presencia está confirmado',
-    preview_text: 'Siguiente paso: completa tu onboarding',
-    content: layout(env, {
-      portada: 'hero-pp.jpg',
-      eyebrow: 'Punto Presencia',
-      titulo: 'Ya eres parte de Galería 9',
-      cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
-        <p>Confirmamos a <b>{{ subscriber.marca }}</b> en Punto Presencia, plan <b>{{ subscriber.plan_pp }}</b>, del {{ subscriber.inicio_estancia_texto }} al {{ subscriber.fin_estancia_texto }}.</p>
-        <p>El siguiente paso es tu <b>onboarding</b>: ahí nos compartes tu logo, inventario y lo que necesitamos para preparar tu espacio. Toma unos minutos.</p>`,
-      iconos: [
-        ['checklist', '1. Onboarding', 'Logo, inventario y datos de tu marca'],
-        ['caja', '2. Montaje', 'Preparamos tu display'],
-        ['tienda', '3. En piso', 'Tu marca, frente a la comunidad'],
-      ],
-      cta: { texto: 'Completar mi onboarding', url: '{{ subscriber.link_onboarding }}' },
-      nota: `¿Dudas? Escríbenos por <a href="${WA}" style="color:#8a7a52">WhatsApp</a>.`,
-    }),
-  };
+async function leerPlantilla(url) {
+  const res = await fetch(url, { cf: { cacheTtl: 60, cacheEverything: true } });
+  const txt = await res.text();
+  // Pages responde 200 con la página del sitio cuando el archivo no existe
+  if (!res.ok || /<!doctype html/i.test(txt)) throw new Error(`No encontré la plantilla ${url}`);
+  return txt;
 }
-
-// ── Plantilla de correo (marca Galería 9) ───────────────────────────────────
-function layout(env, { preheader = '', eyebrow, titulo, cuerpo, imagen, portada, iconos, cta, nota }) {
-  const site = siteUrl(env);
-  const fila = iconos ? iconRow(env, iconos) : '';
-  return `<div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f2">
-<tr><td align="center" style="padding:28px 14px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#2b2b2a">
-  <tr><td style="padding:16px 28px 14px">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td valign="middle" style="width:30px"><img src="${site}/logo.png" height="38" alt="Galería 9" style="display:block;height:38px;width:auto;border:0"></td>
-      <td valign="middle" style="padding-left:12px;font-size:12px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:#2b2b2a;white-space:nowrap">Galería 9</td>
-      ${eyebrow ? `<td valign="middle" align="right" style="font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#8a7a52">${esc(eyebrow)}</td>` : ''}
-    </tr></table>
-  </td></tr>
-  ${portada ? `<tr><td style="padding:0"><img src="${site}/email/${portada}" width="560" alt="" style="display:block;width:100%;max-width:560px;height:auto;border:0"></td></tr>` : ''}
-  <tr><td style="padding:24px 28px 0">
-    <div style="font-size:28px;font-weight:200;line-height:1.15;margin:0 0 16px">${esc(titulo)}</div>
-  </td></tr>
-  ${imagen ? `<tr><td align="center" style="padding:0 28px 18px"><img src="${imagen}" width="260" alt="" style="display:block;width:260px;max-width:100%;height:auto;border:0;margin:0 auto"></td></tr>` : ''}
-  <tr><td style="padding:0 28px;font-size:15px;line-height:1.6;font-weight:300">${cuerpo}</td></tr>
-  ${fila}
-  ${cta ? `<tr><td style="padding:10px 28px 26px"><a href="${cta.url}" style="display:inline-block;background:#2b2b2a;color:#f2f2f2;text-decoration:none;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px">${esc(cta.texto)} →</a></td></tr>` : ''}
-  ${nota ? `<tr><td style="padding:0 28px 22px;font-size:13px;color:#6b6b69">${nota}</td></tr>` : ''}
-  <tr><td style="padding:18px 28px 24px;border-top:1px solid #e4dfd8;font-size:12px;color:#8a8a88;line-height:1.6">
-    Galería 9 · Providencia, Guadalajara<br>
-    <a href="${IG}" style="color:#8a7a52">Instagram</a> · <a href="${WA}" style="color:#8a7a52">WhatsApp</a> · <a href="${site}" style="color:#8a7a52">galeria9</a>
-  </td></tr>
-</table></td></tr></table>`;
+function sinComentarioInicial(t) {
+  return t.replace(/^\s*<!--[\s\S]*?-->\s*/, '');
 }
-
-// Fila de 3 puntos con icono (PNG dorados en /email/ic-*.png del sitio)
-function iconRow(env, items) {
-  const site = siteUrl(env);
-  const celdas = items.map(([ic, titulo, texto]) => `
-    <td valign="top" width="33%" style="padding:0 8px;text-align:center">
-      <img src="${site}/email/ic-${ic}.png" width="40" height="40" alt="" style="display:block;margin:0 auto 8px;border:0">
-      <div style="font-size:13px;font-weight:500;color:#2b2b2a;margin:0 0 3px">${esc(titulo)}</div>
-      <div style="font-size:12px;line-height:1.45;color:#6b6b69">${esc(texto)}</div>
-    </td>`).join('');
-  return `<tr><td style="padding:14px 20px 8px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f5f1;border-top:1px solid #e4dfd8;border-bottom:1px solid #e4dfd8"><tr><td style="padding:18px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${celdas}</tr></table></td></tr></table></td></tr>`;
+function separarEncabezado(t) {
+  const m = t.match(/^\s*<!--([\s\S]*?)-->\s*/);
+  const meta = {};
+  if (m) for (const linea of m[1].split('\n')) {
+    const i = linea.indexOf(':');
+    if (i < 1) continue;
+    const k = linea.slice(0, i).trim().toLowerCase();
+    if (!/^[a-z_]+$/.test(k)) continue;
+    (meta[k] ||= []).push(linea.slice(i + 1).trim());
+  }
+  return { meta, cuerpo: m ? t.slice(m[0].length) : t };
+}
+// Mini motor tipo Mustache con [[ ]] (no choca con {{ }} / {% %} de Kit):
+//   [[x]] escapado · [[&x]] sin escapar · [[#x]]…[[/x]] si existe (repite si es lista) · [[^x]]…[[/x]] si no existe
+function render(tpl, pila) {
+  const buscar = (k) => { for (let i = pila.length - 1; i >= 0; i--) if (pila[i] && typeof pila[i] === 'object' && k in pila[i]) return pila[i][k]; return undefined; };
+  const vacio = (v) => v == null || v === false || v === '' || (Array.isArray(v) && !v.length);
+  let out = String(tpl).replace(/\[\[([#^])(\w+)\]\]([\s\S]*?)\[\[\/\2\]\]/g, (_, tipo, k, dentro) => {
+    const v = buscar(k);
+    if (tipo === '^') return vacio(v) ? render(dentro, pila) : '';
+    if (vacio(v)) return '';
+    if (Array.isArray(v)) return v.map((item) => render(dentro, [...pila, item])).join('');
+    return render(dentro, typeof v === 'object' ? [...pila, v] : pila);
+  });
+  out = out.replace(/\[\[(&?)(\w+)\]\]/g, (_, raw, k) => {
+    const v = buscar(k);
+    return v == null ? '' : raw ? String(v) : esc(v);
+  });
+  return out;
 }
 
 // ── Eventos públicos (Airtable) ─────────────────────────────────────────────

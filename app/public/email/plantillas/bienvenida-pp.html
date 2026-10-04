@@ -1,0 +1,15 @@
+<!--
+asunto: Tu lugar en Punto Presencia está confirmado
+preview: Siguiente paso: completa tu onboarding
+eyebrow: Punto Presencia
+titulo: Ya eres parte de Galería 9
+portada: hero-pp.jpg
+icono: checklist | 1. Onboarding | Logo, inventario y datos de tu marca
+icono: caja | 2. Montaje | Preparamos tu display
+icono: tienda | 3. En piso | Tu marca, frente a la comunidad
+boton: Completar mi onboarding | {{ subscriber.link_onboarding }}
+-->
+<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
+<p>Confirmamos a <b>{{ subscriber.marca }}</b> en Punto Presencia, plan <b>{{ subscriber.plan_pp }}</b>, del {{ subscriber.inicio_estancia_texto }} al {{ subscriber.fin_estancia_texto }}.</p>
+<p>El siguiente paso es tu <b>onboarding</b>: ahí nos compartes tu logo, inventario y lo que necesitamos para preparar tu espacio. Toma unos minutos.</p>
+<p style="font-size:13px;color:#6b6b69">¿Dudas? Escríbenos por <a href="https://wa.me/523318030563" style="color:#8a7a52">WhatsApp</a>.</p>

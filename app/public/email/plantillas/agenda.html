@@ -1,0 +1,22 @@
+<!--
+asunto: Agenda Galería 9 · [[mes]]
+preview: Talleres, pláticas y eventos de las próximas semanas
+eyebrow: Agenda · [[mes]]
+titulo: Lo que viene en Galería 9
+portada: hero-agenda.jpg
+boton: Ver la agenda completa | [[site]]/eventos
+-->
+<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %} esto es lo que tenemos en las próximas semanas.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px">
+[[#eventos]]<tr>
+  <td valign="top" width="112" style="padding:0 16px 22px 0;width:112px">
+    [[#imagen]]<a href="[[site]]/eventos"><img src="[[&imagen]]" width="112" alt="" style="display:block;width:112px;height:auto;border:0"></a>[[/imagen]]
+    [[^imagen]]<div style="width:112px;height:112px;background:#f7f5f1"></div>[[/imagen]]
+  </td>
+  <td valign="top" style="padding:0 0 22px">
+    <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8a7a52;margin:0 0 4px"><img src="[[site]]/email/ic-calendario.png" width="14" height="14" alt="" style="vertical-align:-2px;margin-right:6px;border:0">[[fecha_corta]] · [[horario]]</div>
+    <div style="font-size:19px;font-weight:300;color:#2b2b2a;margin:0 0 4px">[[titulo]]</div>
+    [[#descripcion]]<div style="font-size:14px;color:#6b6b69;line-height:1.5">[[descripcion]]</div>[[/descripcion]]
+  </td>
+</tr>[[/eventos]]
+</table>
