@@ -1,0 +1,12 @@
+# galeria9-mkt — email marketing Galería 9 (Airtable ↔ Kit). Ver galeria9-mkt.js.
+# Hoy se despliega pegando el código en el dashboard; este archivo documenta la config
+# (y permite `wrangler deploy` si algún día se decide desplegar desde el repo).
+name = "galeria9-mkt"
+main = "galeria9-mkt.js"
+compatibility_date = "2026-10-01"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Secretos (no van aquí): KIT_API_KEY, AIRTABLE_TOKEN, ADMIN_KEY
+# Variables opcionales: MODE = "live", INCLUDE_TEST = "1"
