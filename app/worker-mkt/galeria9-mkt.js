@@ -262,8 +262,14 @@ async function testerDayContenido(env, eventoId) {
     cuerpo: `
       <p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
       <p>El <b>${esc(e.fechaTexto)}</b>, de ${esc(e.horario)}, tenemos Tester Day en Galería 9. ${esc(e.descripcion || '')}</p>
-      <p>Como marca de <b>Punto Presencia</b> tienes precio preferente para participar. Las dinámicas son express: máximo 15 minutos de interacción con cada cliente.</p>`,
+      <p>Como marca de <b>Punto Presencia</b> tienes precio preferente para participar.</p>`,
     imagen: e.imagen ? `${workerUrl(env)}/img/${e.id}` : null,
+    portada: e.imagen ? null : 'hero-tester.jpg',
+    iconos: [
+      ['reloj', 'Dinámicas express', 'Máximo 15 min por cliente'],
+      ['precio', 'Precio preferente', 'Por ser marca de Punto Presencia'],
+      ['bolsa', 'Tu producto', 'Frente a clientes nuevos'],
+    ],
     cta: { texto: 'Quiero participar', url: `${site}/tester-day` },
   });
   return { asunto: `Tester Day ${e.fechaCorta}: lleva tu marca`, preview: 'Precio preferente para marcas de Punto Presencia', html, nombre: `Tester Day ${e.fecha}` };
@@ -282,12 +288,13 @@ async function agendaContenido(env) {
   const items = evs.map((e) => `
     <tr><td style="padding:0 0 22px">
       ${e.imagen ? `<a href="${site}/eventos"><img src="${workerUrl(env)}/img/${e.id}" width="520" alt="" style="display:block;width:100%;max-width:520px;height:auto;border:0;margin:0 0 10px"></a>` : ''}
-      <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8a7a52;margin:0 0 4px">${esc(e.fechaCorta)} · ${esc(e.horario)}</div>
+      <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8a7a52;margin:0 0 4px"><img src="${site}/email/ic-calendario.png" width="14" height="14" alt="" style="vertical-align:-2px;margin-right:6px;border:0">${esc(e.fechaCorta)} · ${esc(e.horario)}</div>
       <div style="font-size:19px;font-weight:300;color:#2b2b2a;margin:0 0 4px">${esc(e.titulo)}</div>
       ${e.descripcion ? `<div style="font-size:14px;color:#6b6b69;line-height:1.5">${esc(e.descripcion)}</div>` : ''}
     </td></tr>`).join('');
   const html = layout(env, {
     preheader: `Lo que viene en Galería 9: ${evs.map((e) => e.titulo).slice(0, 3).join(', ')}.`,
+    portada: 'hero-agenda.jpg',
     eyebrow: `Agenda · ${mes}`,
     titulo: 'Lo que viene en Galería 9',
     cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %} esto es lo que tenemos en las próximas semanas.</p>
@@ -369,11 +376,17 @@ function correoBienvenidaNewsletter(env) {
     subject: 'Bienvenida a Galería 9',
     preview_text: 'Talleres, pláticas y marcas en Providencia, Guadalajara',
     content: layout(env, {
+      portada: 'hero-newsletter.jpg',
       eyebrow: 'Galería 9',
       titulo: 'Gracias por sumarte',
       cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
         <p>Desde ahora te contamos primero lo que pasa en Galería 9: talleres, pláticas, Tester Days y las marcas que nos visitan.</p>
         <p>Cada mes te llega la agenda. Mientras, puedes ver lo que viene esta semana.</p>`,
+      iconos: [
+        ['calendario', 'Talleres y pláticas', 'Bienestar, creatividad y comunidad'],
+        ['bolsa', 'Marcas locales', 'Producto hecho aquí, en piso'],
+        ['destello', 'Tester Days', 'Prueba antes que nadie'],
+      ],
       cta: { texto: 'Ver la agenda', url: `${site}/eventos` },
     }),
   };
@@ -384,11 +397,17 @@ function correoBienvenidaPP(env) {
     subject: 'Tu lugar en Punto Presencia está confirmado',
     preview_text: 'Siguiente paso: completa tu onboarding',
     content: layout(env, {
+      portada: 'hero-pp.jpg',
       eyebrow: 'Punto Presencia',
       titulo: 'Bienvenida a Galería 9',
       cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
         <p>Confirmamos a <b>{{ subscriber.marca }}</b> en Punto Presencia, plan <b>{{ subscriber.plan_pp }}</b>, del {{ subscriber.inicio_estancia_texto }} al {{ subscriber.fin_estancia_texto }}.</p>
         <p>El siguiente paso es tu <b>onboarding</b>: ahí nos compartes tu logo, inventario y lo que necesitamos para preparar tu espacio. Toma unos minutos.</p>`,
+      iconos: [
+        ['checklist', '1. Onboarding', 'Logo, inventario y datos de tu marca'],
+        ['caja', '2. Montaje', 'Preparamos tu display'],
+        ['tienda', '3. En piso', 'Tu marca, frente a la comunidad'],
+      ],
       cta: { texto: 'Completar mi onboarding', url: '{{ subscriber.link_onboarding }}' },
       nota: `¿Dudas? Escríbenos por <a href="${WA}" style="color:#8a7a52">WhatsApp</a>.`,
     }),
@@ -396,19 +415,22 @@ function correoBienvenidaPP(env) {
 }
 
 // ── Plantilla de correo (marca Galería 9) ───────────────────────────────────
-function layout(env, { preheader = '', eyebrow, titulo, cuerpo, imagen, cta, nota }) {
+function layout(env, { preheader = '', eyebrow, titulo, cuerpo, imagen, portada, iconos, cta, nota }) {
   const site = siteUrl(env);
+  const fila = iconos ? iconRow(env, iconos) : '';
   return `<div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f2">
 <tr><td align="center" style="padding:28px 14px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#2b2b2a">
-  <tr><td style="padding:26px 28px 8px"><img src="${site}/logo.png" height="44" alt="Galería 9" style="display:block;height:44px;width:auto;border:0"></td></tr>
-  <tr><td style="padding:10px 28px 0">
+  <tr><td style="padding:26px 28px 18px"><img src="${site}/logo.png" height="44" alt="Galería 9" style="display:block;height:44px;width:auto;border:0"></td></tr>
+  ${portada ? `<tr><td style="padding:0"><img src="${site}/email/${portada}" width="560" alt="" style="display:block;width:100%;max-width:560px;height:auto;border:0"></td></tr>` : ''}
+  <tr><td style="padding:24px 28px 0">
     ${eyebrow ? `<div style="font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#8a7a52;margin:0 0 8px">${esc(eyebrow)}</div>` : ''}
     <div style="font-size:28px;font-weight:200;line-height:1.15;margin:0 0 16px">${esc(titulo)}</div>
   </td></tr>
   ${imagen ? `<tr><td style="padding:0 28px 14px"><img src="${imagen}" width="504" alt="" style="display:block;width:100%;max-width:504px;height:auto;border:0"></td></tr>` : ''}
   <tr><td style="padding:0 28px;font-size:15px;line-height:1.6;font-weight:300">${cuerpo}</td></tr>
+  ${fila}
   ${cta ? `<tr><td style="padding:10px 28px 26px"><a href="${cta.url}" style="display:inline-block;background:#2b2b2a;color:#f2f2f2;text-decoration:none;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px">${esc(cta.texto)} →</a></td></tr>` : ''}
   ${nota ? `<tr><td style="padding:0 28px 22px;font-size:13px;color:#6b6b69">${nota}</td></tr>` : ''}
   <tr><td style="padding:18px 28px 24px;border-top:1px solid #e4dfd8;font-size:12px;color:#8a8a88;line-height:1.6">
@@ -416,6 +438,18 @@ function layout(env, { preheader = '', eyebrow, titulo, cuerpo, imagen, cta, not
     <a href="${IG}" style="color:#8a7a52">Instagram</a> · <a href="${WA}" style="color:#8a7a52">WhatsApp</a> · <a href="${site}" style="color:#8a7a52">galeria9</a>
   </td></tr>
 </table></td></tr></table>`;
+}
+
+// Fila de 3 puntos con icono (PNG dorados en /email/ic-*.png del sitio)
+function iconRow(env, items) {
+  const site = siteUrl(env);
+  const celdas = items.map(([ic, titulo, texto]) => `
+    <td valign="top" width="33%" style="padding:0 8px;text-align:center">
+      <img src="${site}/email/ic-${ic}.png" width="40" height="40" alt="" style="display:block;margin:0 auto 8px;border:0">
+      <div style="font-size:13px;font-weight:500;color:#2b2b2a;margin:0 0 3px">${esc(titulo)}</div>
+      <div style="font-size:12px;line-height:1.45;color:#6b6b69">${esc(texto)}</div>
+    </td>`).join('');
+  return `<tr><td style="padding:14px 20px 8px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f5f1;border-top:1px solid #e4dfd8;border-bottom:1px solid #e4dfd8"><tr><td style="padding:18px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${celdas}</tr></table></td></tr></table></td></tr>`;
 }
 
 // ── Eventos públicos (Airtable) ─────────────────────────────────────────────
