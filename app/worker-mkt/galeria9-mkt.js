@@ -287,12 +287,16 @@ async function agendaContenido(env) {
   const site = siteUrl(env);
   const mes = new Intl.DateTimeFormat('es-MX', { month: 'long', timeZone: TZ }).format(new Date());
   const items = evs.map((e) => `
-    <tr><td style="padding:0 0 22px">
-      ${e.imagen ? `<a href="${site}/eventos"><img src="${workerUrl(env)}/img/${e.id}" width="520" alt="" style="display:block;width:100%;max-width:520px;height:auto;border:0;margin:0 0 10px"></a>` : ''}
+    <tr>
+      <td valign="top" width="112" style="padding:0 16px 22px 0;width:112px">${e.imagen
+        ? `<a href="${site}/eventos"><img src="${workerUrl(env)}/img/${e.id}" width="112" alt="" style="display:block;width:112px;height:auto;border:0"></a>`
+        : `<div style="width:112px;height:112px;background:#f7f5f1"></div>`}</td>
+      <td valign="top" style="padding:0 0 22px">
       <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8a7a52;margin:0 0 4px"><img src="${site}/email/ic-calendario.png" width="14" height="14" alt="" style="vertical-align:-2px;margin-right:6px;border:0">${esc(e.fechaCorta)} · ${esc(e.horario)}</div>
       <div style="font-size:19px;font-weight:300;color:#2b2b2a;margin:0 0 4px">${esc(e.titulo)}</div>
       ${e.descripcion ? `<div style="font-size:14px;color:#6b6b69;line-height:1.5">${esc(e.descripcion)}</div>` : ''}
-    </td></tr>`).join('');
+      </td>
+    </tr>`).join('');
   const html = layout(env, {
     preheader: `Lo que viene en Galería 9: ${evs.map((e) => e.titulo).slice(0, 3).join(', ')}.`,
     portada: 'hero-agenda.jpg',
@@ -378,12 +382,12 @@ async function setup(env, prueba) {
 function correoBienvenidaNewsletter(env) {
   const site = siteUrl(env);
   return {
-    subject: 'Bienvenida a Galería 9',
+    subject: 'Gracias por sumarte a Galería 9',
     preview_text: 'Talleres, pláticas y marcas en Providencia, Guadalajara',
     content: layout(env, {
       portada: 'hero-newsletter.jpg',
       eyebrow: 'Newsletter',
-      titulo: 'Gracias por sumarte',
+      titulo: 'Ya eres parte de la comunidad',
       cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
         <p>Desde ahora te contamos primero lo que pasa en Galería 9: talleres, pláticas, Tester Days y las marcas que nos visitan.</p>
         <p>Cada mes te llega la agenda. Mientras, puedes ver lo que viene esta semana.</p>`,
@@ -404,7 +408,7 @@ function correoBienvenidaPP(env) {
     content: layout(env, {
       portada: 'hero-pp.jpg',
       eyebrow: 'Punto Presencia',
-      titulo: 'Bienvenida a Galería 9',
+      titulo: 'Ya eres parte de Galería 9',
       cuerpo: `<p>{% if subscriber.first_name %}Hola {{ subscriber.first_name }}:{% else %}Hola:{% endif %}</p>
         <p>Confirmamos a <b>{{ subscriber.marca }}</b> en Punto Presencia, plan <b>{{ subscriber.plan_pp }}</b>, del {{ subscriber.inicio_estancia_texto }} al {{ subscriber.fin_estancia_texto }}.</p>
         <p>El siguiente paso es tu <b>onboarding</b>: ahí nos compartes tu logo, inventario y lo que necesitamos para preparar tu espacio. Toma unos minutos.</p>`,
@@ -438,7 +442,7 @@ function layout(env, { preheader = '', eyebrow, titulo, cuerpo, imagen, portada,
   <tr><td style="padding:24px 28px 0">
     <div style="font-size:28px;font-weight:200;line-height:1.15;margin:0 0 16px">${esc(titulo)}</div>
   </td></tr>
-  ${imagen ? `<tr><td style="padding:0 28px 14px"><img src="${imagen}" width="504" alt="" style="display:block;width:100%;max-width:504px;height:auto;border:0"></td></tr>` : ''}
+  ${imagen ? `<tr><td align="center" style="padding:0 28px 18px"><img src="${imagen}" width="260" alt="" style="display:block;width:260px;max-width:100%;height:auto;border:0;margin:0 auto"></td></tr>` : ''}
   <tr><td style="padding:0 28px;font-size:15px;line-height:1.6;font-weight:300">${cuerpo}</td></tr>
   ${fila}
   ${cta ? `<tr><td style="padding:10px 28px 26px"><a href="${cta.url}" style="display:inline-block;background:#2b2b2a;color:#f2f2f2;text-decoration:none;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px">${esc(cta.texto)} →</a></td></tr>` : ''}
