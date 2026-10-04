@@ -6,7 +6,7 @@ main = "galeria9-mkt.js"
 compatibility_date = "2026-10-01"
 
 [triggers]
-crons = ["*/15 * * * *"]
+crons = ["*/30 * * * *", "0 16 * * *"]
 
 # Secretos (no van aquí): KIT_API_KEY, AIRTABLE_TOKEN, ADMIN_KEY
 # Variables opcionales: MODE = "live", INCLUDE_TEST = "1"

@@ -514,7 +514,8 @@ function kitClient(env) {
   }
   return {
     tag: async (name) => (await call('POST', '/tags', { name })).tag, // idempotente por nombre
-    findTag: async (name) => (await all('/tags', 'tags')).find((t) => t.name.toLowerCase() === name.toLowerCase()) || null,
+    // POST /tags es idempotente por nombre: regresa la etiqueta existente (más confiable que paginar la lista)
+    findTag: async (name) => (await call('POST', '/tags', { name })).tag,
     tagSubscribers: async (tagId) => (await all(`/tags/${tagId}/subscribers`, 'subscribers')).map((s) => s.email_address),
     subscriberTags: (id) => all(`/subscribers/${id}/tags`, 'tags'),
     addTag: (tagId, email) => call('POST', `/tags/${tagId}/subscribers`, { email_address: email }),
