@@ -22,7 +22,7 @@ const prioridades = [
         </header>
       </div>
 
-      <form id="f" class="mform reveal" novalidate>
+      <form id="f" class="mform ag__form reveal" novalidate>
         <div class="mform-two">
           <label class="mfield"><span>Nombre</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
           <label class="mfield"><span>Celular / WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
@@ -45,7 +45,7 @@ const prioridades = [
           <p class="prio__count" id="prioCount" aria-live="polite">0 de 3</p>
         </fieldset>
 
-        <div><button type="submit" class="btn">Enviar</button></div>
+        <div class="ag__send"><button type="submit" class="btn">Enviar</button></div>
       </form>
 
       <div class="mdone" id="done" hidden>
@@ -116,4 +116,11 @@ const prioridades = [
   .prio__count { margin: .9rem 0 0; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-ink); }
   .prio.invalid legend { color: #b4523f; }
   @media (max-width: 640px) { .prio__list { grid-template-columns: 1fr; } }
+  /* Escritorio: campos más angostos a la izquierda, prioridades a la derecha */
+  @media (min-width: 900px) {
+    .ag__form { max-width: none; grid-template-columns: minmax(0, 520px) minmax(0, 1fr); column-gap: clamp(2.5rem, 6vw, 6rem); align-items: start; }
+    .ag__form .prio { margin-top: 0; grid-column: 2; grid-row: 1 / span 2; }
+    .ag__form .prio__list { grid-template-columns: 1fr; gap: .6rem; }
+    .ag__send { grid-column: 1; }
+  }
 </style>
