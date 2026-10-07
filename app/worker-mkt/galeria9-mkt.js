@@ -19,7 +19,7 @@
  *  Las campañas automáticas (3 y 4) y la sincronización solo escriben en Kit con MODE = "live".
  *
  * RUTAS (las de ?k= necesitan ADMIN_KEY; GET para poder usarlas como botón o link)
- *   POST /subscribe                        público (solo desde el sitio de Galería 9)
+ *   POST /subscribe                        público (solo desde el sitio de Galería 9): {email, nombre?, celular?, origen?}
  *   GET  /img/<recEvento>                  público: imagen estable de un evento público
  *   GET  /status?k=                        simulación de la sincronización (no escribe)
  *   GET  /sync?k=                          sincroniza ya
@@ -115,6 +115,7 @@ async function subscribe(request, env) {
   const email = String(b.email || '').trim().toLowerCase();
   if (!EMAIL_RE.test(email) || email.length > 200) return json({ error: 'Correo inválido' }, 400, cors);
   const nombre = String(b.nombre || '').trim().slice(0, 60) || null;
+  const celular = String(b.celular || '').replace(/[^\d+ ()-]/g, '').trim().slice(0, 20) || null; // form "Nuevos hábitos"
   const origen = String(b.origen || 'sitio').slice(0, 60);
 
   const kit = kitClient(env);
@@ -127,10 +128,12 @@ async function subscribe(request, env) {
     if (seq) await kit.addToSequence(seq.id, email);
   }
   // La lista vive en Airtable: registra el alta si ese correo no estaba
-  const existe = await airList(env, T.newsletter, { filterByFormula: `LOWER({Correo})='${email.replace(/'/g, "\\'")}'`, fields: ['Correo'] });
+  const existe = await airList(env, T.newsletter, { filterByFormula: `LOWER({Correo})='${email.replace(/'/g, "\\'")}'`, fields: ['Correo', 'Celular'] });
   if (!existe.length) {
     const prueba = !origin.startsWith('https://galeria9.pages.dev');
-    await airCreate(env, T.newsletter, { Correo: email, Nombre: nombre || undefined, Estatus: 'Activo', Origen: 'Sitio', En_Kit: true, Notas: `Alta desde ${origen}`, ...(prueba ? { test_record: true } : {}) });
+    await airCreate(env, T.newsletter, { Correo: email, Nombre: nombre || undefined, Celular: celular || undefined, Estatus: 'Activo', Origen: 'Sitio', En_Kit: true, Notas: `Alta desde ${origen}`, ...(prueba ? { test_record: true } : {}) });
+  } else if (celular && !existe[0].fields.Celular) {
+    await airUpdate(env, T.newsletter, [{ id: existe[0].id, fields: { Celular: celular } }]); // ya estaba suscrito: completa su celular
   }
   return json({ ok: true, nuevo: !yaTenia }, 200, cors);
 }

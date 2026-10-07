@@ -1,7 +1,124 @@
 ---
 import Base from '../layouts/Base.astro';
 import Cabinas from '../components/Cabinas.astro';
+
+// Íconos de "website design.pdf" (renderizados del PDF: public/habitos/h1–h9.png)
+const iconos = Array.from({ length: 9 }, (_, i) => `/habitos/h${i + 1}.png`);
+// Alta a la comunidad: mismo endpoint del newsletter (Worker galeria9-mkt → Kit + Airtable)
+const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
 ---
-<Base title="Nuevos hábitos — Galería 9" description="Marcas residentes de bienestar en Galería 9: respiración, reprogramación mental, masajes, belleza y nutrición.">
-  <Cabinas />
+<Base title="Nuevos hábitos — Galería 9" description="Consciencia y transformación en Galería 9: únete a la comunidad y conoce a las marcas residentes de bienestar.">
+  <section class="hab">
+    <div class="wrap hab__inner">
+      <div class="hab__main">
+        <h1 class="hab__title reveal">Nuevos hábitos</h1>
+
+        <div class="hab__icons reveal" aria-hidden="true">
+          {iconos.map((src) => <img src={src} alt="" width="120" height="120" />)}
+        </div>
+
+        <p class="hab__intro reveal">¿Buscas un cambio? ¿un nuevo estilo de vida?<br/>¿consciencia y transformación? <span>¡Bienvenid@ a la comunidad!</span></p>
+
+        <form class="hab__form reveal" id="habForm" novalidate data-url={SUBSCRIBE_URL}>
+          <label class="hab__field"><span>Nombre completo</span><input name="nombre" autocomplete="name" required maxlength="60" /></label>
+          <label class="hab__field"><span>Celular</span><input name="celular" type="tel" autocomplete="tel" inputmode="tel" required maxlength="20" /></label>
+          <label class="hab__field"><span>Correo</span><input name="email" type="email" autocomplete="email" required maxlength="200" /></label>
+          <input class="hab__hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <button class="hab__btn" type="submit">Digo <em>sí</em> a mi expansión</button>
+          <p class="hab__msg" id="habMsg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <a class="hab__badge reveal" href="/#puertas" aria-label="Transformación · Consciencia y hábitos">
+        <strong>Transformación</strong>
+        <span>Consciencia y hábitos</span>
+        <img src="/home/ic-corazon.svg" alt="" />
+      </a>
+    </div>
+  </section>
+
+  <Cabinas compact />
 </Base>
+
+<script>
+  const form = document.getElementById('habForm') as HTMLFormElement | null;
+  const msg = document.getElementById('habMsg')!;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    const nombre = d.nombre.trim(), celular = d.celular.trim(), email = d.email.trim();
+    msg.className = 'hab__msg';
+    if (!nombre || !celular || !email) { msg.textContent = 'Completa tu nombre, celular y correo.'; msg.classList.add('is-err'); return; }
+    if (!/^\S+@\S+\.\S+$/.test(email)) { msg.textContent = 'Revisa tu correo.'; msg.classList.add('is-err'); return; }
+    if (celular.replace(/\D/g, '').length < 10) { msg.textContent = 'Revisa tu celular (10 dígitos).'; msg.classList.add('is-err'); return; }
+    const btn = form.querySelector('button')!;
+    btn.disabled = true; msg.textContent = 'Enviando…';
+    try {
+      const res = await fetch(form.dataset.url!, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, celular, email, origen: 'nuevos-habitos', website: d.website }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      form.classList.add('is-done');
+      msg.textContent = '¡Listo! Ya eres parte de la comunidad. Revisa tu correo.';
+    } catch {
+      btn.disabled = false;
+      msg.textContent = 'No se pudo enviar. Intenta de nuevo en un momento.'; msg.classList.add('is-err');
+    }
+  });
+</script>
+
+<style>
+  .hab { padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .hab__inner { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start; }
+  .hab__title { font-size: clamp(2.6rem, 6.2vw, 5rem); font-weight: 100; line-height: 1; letter-spacing: -.02em; text-transform: uppercase; }
+
+  /* Íconos: al pasar el mouse cada uno sube; recorrer la fila hace "olita" */
+  .hab__icons { display: flex; flex-wrap: wrap; gap: clamp(.7rem, 1.6vw, 1.3rem); margin-top: clamp(1.4rem, 2.6vw, 2.2rem); }
+  .hab__icons img { width: clamp(46px, 4.6vw, 60px); height: auto; transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); }
+  .hab__icons img:hover { transform: translateY(-10px); transition-duration: .2s; }
+
+  .hab__intro { margin-top: clamp(1.8rem, 3vw, 2.6rem); font-size: clamp(1.1rem, 1.7vw, 1.45rem); font-weight: 400; line-height: 1.55; color: var(--ink); }
+  .hab__intro span { white-space: nowrap; }
+
+  .hab__form { display: grid; gap: 1.1rem; max-width: 460px; margin-top: clamp(1.8rem, 3vw, 2.6rem); }
+  .hab__field { display: flex; flex-direction: column; gap: .45rem; }
+  .hab__field span { font-size: .82rem; letter-spacing: .04em; color: var(--ink-70); }
+  .hab__field input {
+    font: inherit; font-size: 1rem; color: var(--ink); background: var(--white);
+    padding: .9em 1em; border: 1px solid var(--ink-12); border-radius: var(--radius);
+  }
+  .hab__field input:focus { outline: none; border-color: var(--ink); }
+  .hab__hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .hab__btn {
+    justify-self: start; margin-top: .6rem; font: inherit; font-size: clamp(1.05rem, 1.5vw, 1.3rem); font-weight: 400;
+    color: var(--paper); background: var(--ink); border: 1px solid var(--ink); padding: .95em 1.5em; cursor: pointer;
+    transition: background .3s var(--ease), color .3s var(--ease);
+  }
+  .hab__btn em { font-weight: 700; }
+  .hab__btn:hover { background: transparent; color: var(--ink); }
+  .hab__btn:disabled { opacity: .55; cursor: default; }
+  .hab__msg { min-height: 1.4em; font-size: .92rem; color: var(--gold-ink); }
+  .hab__msg.is-err { color: #b4523f; }
+  .hab__form.is-done .hab__field, .hab__form.is-done .hab__btn { display: none; }
+  .hab__form.is-done .hab__msg { font-size: 1.15rem; color: var(--ink); }
+
+  /* Mini tarjeta de la sección (como las del home) */
+  .hab__badge {
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: .15rem;
+    width: 150px; padding: 1.1rem .8rem 1.3rem; border-radius: 26px; background: #d3d0ce; color: var(--ink);
+    transition: transform .35s var(--ease);
+  }
+  .hab__badge:hover { transform: translateY(-4px); }
+  .hab__badge strong { font-size: .78rem; font-weight: 700; text-transform: uppercase; }
+  .hab__badge span { font-size: .55rem; text-transform: uppercase; letter-spacing: .02em; }
+  .hab__badge img { width: 54px; margin-top: .9rem; }
+
+  @media (prefers-reduced-motion: reduce) { .hab__icons img { transition: none; } .hab__icons img:hover { transform: none; } }
+  @media (max-width: 760px) {
+    .hab__inner { grid-template-columns: 1fr; }
+    .hab__badge { display: none; }
+    .hab__intro br { display: none; }
+    .hab__btn { justify-self: stretch; }
+  }
+</style>

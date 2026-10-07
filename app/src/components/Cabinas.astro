@@ -9,16 +9,25 @@ const cabinas = [
   { n: 'Manoela Mena', lema: 'Diseña tu mirada — hidratación en piel y servicios de belleza', dur: '20 min', ic: 'face_retouching_natural', wa: '33 2312 4894', waLink: '523323124894', ig: '@bymanoelamena', igLink: 'bymanoelamena' },
   { n: 'Jar Almodovar', lema: 'Regeneración nutricional y hormonal', ic: 'nutrition', wa: '33 1000 0003', ig: '@jaralmodovar' },
 ];
+// compact: debajo de la sección "Nuevos hábitos" (que ya trae el título de la página)
+const { compact = false } = Astro.props;
 ---
-<section class="section cabinas" id="cabinas">
+<section class={`section cabinas ${compact ? 'cabinas--compact' : ''}`} id="cabinas">
   <div class="wrap">
-    <div class="two">
-      <div class="reveal">
-        <span class="eyebrow">Nueva transformación · Nuevo estilo de vida</span>
-        <h1 class="h2" style="margin-top:1.2rem">Nuevos<br/>hábitos.</h1>
+    {compact ? (
+      <div class="cab__head reveal">
+        <span class="eyebrow">Marcas residentes</span>
+        <p class="muted">Cada una con su especialidad. Escríbeles directo para agendar tu cita.</p>
       </div>
-      <p class="lead reveal">Marcas residentes de bienestar, cada una con su especialidad. Escríbeles directo para agendar tu cita.</p>
-    </div>
+    ) : (
+      <div class="two">
+        <div class="reveal">
+          <span class="eyebrow">Nueva transformación · Nuevo estilo de vida</span>
+          <h1 class="h2" style="margin-top:1.2rem">Nuevos<br/>hábitos.</h1>
+        </div>
+        <p class="lead reveal">Marcas residentes de bienestar, cada una con su especialidad. Escríbeles directo para agendar tu cita.</p>
+      </div>
+    )}
 
     <div class="cabgrid">
       {cabinas.map((c, i) => (
@@ -43,6 +52,9 @@ const cabinas = [
 </section>
 
 <style>
+  .cabinas--compact { padding-top: 1rem; }
+  .cab__head { display: flex; align-items: baseline; gap: .6rem 1.6rem; flex-wrap: wrap; margin-bottom: 1.8rem; }
+  .cab__head p { margin: 0; font-size: .95rem; }
   .cabgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
   .cab {
     display: flex; flex-direction: column; gap: .5rem;
