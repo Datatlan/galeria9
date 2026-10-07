@@ -3,15 +3,26 @@
 // de diagnóstico breve (distinto al de Punto Presencia) → Leads, Interes = Agencia.
 // Es la tercera puerta del home (Expansión).
 import Base from '../layouts/Base.astro';
+import SeccionBadge from '../components/SeccionBadge.astro';
+
+// Encuesta (website design.pdf): hasta 3 prioridades → campo Prioridades de Leads.
+const prioridades = [
+  'Alineación: personalidad con mi talento', 'Estructura para crecer', 'Contenido digital para mis redes',
+  'Nuevas estrategias físicas (comunidad)', 'Nuevas estrategias digitales', 'Visibilidad y comunidad',
+  'Colaboraciones y alianzas', 'Estrategias de venta', 'Sesión de fotos', 'Grabación de video',
+];
 ---
-<Base title="Expresa tu talento + agencia — Galería 9" description="Un diagnóstico breve para conocer tu marca y cómo acompañarla con estrategia y creación de contenido.">
+<Base title="Expresa tu talento + agencia — Galería 9" description="Un diagnóstico breve para conocer tu marca y cómo acompañarla.">
   <section class="section">
     <div class="wrap">
-      <header class="mhead reveal">
-        <span class="eyebrow">Expansión · Comunicación y estrategias</span>
-        <h1 class="h2" style="margin-top:1rem">Expresa tu talento<br/>+ agencia.</h1>
-        <p class="lead">Un diagnóstico breve para conocer tu marca. Déjanos tus datos y te contactamos para platicar cómo acompañarte con estrategia y creación de contenido.</p>
-      </header>
+      <div class="ag__top">
+        <header class="mhead reveal">
+          <span class="eyebrow">Expansión · Comunicación y estrategias</span>
+          <h1 class="h2" style="margin-top:1rem">Expresa tu talento<br/>+ agencia.</h1>
+          <p class="lead">Un diagnóstico breve para conocer tu marca. Déjanos tus datos y te contactamos para platicar cómo acompañarte.</p>
+        </header>
+        <SeccionBadge t="Expansión" sub="Comunicación y estrategias" ic="mente" bg="#e4dfd8" />
+      </div>
 
       <form id="f" class="mform reveal" novalidate>
         <div class="mform-two">
@@ -21,6 +32,21 @@ import Base from '../layouts/Base.astro';
           <label class="mfield mfield--wide"><span>Giro de negocio o talento</span><input type="text" name="giro" placeholder="Ej. Joyería artesanal, coaching, repostería…" required /></label>
           <label class="mfield mfield--wide"><span>Link de Instagram</span><input type="text" name="instagram" placeholder="instagram.com/tumarca" required /></label>
         </div>
+
+        <fieldset class="opt-group prio" id="prio">
+          <legend><strong>¿Qué estás buscando?</strong> Selecciona tus 3 prioridades principales.</legend>
+          <div class="prio__list">
+            {prioridades.map((p) => (
+              <label class="prio__opt"><input type="checkbox" name="prioridad" value={p} /><span>{p}</span></label>
+            ))}
+            <label class="prio__opt prio__opt--otro">
+              <input type="checkbox" name="prioridad" value="Otro" id="prioOtro" /><span>Otro</span>
+              <input type="text" name="prio_otro" id="prioOtroTxt" placeholder="¿Cuál?" maxlength="80" disabled />
+            </label>
+          </div>
+          <p class="prio__count" id="prioCount" aria-live="polite">0 de 3</p>
+        </fieldset>
+
         <div><button type="submit" class="btn">Enviar</button></div>
       </form>
 
@@ -36,15 +62,60 @@ import Base from '../layouts/Base.astro';
   </section>
 
   <script>
-    import { initLeadForm, lineas } from '../scripts/leadForm.js';
+    import { initLeadForm, lineas, grupoObligatorio } from '../scripts/leadForm.js';
+    const form = document.getElementById('f');
+    const boxes = [...form.querySelectorAll('input[name="prioridad"]')];
+    const otro = document.getElementById('prioOtro');
+    const otroTxt = document.getElementById('prioOtroTxt');
+    const count = document.getElementById('prioCount');
+    // Máximo 3: al llegar a 3 se bloquean las demás
+    const sync = () => {
+      const n = boxes.filter((b) => b.checked).length;
+      boxes.forEach((b) => { b.disabled = !b.checked && n >= 3; b.closest('.prio__opt').classList.toggle('is-off', b.disabled); });
+      otroTxt.disabled = !otro.checked;
+      otroTxt.required = otro.checked;
+      count.textContent = `${n} de 3`;
+    };
+    boxes.forEach((b) => b.addEventListener('change', () => { sync(); if (b === otro && otro.checked) otroTxt.focus(); }));
+    sync();
+    const alMenosUna = grupoObligatorio(form, 'prioridad');
+
     initLeadForm({
-      build: (g) => ({
-        interes: 'Agencia',
-        detalle: lineas([
-          ['Giro / talento', g('giro')],
-          ['Instagram', g('instagram')],
-        ]),
-      }),
+      validate: () => alMenosUna(),
+      build: (g, fd) => {
+        const prio = fd.getAll('prioridad').map(String);
+        return {
+          interes: 'Agencia',
+          detalle: lineas([
+            ['Giro / talento', g('giro')],
+            ['Instagram', g('instagram')],
+            ['Prioridades', prio.map((p) => (p === 'Otro' && g('prio_otro') ? `Otro: ${g('prio_otro')}` : p)).join(' · ')],
+          ]),
+          extra: { Prioridades: prio },
+        };
+      },
     });
   </script>
 </Base>
+
+<style>
+  .ag__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
+  .prio { margin-top: .6rem; }
+  .prio legend { font-size: 1rem; color: var(--ink); margin-bottom: 1rem; line-height: 1.5; }
+  .prio legend strong { font-weight: 500; display: block; font-size: 1.15rem; }
+  .prio__list { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem 1.6rem; }
+  .prio__opt { display: flex; align-items: center; gap: .65rem; font-size: .95rem; color: var(--ink); cursor: pointer; line-height: 1.3; }
+  .prio__opt input[type=checkbox] { width: 18px; height: 18px; flex: none; margin: 0; accent-color: var(--ink); cursor: pointer; }
+  .prio__opt.is-off { color: var(--ink-45); cursor: default; }
+  .prio__opt.is-off input { cursor: default; }
+  .prio__opt--otro { grid-column: 1 / -1; }
+  .prio__opt--otro input[type=text] {
+    flex: 1; max-width: 320px; font: inherit; font-size: .95rem; color: var(--ink); background: transparent;
+    border: 0; border-bottom: 1px solid var(--ink-12); padding: .25em .1em;
+  }
+  .prio__opt--otro input[type=text]:focus { outline: none; border-color: var(--ink); }
+  .prio__opt--otro input[type=text]:disabled { opacity: .45; }
+  .prio__count { margin: .9rem 0 0; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-ink); }
+  .prio.invalid legend { color: #b4523f; }
+  @media (max-width: 640px) { .prio__list { grid-template-columns: 1fr; } }
+</style>
