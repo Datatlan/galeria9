@@ -14,14 +14,14 @@ const links = [
     <nav class="nav__links">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
     </nav>
-    <a href="/#contacto" class="btn nav__cta">Contacto</a>
+    <a href="#contacto-ft" class="btn nav__cta">Contacto</a>
     <button class="nav__burger" id="navBurger" aria-label="Abrir menú" aria-expanded="false" aria-controls="navPanel">
       <span></span><span></span>
     </button>
   </div>
   <nav class="nav__panel" id="navPanel" hidden>
     {links.map((l) => <a href={l.href}>{l.label}</a>)}
-    <a href="/#contacto" class="nav__panel-cta">Contacto</a>
+    <a href="#contacto-ft" class="nav__panel-cta">Contacto</a>
   </nav>
 </header>
 
