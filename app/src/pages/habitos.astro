@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
 import Cabinas from '../components/Cabinas.astro';
-import SeccionBadge from '../components/SeccionBadge.astro';
 
 // Íconos de "website design.pdf" (renderizados del PDF: public/habitos/h1–h9.png)
 const iconos = Array.from({ length: 9 }, (_, i) => `/habitos/h${i + 1}.png`);
@@ -30,7 +29,6 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
         </form>
       </div>
 
-      <SeccionBadge t="Transformación" sub="Consciencia y hábitos" ic="corazon" bg="#d3d0ce" />
     </div>
   </section>
 
@@ -67,7 +65,7 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
 
 <style>
   .hab { padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem); }
-  .hab__inner { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: start; }
+  .hab__inner { display: grid; grid-template-columns: 1fr; }
   .hab__title { font-size: clamp(2.6rem, 6.2vw, 5rem); font-weight: 100; line-height: 1; letter-spacing: -.02em; text-transform: uppercase; }
 
   /* Íconos: al pasar el mouse cada uno sube; recorrer la fila hace "olita" */
