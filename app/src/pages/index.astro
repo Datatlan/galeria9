@@ -4,10 +4,11 @@ import Agenda from '../components/Agenda.astro';
 import Contacto from '../components/Contacto.astro';
 
 // Las 3 puertas del home: cada una lleva a su página.
+// Íconos vectoriales extraídos de "website design.pdf" (public/home/ic-*.svg).
 const puertas = [
-  { t: 'Transformación', sub: 'Consciencia y hábitos', d: 'Hábitos conscientes para un nuevo estilo de vida.', foto: '/fotos/evento-roof.jpg', href: '/habitos' },
-  { t: 'Conexión', sub: 'Espacios y eventos', d: 'Experiencias privadas y activaciones para tu marca personal o profesional.', foto: '/fotos/evento-terraza.jpg', href: '/estrategias' },
-  { t: 'Expansión', sub: 'Comunicación y estrategias', d: 'Expresa tu talento, con la estrategia y el acompañamiento de una agencia.', foto: '/fotos/tu-talento.png', href: '/agencia' },
+  { t: 'Transformación', sub: 'Consciencia y hábitos', ic: 'corazon', bg: '#d3d0ce', href: '/habitos' },
+  { t: 'Conexión', sub: 'Espacios y eventos', ic: 'pulso', bg: '#dad1bd', href: '/estrategias' },
+  { t: 'Expansión', sub: 'Comunicación y estrategias', ic: 'mente', bg: '#e4dfd8', href: '/agencia' },
 ];
 ---
 <Base>
@@ -24,21 +25,17 @@ const puertas = [
 
   <!-- LAS 3 PUERTAS -->
   <section class="puertas" id="puertas">
-    <div class="wrap puertas__grid">
-      {puertas.map((p, i) => (
-        <a class="puerta reveal" href={p.href} style={`transition-delay:${i * 90}ms`}>
-          <figure class="puerta__media">
-            <img src={p.foto} alt={`${p.t} · Galería 9`} loading="lazy" />
-          </figure>
-          <div class="puerta__body">
-            <span class="puerta__num">{String(i + 1).padStart(2, '0')}</span>
+    <div class="wrap">
+      <p class="puertas__intro reveal">siente, elige y toma acción…</p>
+      <div class="puertas__grid">
+        {puertas.map((p, i) => (
+          <a class="puerta reveal" href={p.href} style={`--bg:${p.bg}; transition-delay:${i * 90}ms`}>
             <h2 class="puerta__t">{p.t}</h2>
             <span class="puerta__sub">{p.sub}</span>
-            <p class="muted">{p.d}</p>
-            <span class="puerta__cta">Conoce más →</span>
-          </div>
-        </a>
-      ))}
+            <img class="puerta__ic" src={`/home/ic-${p.ic}.svg`} alt="" loading="lazy" />
+          </a>
+        ))}
+      </div>
     </div>
   </section>
 
@@ -67,24 +64,21 @@ const puertas = [
   .hero__kicker { margin: clamp(1.6rem, 3vw, 2.4rem) 0 0 .1em; font-size: clamp(.9rem, 1.1vw, 1rem); font-weight: 700; letter-spacing: .01em; text-transform: uppercase; color: var(--gold); }
   .hero__logo { width: clamp(120px, 15.8vw, 220px); height: auto; margin-right: clamp(0rem, 4vw, 4rem); }
 
-  /* Las 3 puertas */
-  .puertas { background: var(--sand); padding-block: clamp(3.5rem, 8vw, 6rem); }
-  .puertas__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  /* Las 3 puertas — tarjetas de color con ícono de línea (website design.pdf) */
+  .puertas { padding-block: clamp(1rem, 3vw, 2rem) clamp(4rem, 9vw, 7rem); }
+  .puertas__intro { font-size: clamp(1.4rem, 2.3vw, 1.8rem); font-weight: 200; letter-spacing: -.01em; margin: 0 0 clamp(1.4rem, 2.6vw, 2.2rem); }
+  .puertas__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.9rem, 1.9vw, 1.5rem); }
   .puerta {
-    display: flex; flex-direction: column; background: var(--white);
-    border: 1px solid var(--ink-12); border-radius: var(--radius); overflow: hidden;
-    transition: border-color .3s var(--ease), transform .3s var(--ease);
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    aspect-ratio: 275 / 342; padding: clamp(2.2rem, 6vw, 4.4rem) 1.2rem clamp(1.8rem, 4vw, 3rem);
+    background: var(--bg); border-radius: clamp(20px, 2.8vw, 34px); color: var(--ink);
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease);
   }
-  .puerta:hover { border-color: var(--ink); transform: translateY(-4px); }
-  .puerta__media { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; }
-  .puerta__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
-  .puerta:hover .puerta__media img { transform: scale(1.05); }
-  .puerta__body { display: flex; flex-direction: column; gap: .45rem; padding: clamp(1.4rem, 2.4vw, 2rem); flex: 1; }
-  .puerta__num { font-size: .75rem; letter-spacing: .2em; color: var(--gold-ink); }
-  .puerta__t { font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 300; line-height: 1.1; margin: .2rem 0 0; }
-  .puerta__sub { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
-  .puerta .muted { font-size: .92rem; margin-top: .4rem; flex: 1; }
-  .puerta__cta { margin-top: .6rem; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--ink); }
+  .puerta:hover { transform: translateY(-6px); box-shadow: 0 22px 40px -26px rgba(43,43,42,.45); }
+  .puerta__t { font-size: clamp(1.25rem, 2.35vw, 2rem); font-weight: 700; line-height: 1; letter-spacing: -.005em; text-transform: uppercase; }
+  .puerta__sub { margin-top: .35em; font-size: clamp(.95rem, 1.6vw, 1.35rem); font-weight: 300; line-height: 1.05; text-transform: uppercase; }
+  .puerta__ic { margin-top: auto; width: 58%; max-height: 50%; object-fit: contain; transition: transform .5s var(--ease); }
+  .puerta:hover .puerta__ic { transform: scale(1.05); }
 
   /* Interludio full-bleed "El lugar" — velo uniforme + contenido centrado */
   .lugar { position: relative; height: clamp(300px, 44vh, 440px); overflow: hidden; background: var(--ink); }
@@ -104,7 +98,13 @@ const puertas = [
   }
   .lugar__link:hover { border-color: var(--paper); }
 
-  @media (max-width: 900px) { .puertas__grid { grid-template-columns: 1fr; } .puerta__media { aspect-ratio: 16 / 9; } }
+  @media (max-width: 760px) {
+    .puertas__grid { grid-template-columns: 1fr; }
+    .puerta { aspect-ratio: auto; min-height: 300px; padding-block: 2.4rem 2rem; }
+    .puerta__t { font-size: 1.7rem; }
+    .puerta__sub { font-size: 1.1rem; }
+    .puerta__ic { width: 38%; max-height: 150px; margin-top: 1.8rem; }
+  }
   @media (max-width: 760px) {
     .hero { min-height: auto; }
     .hero__inner { grid-template-columns: 1fr; gap: 2.2rem; }
