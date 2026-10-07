@@ -6,26 +6,32 @@ const { standalone = false } = Astro.props;
 ---
 <section class={`section agenda ${standalone ? 'agenda--page' : ''}`} id="agenda" hidden={!standalone} data-standalone={standalone ? '' : undefined}>
   <div class="wrap">
-    <div class="two">
-      <div class="reveal">
-        <span class="eyebrow">{standalone ? 'Agenda' : 'Qué está pasando'}</span>
-        {standalone
-          ? <h1 class="h2" style="margin-top:1.2rem">Próximos<br/>eventos.</h1>
-          : <h2 class="h2" style="margin-top:1.2rem">Próximos<br/>eventos.</h2>}
+    {standalone ? (
+      <div class="two">
+        <div class="reveal">
+          <span class="eyebrow">Agenda</span>
+          <h1 class="h2" style="margin-top:1.2rem">Próximos<br/>eventos.</h1>
+        </div>
+        <div class="reveal">
+          <p class="lead">Talleres, activaciones y encuentros abiertos en Galería 9. Aparta tu lugar.</p>
+        </div>
       </div>
-      <div class="reveal">
-        <p class="lead">Talleres, activaciones y encuentros abiertos en Galería 9. Aparta tu lugar.</p>
-        {!standalone && (
-          <div class="agenda__actions">
-            <a href="/eventos" class="link-arrow">Ver todos los eventos →</a>
-            <div class="agenda__nav" id="agendaNav" hidden>
-              <button type="button" class="agenda__arrow" data-dir="-1" aria-label="Eventos anteriores">←</button>
-              <button type="button" class="agenda__arrow" data-dir="1" aria-label="Más eventos">→</button>
-            </div>
+    ) : (
+      /* Embebido (home, espacios): encabezado compacto de website design.pdf */
+      <div class="agenda__head reveal">
+        <div class="agenda__title">
+          <span class="eyebrow">Qué está pasando</span>
+          <h2 class="agenda__label">Eventos del mes</h2>
+        </div>
+        <div class="agenda__actions">
+          <a href="/eventos" class="link-arrow">Ver todos los eventos →</a>
+          <div class="agenda__nav" id="agendaNav" hidden>
+            <button type="button" class="agenda__arrow" data-dir="-1" aria-label="Eventos anteriores">←</button>
+            <button type="button" class="agenda__arrow" data-dir="1" aria-label="Más eventos">→</button>
           </div>
-        )}
+        </div>
       </div>
-    </div>
+    )}
     <div class="grid-ev" id="agendaGrid"></div>
     {standalone && (
       <p class="muted agenda__empty" id="agendaEmpty" hidden>
@@ -155,6 +161,15 @@ const { standalone = false } = Astro.props;
   /* Lo estático del componente (con scope). Las CARDS se inyectan por JS, así
      que sus estilos van en el bloque is:global de abajo. */
   .grid-ev { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.8rem; margin-top: 2.5rem; }
+  .agenda__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem 2.5rem; flex-wrap: wrap; }
+  .agenda__title { display: flex; align-items: baseline; gap: .6rem 1.6rem; flex-wrap: wrap; }
+  .agenda__label { font-size: clamp(.95rem, 1.2vw, 1.05rem); font-weight: 700; letter-spacing: .01em; line-height: 1.2; text-transform: uppercase; color: var(--gold); }
+  .agenda__head .agenda__actions { margin-top: 0; gap: 1rem 1.6rem; }
+  @media (max-width: 760px) {
+    .agenda__head { gap: 1.4rem; }
+    .agenda__head .agenda__actions { width: 100%; flex-wrap: nowrap; gap: .8rem; }
+    .agenda__head .link-arrow { white-space: nowrap; }
+  }
   .agenda__actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.2rem; }
   .agenda__nav { display: flex; gap: .5rem; }
   .agenda__nav[hidden] { display: none; }
