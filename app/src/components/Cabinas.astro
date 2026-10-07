@@ -52,7 +52,7 @@ const { compact = false } = Astro.props;
 </section>
 
 <style>
-  .cabinas--compact { padding-top: 1rem; }
+  .cabinas--compact { padding-block: 1rem clamp(3rem, 6vw, 4.5rem); }
   .cab__head { display: flex; align-items: baseline; gap: .6rem 1.6rem; flex-wrap: wrap; margin-bottom: 1.8rem; }
   .cab__head p { margin: 0; font-size: .95rem; }
   .cabgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }

@@ -16,7 +16,15 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
         <div class="hab__icons reveal" aria-hidden="true">
           {iconos.map((src) => <img src={src} alt="" width="120" height="120" />)}
         </div>
+      </div>
+    </div>
+  </section>
 
+  <Cabinas compact />
+
+  <section class="hab hab--form">
+    <div class="wrap hab__inner">
+      <div class="hab__main">
         <p class="hab__intro reveal">¿Buscas un cambio? ¿un nuevo estilo de vida?<br/>¿consciencia y transformación? <span>¡Bienvenid@ a la comunidad!</span></p>
 
         <form class="hab__form reveal" id="habForm" novalidate data-url={SUBSCRIBE_URL}>
@@ -28,11 +36,8 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
           <p class="hab__msg" id="habMsg" role="status" aria-live="polite"></p>
         </form>
       </div>
-
     </div>
   </section>
-
-  <Cabinas compact />
 </Base>
 
 <script>
@@ -64,7 +69,9 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
 </script>
 
 <style>
-  .hab { padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .hab { padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2rem, 4vw, 3rem); }
+  .hab--form { padding-block: 0 clamp(3.5rem, 8vw, 6rem); }
+  .hab--form .hab__intro { margin-top: 0; }
   .hab__inner { display: grid; grid-template-columns: 1fr; }
   .hab__title { font-size: clamp(2.6rem, 6.2vw, 5rem); font-weight: 100; line-height: 1; letter-spacing: -.02em; text-transform: uppercase; }
 
