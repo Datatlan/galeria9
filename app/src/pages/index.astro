@@ -15,17 +15,10 @@ const puertas = [
   <section class="hero">
     <div class="wrap hero__inner">
       <div class="hero__copy">
-        <span class="eyebrow reveal">Guadalajara · Market de Talentos</span>
-        <h1 class="display reveal">Un punto de<br/>encuentro.</h1>
-        <p class="lead hero__lead reveal">Galería 9 es un espacio de expansión en donde marcas y personas se expresan y comparten su esencia a través de la conexión con su talento.</p>
-        <div class="hero__cta reveal">
-          <a href="/cotiza" class="btn">Solicita tu evento</a>
-          <a href="/#puertas" class="link-arrow">Conoce la casa →</a>
-        </div>
+        <h1 class="hero__title reveal">Un punto de<br/>encuentro para tu<br/><em>expansión</em></h1>
+        <p class="hero__kicker reveal">Market de Talentos</p>
       </div>
-      <figure class="hero__photo reveal">
-        <img src="/fotos/punto-presencia-2.jpg" alt="El Market de Galería 9" />
-      </figure>
+      <img class="hero__logo reveal" src="/logo.png" alt="Galería 9 · Market de Talentos" width="499" height="948" />
     </div>
   </section>
 
@@ -66,13 +59,13 @@ const puertas = [
 </Base>
 
 <style>
-  .hero { position: relative; overflow: clip; padding-block: clamp(3rem, 7vw, 5.5rem) clamp(3.5rem, 8vw, 6.5rem); }
-  .hero__inner { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
-  .hero .display { margin-top: 1.6rem; }
-  .hero__lead { max-width: 34ch; margin-top: 2rem; }
-  .hero__cta { display: flex; align-items: center; gap: 2rem; margin-top: 2.8rem; flex-wrap: wrap; }
-  .hero__photo { margin: 0; overflow: hidden; border-radius: var(--radius); max-height: min(72vh, 620px); }
-  .hero__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Hero — diseño "website design.pdf": título Thin + itálica, kicker dorado, logo grande a la derecha */
+  .hero { position: relative; overflow: clip; min-height: min(78vh, 760px); display: grid; align-items: center; padding-block: clamp(3rem, 7vw, 5rem); }
+  .hero__inner { display: grid; grid-template-columns: 1fr auto; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .hero__title { font-size: clamp(2.6rem, 6.25vw, 5.4rem); font-weight: 100; line-height: .94; letter-spacing: -.015em; }
+  .hero__title em { font-style: italic; font-weight: 100; }
+  .hero__kicker { margin: clamp(1.6rem, 3vw, 2.4rem) 0 0 .1em; font-size: clamp(.9rem, 1.1vw, 1rem); font-weight: 700; letter-spacing: .01em; text-transform: uppercase; color: var(--gold); }
+  .hero__logo { width: clamp(120px, 15.8vw, 220px); height: auto; margin-right: clamp(0rem, 4vw, 4rem); }
 
   /* Las 3 puertas */
   .puertas { background: var(--sand); padding-block: clamp(3.5rem, 8vw, 6rem); }
@@ -113,7 +106,8 @@ const puertas = [
 
   @media (max-width: 900px) { .puertas__grid { grid-template-columns: 1fr; } .puerta__media { aspect-ratio: 16 / 9; } }
   @media (max-width: 760px) {
-    .hero__inner { grid-template-columns: 1fr; }
-    .hero__photo { max-height: 340px; order: -1; }
+    .hero { min-height: auto; }
+    .hero__inner { grid-template-columns: 1fr; gap: 2.2rem; }
+    .hero__logo { order: -1; width: 92px; margin: 0; }
   }
 </style>

@@ -18,7 +18,8 @@
   --gold-ink: #8a7a52;   /* dorado más oscuro para texto sobre claro */
 
   /* Tipografía */
-  --sans: "Helvetica Neue", Helvetica, "Inter", Arial, sans-serif;
+  /* Inter antes que Helvetica: Windows mapea "Helvetica" a Arial y nunca llegaría a Inter */
+  --sans: "Helvetica Neue", "Inter", Helvetica, Arial, sans-serif;
 
   /* Ritmo */
   --maxw: 1160px;
