@@ -45,7 +45,9 @@ const puertas = [
 
 <style>
   /* Hero — diseño "website design.pdf": título Thin + itálica, kicker dorado, logo grande a la derecha */
-  .hero { position: relative; overflow: clip; min-height: min(78vh, 760px); display: grid; align-items: center; padding-block: clamp(3rem, 7vw, 5rem); }
+  .hero { position: relative; overflow: clip; display: grid; align-items: center; padding-block: clamp(3rem, 7vw, 5rem); }
+  /* La altura de pantalla solo en escritorio ancho; en tablet dejaba mucho hueco */
+  @media (min-width: 1100px) { .hero { min-height: min(78vh, 760px); } }
   .hero__inner { display: grid; grid-template-columns: 1fr auto; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
   .hero__title { font-size: clamp(2.6rem, 6.25vw, 5.4rem); font-weight: 100; line-height: .94; letter-spacing: -.015em; }
   .hero__title em { font-style: italic; font-weight: 100; }
@@ -76,8 +78,11 @@ const puertas = [
     .puerta__ic { width: auto; height: 112px; max-width: 60%; max-height: none; margin: 1.4rem 0 0; }
   }
   @media (max-width: 760px) {
-    .hero { min-height: auto; }
-    .hero__inner { grid-template-columns: 1fr; gap: 2.2rem; }
-    .hero__logo { order: -1; width: 92px; margin: 0; }
+    /* Celular: dos columnas, logo a la izquierda */
+    .hero { padding-block: 2.2rem 2.4rem; }
+    .hero__inner { grid-template-columns: auto 1fr; gap: clamp(1rem, 5vw, 1.6rem); }
+    .hero__logo { order: -1; width: clamp(68px, 22vw, 96px); margin: 0; }
+    .hero__title { font-size: clamp(1.55rem, 7vw, 2.3rem); }
+    .hero__kicker { margin-top: .9rem; font-size: .78rem; }
   }
 </style>
