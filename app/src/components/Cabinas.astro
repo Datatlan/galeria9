@@ -3,7 +3,7 @@
 // nombre · lema · duración · contacto. Sin waLink = WhatsApp en texto plano.
 // Arigato 88 se quitó (ya no está en Galería 9).
 const cabinas = [
-  { n: 'Elsonidodefer', tipo: 'Studio', lema: 'Experiencias y programas de respiración y autoconocimiento', ic: 'self_improvement', wa: '33 3395 3558', waLink: '523333953558', ig: '@elsonidodefer', igLink: 'elsonidodefer', featured: true },
+  { n: 'Elsonidodefer', tipo: 'Studio', lema: 'Experiencias y programas de respiración y autoconocimiento', ic: 'self_improvement', wa: '33 3395 3558', waLink: '523333953558', ig: '@elsonidodefer', igLink: 'elsonidodefer' },
   { n: 'Reprogramación Mental', lema: 'Sesiones y programas 1:1 — entrena tu mente, educa tu palabra y transforma tu inconsciente', dur: '60 min', ic: 'psychology', wa: '33 1803 0563', waLink: '523318030563' },
   { n: 'Carolina', lema: 'El arte de volver a ti', desc: 'Masajes, talleres y experiencias de relajación', dur: '60 / 90 min', ic: 'volunteer_activism', wa: '33 3956 4990', waLink: '523339564990' },
   { n: 'Manoela Mena', lema: 'Diseña tu mirada — hidratación en piel y servicios de belleza', dur: '20 min', ic: 'face_retouching_natural', wa: '33 2312 4894', waLink: '523323124894', ig: '@bymanoelamena', igLink: 'bymanoelamena' },
@@ -31,7 +31,7 @@ const { compact = false } = Astro.props;
 
     <div class="cabgrid">
       {cabinas.map((c, i) => (
-        <article class={`cab reveal ${c.featured ? 'cab--fer' : ''}`} style={`transition-delay:${i * 70}ms`}>
+        <article class="cab reveal" style={`transition-delay:${i * 70}ms`}>
           <span class="cab__ic"><span class="material-symbols-outlined">{c.ic}</span></span>
           <h3 class="cab__name">{c.n}</h3>
           <p class="cab__svc">{c.lema}</p>
@@ -68,20 +68,13 @@ const { compact = false } = Astro.props;
     display: grid; place-items: center; color: var(--gold-ink); margin-bottom: .5rem;
   }
   .cab__ic .material-symbols-outlined { font-size: 22px; }
-  .cab--fer .cab__ic { background: rgba(255, 255, 255, .09); color: var(--gold); }
   .cab__name { font-size: 1.4rem; font-weight: 300; margin: .2rem 0; }
   .cab__svc { font-size: .88rem; color: var(--ink-70); line-height: 1.4; }
   .cab__dur { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-ink); margin-top: .25rem; }
-  .cab--fer .cab__dur { color: var(--gold); }
   .cab__contact { margin-top: auto; display: flex; flex-direction: column; gap: .2rem; font-size: .78rem; color: var(--ink-70); letter-spacing: .01em; }
   .cab__contact a { transition: color .3s var(--ease); }
   .cab__contact a:hover { color: var(--ink); text-decoration: underline; }
-  .cab--fer .cab__contact { color: rgba(242,242,242,.72); }
-  .cab--fer .cab__contact a:hover { color: var(--paper); }
   .cab__ig { color: var(--gold-ink); }
-  .cab--fer .cab__ig { color: var(--gold); }
-  .cab--fer { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .cab--fer .cab__svc { color: rgba(242,242,242,.72); }
 
   @media (max-width: 980px) { .cabgrid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 760px) { .cabgrid { grid-template-columns: 1fr; } }
