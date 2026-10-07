@@ -1,9 +1,64 @@
 ---
 import Base from '../layouts/Base.astro';
-import Marcas from '../components/Marcas.astro';
 import Contacto from '../components/Contacto.astro';
+import SeccionBadge from '../components/SeccionBadge.astro';
+
+// Conexión · "Tu talento" (website design.pdf): seis estrategias en pastillas de color.
+// Cada una lleva a su página. (La versión anterior con fotos vive en components/Marcas.astro.)
+const C = { arena: '#e4dfd8', oro: '#dad1bd', gris: '#d3d0ce' };
+const estrategias = [
+  { t: 'Crea tu experiencia', d: 'espacios, activaciones y celebraciones', bg: C.arena, href: '/cotiza' },
+  { t: 'Punto Presencia', d: 'tu marca encuentra visibilidad y un espacio físico en Galería 9', bg: C.oro, href: '/punto-presencia' },
+  { t: 'Pop Up', d: 'activación de 1 semana · físico y digital', bg: C.gris, href: '/pop-up' },
+  { t: 'Tu talento es arte', d: 'expresa tu talento como arte · estrategia visibilidad 1 semana', bg: C.gris, href: '/tu-talento' },
+  { t: 'Tester Day', d: 'haz que prueben y conozcan tu producto', bg: C.arena, href: '/tester-day' },
+  { t: 'Invitado especial', d: 'exhibe en el corazón de Galería 9', bg: C.oro, href: '/invitado-especial' },
+];
 ---
-<Base title="Estrategias para marcas — Galería 9" description="Eventos, Punto Presencia, Pop Up, Tu Talento es un Arte, Tester Day e Invitado Especial: estrategias de visibilidad para tu marca.">
-  <Marcas />
+<Base title="Tu talento — Galería 9" description="Crea tu experiencia, Punto Presencia, Pop Up, Tu talento es arte, Tester Day e Invitado especial: estrategias de visibilidad para tu marca en Galería 9.">
+  <section class="tal">
+    <div class="wrap">
+      <div class="tal__head">
+        <h1 class="tal__title reveal">Tu talento</h1>
+        <SeccionBadge t="Conexión" sub="Espacios y eventos" ic="pulso" bg="#dad1bd" />
+      </div>
+
+      <div class="tal__grid">
+        {estrategias.map((e, i) => (
+          <a class="pill reveal" href={e.href} style={`--bg:${e.bg}; transition-delay:${(i % 3) * 70}ms`}>
+            <h2 class="pill__t">{e.t}</h2>
+            <p class="pill__d">{e.d}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
   <Contacto />
 </Base>
+
+<style>
+  .tal { padding-block: clamp(3rem, 7vw, 5.5rem) clamp(3rem, 7vw, 5rem); }
+  .tal__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
+  .tal__title { font-size: clamp(2.6rem, 6.2vw, 5rem); font-weight: 100; line-height: 1; letter-spacing: -.02em; text-transform: uppercase; margin-top: clamp(1rem, 3vw, 2.4rem); }
+
+  .tal__grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.8rem, 1.6vw, 1.2rem) clamp(1rem, 2.4vw, 1.9rem);
+    margin: clamp(2.2rem, 5vw, 4rem) auto 0; max-width: 1000px;
+  }
+  .pill {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    min-height: clamp(112px, 10.5vw, 146px); padding: 1.2rem clamp(1rem, 2.4vw, 2rem);
+    border-radius: 999px; background: var(--bg); color: #000;
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+  }
+  .pill:hover { transform: translateY(-5px); box-shadow: 0 20px 34px -24px rgba(43,43,42,.5); }
+  .pill__t { font-size: clamp(1.05rem, 1.6vw, 1.32rem); font-weight: 500; line-height: 1.1; letter-spacing: -.02em; text-transform: uppercase; }
+  .pill__d { margin: .25rem 0 0; font-size: clamp(.82rem, 1.1vw, .95rem); font-weight: 400; line-height: 1.25; letter-spacing: -.01em; max-width: 30ch; }
+
+  @media (max-width: 900px) { .tal__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) {
+    .tal__grid { grid-template-columns: 1fr; }
+    .pill { min-height: 104px; border-radius: 52px; }
+  }
+</style>

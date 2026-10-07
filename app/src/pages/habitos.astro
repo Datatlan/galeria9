@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Cabinas from '../components/Cabinas.astro';
+import SeccionBadge from '../components/SeccionBadge.astro';
 
 // Íconos de "website design.pdf" (renderizados del PDF: public/habitos/h1–h9.png)
 const iconos = Array.from({ length: 9 }, (_, i) => `/habitos/h${i + 1}.png`);
@@ -29,11 +30,7 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
         </form>
       </div>
 
-      <a class="hab__badge reveal" href="/#puertas" aria-label="Transformación · Consciencia y hábitos">
-        <strong>Transformación</strong>
-        <span>Consciencia y hábitos</span>
-        <img src="/home/ic-corazon.svg" alt="" />
-      </a>
+      <SeccionBadge t="Transformación" sub="Consciencia y hábitos" ic="corazon" bg="#d3d0ce" />
     </div>
   </section>
 
@@ -103,21 +100,10 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
   .hab__form.is-done .hab__field, .hab__form.is-done .hab__btn { display: none; }
   .hab__form.is-done .hab__msg { font-size: 1.15rem; color: var(--ink); }
 
-  /* Mini tarjeta de la sección (como las del home) */
-  .hab__badge {
-    display: flex; flex-direction: column; align-items: center; text-align: center; gap: .15rem;
-    width: 150px; padding: 1.1rem .8rem 1.3rem; border-radius: 26px; background: #d3d0ce; color: var(--ink);
-    transition: transform .35s var(--ease);
-  }
-  .hab__badge:hover { transform: translateY(-4px); }
-  .hab__badge strong { font-size: .78rem; font-weight: 700; text-transform: uppercase; }
-  .hab__badge span { font-size: .55rem; text-transform: uppercase; letter-spacing: .02em; }
-  .hab__badge img { width: 54px; margin-top: .9rem; }
 
   @media (prefers-reduced-motion: reduce) { .hab__icons img { transition: none; } .hab__icons img:hover { transform: none; } }
   @media (max-width: 760px) {
     .hab__inner { grid-template-columns: 1fr; }
-    .hab__badge { display: none; }
     .hab__intro br { display: none; }
     .hab__btn { justify-self: stretch; }
   }
