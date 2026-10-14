@@ -1,0 +1,168 @@
+---
+// Boleto de un evento público: /boleto?c=<recId de Evento_Interesados>.
+// Galería 9 manda este link por WhatsApp cuando confirma a la persona.
+// El boleto se dibuja en un <canvas> (QR incluido) → la misma imagen sirve para
+// verlo, descargarlo como PNG e imprimirlo/guardarlo como PDF.
+// /boleto?demo=1 muestra un boleto de ejemplo (para presentar sin datos reales).
+import Base from '../layouts/Base.astro';
+---
+<Base title="Tu boleto — Galería 9" description="Tu boleto para un evento en Galería 9.">
+  <section class="bol">
+    <div class="wrap bol__wrap">
+      <p class="bol__estado" id="bolEstado">Cargando tu boleto…</p>
+
+      <div class="bol__ok" id="bolOk" hidden>
+        <img class="bol__img" id="bolImg" alt="Tu boleto" />
+        <div class="bol__acciones">
+          <button class="btn" type="button" id="bolPng">Descargar imagen</button>
+          <button class="btn btn--ghost" type="button" id="bolPdf">Descargar PDF</button>
+        </div>
+        <p class="bol__nota">Presenta este código en la entrada. Puedes guardarlo como imagen o tomarle captura.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import qrcode from 'qrcode-generator';
+  import { WORKER } from '../config.js';
+
+  const TZ = 'America/Mexico_City';
+  const $ = (id) => document.getElementById(id)!;
+  const params = new URLSearchParams(location.search);
+
+  function falla(msg: string) {
+    $('bolEstado').textContent = msg;
+  }
+
+  async function datos() {
+    if (params.get('demo')) {
+      const ini = new Date(Date.now() + 6 * 864e5); ini.setHours(19, 0, 0, 0);
+      return { valido: true, codigo: 'recDEMO0000000000', nombre: 'Mariana López',
+        evento: { titulo: 'Sound Healing - Noche con las estrellas', inicio: ini.toISOString(), fin: new Date(ini.getTime() + 2 * 36e5).toISOString() } };
+    }
+    const c = params.get('c') || '';
+    if (!/^rec[A-Za-z0-9]{14}$/.test(c)) return null;
+    const res = await fetch(`${WORKER}?read=boleto&r=${c}`);
+    return res.ok ? res.json() : null;
+  }
+
+  const fecha = (iso: string) => new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ }).format(new Date(iso));
+  const hora = (iso: string) => new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', timeZone: TZ }).format(new Date(iso));
+  const cargarImg = (src: string) => new Promise<HTMLImageElement>((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mal; i.src = src; });
+
+  // Parte un texto en renglones que quepan en `ancho`
+  function renglones(ctx: CanvasRenderingContext2D, texto: string, ancho: number) {
+    const out: string[] = []; let cur = '';
+    for (const p of texto.split(/\s+/)) {
+      const prueba = cur ? `${cur} ${p}` : p;
+      if (ctx.measureText(prueba).width > ancho && cur) { out.push(cur); cur = p; } else cur = prueba;
+    }
+    if (cur) out.push(cur);
+    return out;
+  }
+
+  async function dibujar(d: any) {
+    const W = 1080, H = 1680, M = 96;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d')!;
+    const INK = '#2b2b2a', GOLD = '#c2b494', GOLD_INK = '#8a7a52', SOFT = 'rgba(43,43,42,.62)';
+    await Promise.all(['100', '300', '400', '700'].map((w) => document.fonts.load(`${w} 40px Inter`)));
+    const F = (w: number, px: number, it = false) => `${it ? 'italic ' : ''}${w} ${px}px "Helvetica Neue", Inter, Arial, sans-serif`;
+
+    // Fondo + tarjeta
+    ctx.fillStyle = '#f2f2f2'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.roundRect(48, 48, W - 96, H - 96, 36); ctx.fill();
+
+    // Encabezado: logo + GALERÍA 9 · BOLETO
+    const logo = await cargarImg('/logo.png');
+    ctx.drawImage(logo, M, 100, 58, 58 * logo.height / logo.width);
+    ctx.fillStyle = GOLD_INK; ctx.font = F(700, 26); ctx.textAlign = 'right';
+    ctx.letterSpacing = '6px'; ctx.fillText('BOLETO', W - M, 140); ctx.letterSpacing = '0px';
+    ctx.textAlign = 'left';
+
+    // Evento
+    let y = 330;
+    ctx.fillStyle = INK; ctx.font = F(100, 74);
+    for (const l of renglones(ctx, d.evento?.titulo || 'Evento en Galería 9', W - 2 * M).slice(0, 3)) { ctx.fillText(l, M, y); y += 84; }
+    y += 14;
+    if (d.evento?.inicio) {
+      const f = fecha(d.evento.inicio);
+      ctx.font = F(400, 34); ctx.fillStyle = INK;
+      ctx.fillText(f.charAt(0).toUpperCase() + f.slice(1), M, y); y += 48;
+      ctx.fillStyle = SOFT;
+      ctx.fillText(hora(d.evento.inicio) + (d.evento.fin ? ` a ${hora(d.evento.fin)}` : ''), M, y); y += 30;
+    }
+
+    // Línea punteada (perforación)
+    y += 46;
+    ctx.strokeStyle = 'rgba(43,43,42,.25)'; ctx.lineWidth = 3; ctx.setLineDash([14, 12]);
+    ctx.beginPath(); ctx.moveTo(M, y); ctx.lineTo(W - M, y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#f2f2f2';
+    ctx.beginPath(); ctx.arc(48, y, 30, 0, Math.PI * 2); ctx.arc(W - 48, y, 30, 0, Math.PI * 2); ctx.fill();
+
+    // A nombre de
+    y += 84;
+    ctx.fillStyle = GOLD_INK; ctx.font = F(700, 22); ctx.letterSpacing = '5px';
+    ctx.fillText('A NOMBRE DE', M, y); ctx.letterSpacing = '0px';
+    y += 56; ctx.fillStyle = INK; ctx.font = F(300, 46);
+    ctx.fillText(renglones(ctx, d.nombre || '', W - 2 * M)[0] || '', M, y);
+
+    // QR
+    const qr = qrcode(0, 'M'); qr.addData(`G9-${d.codigo}`); qr.make();
+    const n = qr.getModuleCount(), lado = 520, cel = Math.floor(lado / (n + 4)), real = cel * (n + 4);
+    const qx = (W - real) / 2, qy = y + 70;
+    ctx.fillStyle = '#fff'; ctx.fillRect(qx, qy, real, real);
+    ctx.fillStyle = INK;
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) ctx.fillRect(qx + (c + 2) * cel, qy + (r + 2) * cel, cel, cel);
+
+    // Código + pie
+    ctx.textAlign = 'center';
+    ctx.fillStyle = SOFT; ctx.font = F(400, 26); ctx.letterSpacing = '3px';
+    ctx.fillText(`G9-${d.codigo.slice(3, 9).toUpperCase()}`, W / 2, qy + real + 50); ctx.letterSpacing = '0px';
+    ctx.fillStyle = GOLD; ctx.font = F(700, 24);
+    ctx.fillText('MARKET DE TALENTOS', W / 2, H - 150);
+    ctx.fillStyle = SOFT; ctx.font = F(400, 24);
+    ctx.fillText('Bogotá 3025 · Providencia · Guadalajara', W / 2, H - 108);
+    return cv;
+  }
+
+  (async () => {
+    let d;
+    try { d = await datos(); } catch { d = null; }
+    if (!d) return falla('No encontramos este boleto. Revisa el link que te enviamos.');
+    if (!d.valido) return falla(d.estatus === 'Cancelado' ? 'Este boleto fue cancelado.' : 'Este boleto todavía no está confirmado. Te avisaremos por WhatsApp.');
+
+    const cv = await dibujar(d);
+    const src = cv.toDataURL('image/png');
+    ($('bolImg') as HTMLImageElement).src = src;
+    $('bolEstado').hidden = true;
+    $('bolOk').hidden = false;
+
+    $('bolPng').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = src; a.download = 'boleto-galeria9.png'; a.click();
+    });
+    $('bolPdf').addEventListener('click', () => window.print());
+  })();
+</script>
+
+<style>
+  .bol { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+  .bol__wrap { display: flex; flex-direction: column; align-items: center; }
+  .bol__estado { font-size: 1.1rem; color: var(--ink-70); text-align: center; max-width: 34ch; margin: 3rem auto; }
+  .bol__ok { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
+  .bol__img { width: min(100%, 420px); height: auto; border-radius: 18px; box-shadow: 0 24px 50px -30px rgba(43,43,42,.45); }
+  .bol__acciones { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center; }
+  .bol__nota { font-size: .88rem; color: var(--ink-45); text-align: center; max-width: 36ch; margin: 0; }
+
+  /* PDF: solo el boleto, centrado en la hoja */
+  @media print {
+    @page { size: letter; margin: 12mm; }
+    :global(body > *:not(main)), :global(header), :global(footer), :global(nav) { display: none !important; }
+    .bol__acciones, .bol__nota, .bol__estado { display: none !important; }
+    .bol { padding: 0; }
+    .bol__img { width: 95mm; box-shadow: none; border-radius: 0; }
+  }
+</style>

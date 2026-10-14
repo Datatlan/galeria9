@@ -20,6 +20,9 @@
  *     sube el archivo al campo Archivos del item (límite Airtable: 5 MB)
  *     y marca Recibido.
  *
+ * BOLETOS (página /boleto?c=<recInteresado>):
+ *   · GET ?read=boleto&r=<rec> → nombre + evento, solo si Estatus = Confirmado/Asistió.
+ *
  * AGENTE DE MARCA (form /agente):
  *   · POST ?lead_upload=<recLead>&f=logo|kb  → sube el logo o el archivo de
  *     información al lead recién creado en Leads_SmartAgent (máx 5 MB, solo
@@ -47,6 +50,9 @@ const ONB = {
   table: 'tblIOBv4kM0YOCb6S',
   archivosField: 'fld4OuCZqGfUIjp7Y', // Archivos (attachments)
 };
+
+// Registros de eventos públicos ("Me interesa") — la página /boleto lee uno.
+const INTERESADOS = 'tblC7MvgHXjObbtjM'; // Evento_Interesados
 
 // Leads del Agente de marca (form /agente): el form crea el registro por la
 // escritura genérica y luego sube logo / archivo de información aquí.
@@ -114,6 +120,29 @@ export default {
 
         const air = await fetch(`https://api.airtable.com/v0/${BASES.prod}/${ONB.table}?${p}`, { headers: auth });
         return passthrough(air);
+      }
+
+      // Boleto de UN registro de Evento_Interesados (página /boleto?c=<recId>).
+      // El record ID es el código del boleto (aleatorio, no adivinable). Solo
+      // devuelve datos si el registro está Confirmado o Asistió; nunca correo
+      // ni teléfono.
+      if (clave === 'boleto') {
+        const r = url.searchParams.get('r') || '';
+        if (!REC_RE.test(r)) return json({ valido: false }, 400);
+        const reg = await fetch(`https://api.airtable.com/v0/${BASES.prod}/${INTERESADOS}/${r}`, { headers: auth });
+        if (!reg.ok) return json({ valido: false }, 404);
+        const f = (await reg.json()).fields || {};
+        if (!['Confirmado', 'Asistió'].includes(f.Estatus)) return json({ valido: false, estatus: f.Estatus || null });
+        const evId = (f.Evento || [])[0];
+        let evento = null;
+        if (evId) {
+          const ev = await fetch(`https://api.airtable.com/v0/${BASES.prod}/tblsOvEhdkacWz5yZ/${evId}`, { headers: auth });
+          if (ev.ok) {
+            const e = (await ev.json()).fields || {};
+            evento = { titulo: e.Titulo_Publico || e.Nombre || 'Evento en Galería 9', inicio: e.Fecha_Inicio || null, fin: e.Fecha_Fin || null };
+          }
+        }
+        return json({ valido: true, codigo: r, nombre: f.Nombre || '', estatus: f.Estatus, evento });
       }
 
       // Eventos públicos para la web (sección "Eventos y Talleres").
