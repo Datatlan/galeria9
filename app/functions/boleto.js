@@ -9,16 +9,19 @@ const TZ = 'America/Mexico_City';
 const fmt = (iso, o) => new Intl.DateTimeFormat('es-MX', { timeZone: TZ, ...o }).format(new Date(iso));
 
 export async function onRequestGet({ request, next }) {
+  // Tarjeta genérica servida desde ESTE dominio (staging o prod), para cualquier /boleto
+  const generica = new URL('/og-boleto.png', request.url).href;
+  const base = new HTMLRewriter().on('meta[property="og:image"]', { element(el) { el.setAttribute('content', generica); } });
   const res = await next();
   const c = new URL(request.url).searchParams.get('c') || '';
-  if (!/^rec[A-Za-z0-9]{14}$/.test(c)) return res;
+  if (!/^rec[A-Za-z0-9]{14}$/.test(c)) return base.transform(res);
 
   let d;
   try {
     const r = await fetch(`${WORKER}?read=boleto&r=${c}`);
     d = r.ok ? await r.json() : null;
-  } catch { return res; }
-  if (!d || !d.valido || !d.evento) return res;
+  } catch { return base.transform(res); }
+  if (!d || !d.valido || !d.evento) return base.transform(res);
 
   const e = d.evento;
   const titulo = `Tu boleto · ${e.titulo}`;
@@ -35,7 +38,7 @@ export async function onRequestGet({ request, next }) {
     .on('meta[name="description"]', set(desc))
     .on('title', { element(el) { el.setInnerContent(`${titulo} — Galería 9`); } });
   // foto del evento si es pública; si no, la tarjeta genérica de ESTE dominio (staging o prod)
-  rw = rw.on('meta[property="og:image"]', set(e.imagen && e.id ? IMG + e.id : new URL('/og-boleto.png', request.url).href));
+  rw = rw.on('meta[property="og:image"]', set(e.imagen && e.id ? IMG + e.id : generica));
   const out = rw.transform(res);
   // la vista previa depende de datos vivos: que nadie la guarde en caché
   const h = new Headers(out.headers);
