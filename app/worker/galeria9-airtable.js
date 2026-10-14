@@ -139,7 +139,14 @@ export default {
           const ev = await fetch(`https://api.airtable.com/v0/${BASES.prod}/tblsOvEhdkacWz5yZ/${evId}`, { headers: auth });
           if (ev.ok) {
             const e = (await ev.json()).fields || {};
-            evento = { titulo: e.Titulo_Publico || e.Nombre || 'Evento en Galería 9', inicio: e.Fecha_Inicio || null, fin: e.Fecha_Fin || null };
+            evento = {
+              id: evId,
+              titulo: e.Titulo_Publico || e.Nombre || 'Evento en Galería 9',
+              inicio: e.Fecha_Inicio || null,
+              fin: e.Fecha_Fin || null,
+              // la foto pública la sirve galeria9-mkt en /img/<id> (vista previa de WhatsApp)
+              imagen: e.Visibilidad === 'Público' && (e.Imagen || []).length > 0,
+            };
           }
         }
         return json({ valido: true, codigo: r, nombre: f.Nombre || '', estatus: f.Estatus, evento });

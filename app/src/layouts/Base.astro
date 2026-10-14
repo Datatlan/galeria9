@@ -3,7 +3,9 @@ import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 
-const { title = 'Galería 9 — Market de Talentos', description = 'Casa de bienestar, eventos y comunidad en Guadalajara.' } = Astro.props;
+const { title = 'Galería 9 — Market de Talentos', description = 'Casa de bienestar, eventos y comunidad en Guadalajara.', image } = Astro.props;
+// Imagen de vista previa (WhatsApp, redes): absoluta, solo si la página la define
+const ogImage = image ? new URL(image, Astro.site).href : null;
 ---
 <!doctype html>
 <html lang="es">
@@ -21,6 +23,8 @@ const { title = 'Galería 9 — Market de Talentos', description = 'Casa de bien
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta name="twitter:card" content="summary_large_image" />}
   </head>
   <body>
     <Nav />
