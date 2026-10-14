@@ -146,6 +146,7 @@ const { standalone = false } = Astro.props;
           WhatsApp: g('telefono'),
           Correo: g('correo') || undefined,
           Evento: idSel ? [idSel] : undefined,
+          Estatus: 'Interesado', // Galería 9 confirma a mano (gratis y de pago)
         });
         evForm.hidden = true; evDone.hidden = false;
       } catch (err) {
