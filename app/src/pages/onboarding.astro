@@ -8,6 +8,11 @@ import Base from '../layouts/Base.astro';
         <span class="eyebrow">Galería 9 · Onboarding</span>
         <h1 class="h2" style="margin-top:1rem">Prepara tu llegada.</h1>
         <p class="lead" id="obIntro">Cargando tu checklist…</p>
+        <div class="ob-evento" id="obEvento" hidden>
+          <span class="ob-evento__k">Tu evento</span>
+          <strong class="ob-evento__t" id="obEventoT"></strong>
+          <span class="ob-evento__d" id="obEventoD"></span>
+        </div>
         <div class="ob-progress" id="obProgress" hidden>
           <div class="ob-progress__bar"><div class="ob-progress__fill" id="obFill"></div></div>
           <span class="ob-progress__label" id="obLabel"></span>
@@ -61,6 +66,8 @@ import Base from '../layouts/Base.astro';
     };
 
     let items = [];
+    // Servicios con Sin_Sesion_Bienvenida (Catalogo, ej. expositores) no llevan el paso de Cal.com.
+    let conCita = true;
 
     // Opciones (Tipo=Selección): cada línea es una pregunta; "Etiqueta :: a | b"
     // o solo "a | b" para un único grupo. La respuesta se guarda como texto.
@@ -242,9 +249,9 @@ import Base from '../layouts/Base.astro';
       let n = 0;
       blocks.forEach((b, i) => {
         cards.push(b.type === 'sec' ? renderSecCard(b, ++n) : renderItemCard(b.items[0], ++n));
-        if (i === 0) cards.push(renderCitaCard(++n));
+        if (i === 0 && conCita) cards.push(renderCitaCard(++n));
       });
-      if (!blocks.length) cards.push(renderCitaCard(++n));
+      if (!blocks.length && conCita) cards.push(renderCitaCard(++n));
       list.innerHTML = cards.join('');
     }
 
@@ -351,6 +358,15 @@ import Base from '../layouts/Base.astro';
         intro.textContent = marca
           ? `${marca}: entrega aquí tu material y confirma los detalles. Puedes volver a este link cuando quieras.`
           : 'Entrega aquí tu material y confirma los detalles. Puedes volver a este link cuando quieras.';
+        conCita = !items.some((it) => [].concat(it.f.Sin_Sesion_Bienvenida || []).includes(true));
+        // Órdenes de expositor: el evento (título + fecha en texto) va arriba.
+        const evT = one(items[0].f.Evento_Titulo);
+        if (evT) {
+          document.getElementById('obEventoT').textContent = evT;
+          const evD = one(items[0].f.Evento_Fecha);
+          document.getElementById('obEventoD').textContent = evD ? evD.charAt(0).toUpperCase() + evD.slice(1) : '';
+          document.getElementById('obEvento').hidden = false;
+        }
         render();
       } catch {
         intro.textContent = ''; errBox.hidden = false;
@@ -361,6 +377,11 @@ import Base from '../layouts/Base.astro';
   <style is:global>
     .wrap--narrow { max-width: 760px; }
 
+    .ob-evento { display: flex; flex-direction: column; gap: .3rem; margin-top: 1.6rem; padding: 1.2rem 1.4rem; background: var(--sand); border-radius: 14px; }
+    .ob-evento[hidden] { display: none; }
+    .ob-evento__k { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
+    .ob-evento__t { font-size: 1.35rem; font-weight: 400; color: var(--ink); }
+    .ob-evento__d { font-size: .95rem; color: var(--ink-70); }
     .ob-progress { display: flex; align-items: center; gap: 1rem; margin-top: 1.6rem; }
     .ob-progress__bar { flex: 1; height: 4px; background: var(--ink-12); border-radius: 100px; overflow: hidden; }
     .ob-progress__fill { height: 100%; background: var(--gold); width: 0%; transition: width .6s var(--ease); }
