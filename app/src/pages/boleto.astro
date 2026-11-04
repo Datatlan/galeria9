@@ -38,7 +38,7 @@ import Base from '../layouts/Base.astro';
   async function datos() {
     if (params.get('demo')) {
       const ini = new Date(Date.now() + 6 * 864e5); ini.setHours(19, 0, 0, 0);
-      return { valido: true, codigo: 'recDEMO0000000000', nombre: 'Mariana López',
+      return { valido: true, codigo: 'recDEMO0000000000', nombre: 'Mariana López', rol: params.get('demo'),
         evento: { titulo: 'Sound Healing - Noche con las estrellas', inicio: ini.toISOString(), fin: new Date(ini.getTime() + 2 * 36e5).toISOString() } };
     }
     const c = params.get('c') || '';
@@ -79,7 +79,9 @@ import Base from '../layouts/Base.astro';
     const logo = await cargarImg('/logo.png');
     ctx.drawImage(logo, M, 100, 58, 58 * logo.height / logo.width);
     ctx.fillStyle = GOLD_INK; ctx.font = F(700, 26); ctx.textAlign = 'right';
-    ctx.letterSpacing = '6px'; ctx.fillText('BOLETO', W - M, 140); ctx.letterSpacing = '0px';
+    // Rol (Evento_Asistentes): el personal de marcas e invitados se distinguen en la entrada
+    const etiqueta = d.rol === 'Expositor' ? 'EXPOSITOR' : d.rol === 'Invitado' ? 'INVITADO' : 'BOLETO';
+    ctx.letterSpacing = '6px'; ctx.fillText(etiqueta, W - M, 140); ctx.letterSpacing = '0px';
     ctx.textAlign = 'left';
 
     // Evento

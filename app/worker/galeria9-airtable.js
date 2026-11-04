@@ -154,7 +154,7 @@ export default {
             };
           }
         }
-        return json({ valido: true, codigo: r, nombre: f.Nombre || '', estatus: f.Estatus, evento });
+        return json({ valido: true, codigo: r, nombre: f.Nombre || '', estatus: f.Estatus, rol: f.Rol || 'Asistente', evento });
       }
 
       // Eventos públicos para la web (sección "Eventos y Talleres").
