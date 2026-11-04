@@ -79,8 +79,8 @@ import Base from '../layouts/Base.astro';
     const logo = await cargarImg('/logo.png');
     ctx.drawImage(logo, M, 100, 58, 58 * logo.height / logo.width);
     ctx.fillStyle = GOLD_INK; ctx.font = F(700, 26); ctx.textAlign = 'right';
-    // Rol (Evento_Asistentes): el personal de marcas e invitados se distinguen en la entrada
-    const etiqueta = d.rol === 'Expositor' ? 'EXPOSITOR' : d.rol === 'Invitado' ? 'INVITADO' : 'BOLETO';
+    // Rol (Evento_Asistentes): el personal de las marcas se distingue en la entrada
+    const etiqueta = d.rol === 'Expositor' ? 'EXPOSITOR' : 'BOLETO';
     ctx.letterSpacing = '6px'; ctx.fillText(etiqueta, W - M, 140); ctx.letterSpacing = '0px';
     ctx.textAlign = 'left';
 
