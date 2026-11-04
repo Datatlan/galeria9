@@ -35,8 +35,9 @@ export async function leer(clave) {
 
 // Eventos públicos para la web (marquesina + fecha + espacio + imagen).
 // El Worker ya filtra Visibilidad=Público a futuro y oculta el nombre interno.
+// Staging/local piden también los eventos test_record (producción no los ve).
 export async function leerEventosPublicos() {
-  const res = await fetch(`${WORKER}?read=eventos-publicos`);
+  const res = await fetch(`${WORKER}?read=eventos-publicos${ES_PRUEBA ? '&test=1' : ''}`);
   if (!res.ok) throw new Error(`Worker ${res.status}`);
   const json = await res.json();
   return json.eventos || [];

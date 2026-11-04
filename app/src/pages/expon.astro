@@ -1,0 +1,133 @@
+---
+// Expón tu marca (genérico): cualquier evento con Acepta_Expositores = ✓.
+// A diferencia de los demás formularios (que caen en Leads), aquí la solicitud
+// crea una Orden en Pendiente ligada al evento (Evento_Expositor) con el
+// servicio del evento en Servicios_Solicitados → la automation crea el
+// Line_Item; cuando Fer la aprueba se genera el onboarding del expositor.
+// Una orden Pendiente no ocupa lugar: solo las Aprobadas cuentan para el cupo.
+// Acepta ?evento=<recId> para llegar con el evento ya elegido (desde la agenda).
+import Base from '../layouts/Base.astro';
+---
+<Base title="Expón tu marca — Galería 9" description="Lleva tu marca a los eventos de Galería 9: elige el evento y cuéntanos de ti.">
+  <section class="section">
+    <div class="wrap">
+      <header class="mhead reveal">
+        <span class="eyebrow">Eventos · Expositores</span>
+        <h1 class="h2" style="margin-top:1rem">Expón tu marca.</h1>
+        <p class="lead">Elige el evento, cuéntanos de tu marca y te confirmamos tu lugar por WhatsApp.</p>
+      </header>
+
+      <form id="f" class="mform reveal" novalidate>
+        <div class="mform-two">
+          <fieldset class="mfield mfield--wide opt-group">
+            <legend>¿En qué evento quieres exponer?</legend>
+            <div class="opt-cards" id="eventos">
+              <p class="mform-note">Cargando eventos…</p>
+            </div>
+          </fieldset>
+
+          <label class="mfield"><span>Marca</span><input type="text" name="marca" placeholder="Nombre de tu marca" required /></label>
+          <label class="mfield"><span>Tu nombre</span><input type="text" name="nombre" placeholder="Nombre de quien nos escribe" required /></label>
+          <label class="mfield"><span>Celular / WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
+          <label class="mfield"><span>Correo electrónico</span><input type="email" name="correo" placeholder="tu@correo.com" required /></label>
+          <label class="mfield mfield--wide"><span>Instagram</span><input type="text" name="instagram" placeholder="@tumarca" required /></label>
+          <label class="mfield mfield--wide"><span>¿Qué vendes o de qué trata tu marca?</span><textarea name="giro" rows="3" placeholder="Tu producto o servicio, en pocas palabras" required></textarea></label>
+          <label class="mfield mfield--wide"><span id="preguntaTxt">¿Qué vas a presentar?</span><textarea name="respuesta" rows="3" placeholder="Cuéntanos" required></textarea></label>
+        </div>
+        <div><button type="submit" class="btn">Quiero exponer</button></div>
+      </form>
+
+      <div class="mdone" id="done" hidden>
+        <div class="mdone__mark">✓</div>
+        <h2 class="h2">¡Recibimos tu solicitud!</h2>
+        <p class="lead">Te confirmamos tu lugar por WhatsApp y te mandamos lo que necesitamos de tu marca.</p>
+        <div class="mdone__actions">
+          <a href="/eventos" class="btn btn--ghost">Ver eventos</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { T, crear, leerEventosPublicos } from '../config.js';
+    import { grupoObligatorio, lineas } from '../scripts/leadForm.js';
+
+    const form = document.getElementById('f');
+    const done = document.getElementById('done');
+    const box = document.getElementById('eventos');
+    const preguntaTxt = document.getElementById('preguntaTxt');
+    const PREGUNTA = '¿Qué vas a presentar?';
+    const esc = (s) => String(s ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+    const fmt = (ini, fin) => {
+      const a = new Date(ini);
+      const dia = a.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+      const h = (d) => d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+      return `${dia.charAt(0).toUpperCase()}${dia.slice(1)} · ${h(a)}${fin ? ` – ${h(new Date(fin))}` : ''}`;
+    };
+    const precio = (n) => (typeof n === 'number' && n > 0 ? `$${n.toLocaleString('es-MX')} por marca` : '');
+
+    let eventos = [];
+    let eventoOk = () => false;
+    const elegido = () => {
+      const id = form.querySelector('input[name=evento]:checked')?.value;
+      return eventos.find((e) => e.id === id);
+    };
+    // La pregunta del formulario la define cada evento (Pregunta_Expositor).
+    const syncPregunta = () => { preguntaTxt.textContent = elegido()?.expositores.pregunta || PREGUNTA; };
+
+    (async () => {
+      try { eventos = (await leerEventosPublicos()).filter((e) => e.expositores?.abierto); } catch { eventos = []; }
+      if (!eventos.length) {
+        box.innerHTML = '<p class="mform-note">Por ahora no hay eventos abiertos a expositores. Síguenos en redes para enterarte del próximo.</p>';
+        form.querySelector('[type=submit]').disabled = true;
+        return;
+      }
+      const pre = new URLSearchParams(location.search).get('evento');
+      const marcado = (e) => e.id === pre || eventos.length === 1;
+      box.innerHTML = eventos.map((e) => `<label class="opt-card">
+          <input type="radio" name="evento" value="${esc(e.id)}" ${marcado(e) ? 'checked' : ''} />
+          <span class="opt-card__check" aria-hidden="true"></span>
+          <span class="opt-card__sub">${esc(e.titulo)}</span>
+          <span class="opt-card__d">${esc(e.inicio ? fmt(e.inicio, e.fin) : '')}</span>
+          ${precio(e.expositores.precio) ? `<span class="opt-card__d">${esc(precio(e.expositores.precio))}</span>` : ''}
+        </label>`).join('');
+      eventoOk = grupoObligatorio(form, 'evento');
+      box.querySelectorAll('input[name=evento]').forEach((i) => i.addEventListener('change', syncPregunta));
+      syncPregunta();
+    })();
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      if (!form.reportValidity() || !eventoOk()) return;
+      const e = elegido();
+      const fd = new FormData(form);
+      const g = (k) => (fd.get(k) || '').toString().trim();
+      const btn = form.querySelector('[type=submit]');
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      try {
+        await crear(T.ordenes, {
+          Marca: g('marca'),
+          Solicitante: g('nombre'),
+          WhatsApp: g('telefono'),
+          Correo: g('correo'),
+          Estatus: 'Pendiente',
+          Evento_Expositor: [e.id],
+          Servicios_Solicitados: e.expositores.servicio ? [e.expositores.servicio] : undefined,
+          Notas: lineas([
+            ['Expositor en', `${e.titulo}${e.inicio ? ` (${fmt(e.inicio, e.fin)})` : ''}`],
+            ['Instagram', g('instagram')],
+            ['Qué vende', g('giro')],
+            [e.expositores.pregunta || PREGUNTA, g('respuesta')],
+          ]),
+        });
+        form.hidden = true;
+        done.hidden = false;
+        done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'Quiero exponer';
+        alert('No pudimos enviar tu solicitud. Intenta de nuevo o escríbenos por WhatsApp.');
+        console.error(err);
+      }
+    });
+  </script>
+</Base>

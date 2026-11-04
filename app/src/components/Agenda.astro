@@ -84,6 +84,12 @@ const { standalone = false } = Astro.props;
       return `${dia} · ${hIni}${hFin ? ` – ${hFin}` : ''}`;
     };
 
+    // "Expón tu marca": eventos con Acepta_Expositores → /expon (se oculta si ya no hay
+    // lugares); Tester Day sin esa casilla sigue usando su página propia.
+    const exponUrl = (e) => e.expositores
+      ? (e.expositores.abierto ? `/expon?evento=${encodeURIComponent(e.id)}` : '')
+      : (e.tipo === 'Tester Day' ? `/tester-day?fecha=${encodeURIComponent(e.id)}` : '');
+
     const grid = document.getElementById('agendaGrid');
     grid.innerHTML = eventos.map((e) => `
       <article class="ev-card reveal in">
@@ -93,9 +99,9 @@ const { standalone = false } = Astro.props;
           <h3 class="h3">${escEv(e.titulo)}</h3>
           ${e.espacios.length ? `<span class="ev-card__place">${escEv(e.espacios.join(' · '))}</span>` : ''}
           ${e.descripcion ? `<p class="muted">${escEv(e.descripcion)}</p>` : ''}
-          ${e.tipo === 'Tester Day'
+          ${exponUrl(e)
             ? `<div class="ev-card__btns">
-                <a class="link-arrow ev-card__alt" href="/tester-day?fecha=${encodeURIComponent(e.id)}">Expón tu marca →</a>
+                <a class="link-arrow ev-card__alt" href="${exponUrl(e)}">Expón tu marca →</a>
                 <button type="button" class="btn ev-card__btn"
                   data-id="${escEv(e.id)}" data-t="${escEv(e.titulo)}" data-d="${escEv(fmtEv(e.inicio, e.fin))}">Quiero asistir</button>
               </div>`

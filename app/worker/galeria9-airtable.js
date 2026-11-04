@@ -20,6 +20,10 @@
  *     sube el archivo al campo Archivos del item (límite Airtable: 5 MB)
  *     y marca Recibido.
  *
+ * EVENTOS PÚBLICOS (v5): ?read=eventos-publicos trae `expositores` por evento
+ *   (Acepta_Expositores → form /expon) y oculta los eventos test_record salvo
+ *   con &test=1 (lo mandan staging y local).
+ *
  * BOLETOS (página /boleto?c=<recInteresado>):
  *   · GET ?read=boleto&r=<rec> → nombre + evento, solo si Estatus = Confirmado/Asistió.
  *
@@ -168,7 +172,9 @@ export default {
         // esos datos de marquesina salen del Worker (nunca el Nombre interno).
         const pe = new URLSearchParams();
         // Sin Fecha_Fin el evento igual cuenta: se usa Fecha_Inicio como referencia.
-        pe.set('filterByFormula', "AND({Visibilidad}='Público', IS_AFTER(IF({Fecha_Fin}, {Fecha_Fin}, {Fecha_Inicio}), NOW()))");
+        // Eventos test_record: solo los ve staging/local (mandan &test=1); producción nunca.
+        const conPrueba = url.searchParams.get('test') === '1';
+        pe.set('filterByFormula', `AND({Visibilidad}='Público', IS_AFTER(IF({Fecha_Fin}, {Fecha_Fin}, {Fecha_Inicio}), NOW())${conPrueba ? '' : ', NOT({test_record})'})`);
         pe.set('pageSize', '100');
 
         const ps = new URLSearchParams();
@@ -193,6 +199,13 @@ export default {
             espacios: (r.fields.Espacio || []).map((id) => espacios[id]).filter(Boolean),
             imagen: (r.fields.Imagen || [])[0]?.url || null,
             tipo: r.fields.Tipo || 'Evento', // 'Tester Day' → la web muestra 'Expón tu marca'
+            // Acepta_Expositores → "Expón tu marca" (form /expon). Lugares vacío = sin cupo.
+            expositores: r.fields.Acepta_Expositores ? {
+              pregunta: r.fields.Pregunta_Expositor || '',
+              servicio: (r.fields.Servicio_Expositor || [])[0] || null,
+              precio: (r.fields.Precio_Expositor || [])[0] ?? null,
+              abierto: !(typeof r.fields.Lugares_Expositores === 'number' && r.fields.Lugares_Expositores <= 0),
+            } : null,
           }))
           .sort((a, b) => (a.inicio || '').localeCompare(b.inicio || ''));
 
