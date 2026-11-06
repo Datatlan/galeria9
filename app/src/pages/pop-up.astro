@@ -11,7 +11,9 @@ import Base from '../layouts/Base.astro';
         <div class="mincluye">
           <span>6 días en el showroom (lun–sáb)</span>
           <span>4 historias + 1 reel colaborativo</span>
-          <span>1 rack + 2 maniquíes</span>
+          <span>1 live desde el Instagram de Galería 9</span>
+          <span>Brindis de cierre: celebra con tus clientes</span>
+          <span>1 rack + 2 maniquíes (opcional)</span>
         </div>
       </header>
 
@@ -43,6 +45,7 @@ import Base from '../layouts/Base.astro';
           <label class="mfield"><span>WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
           <label class="mfield mfield--wide"><span>Correo <span class="muted">(opcional)</span></span><input type="email" name="correo" placeholder="tu@correo.com" /></label>
           <label class="mfield mfield--wide"><span>¿Qué quieres hacer en tu Pop Up?</span><textarea name="idea" rows="3" placeholder="Ej. lanzar una nueva temporada, edición especial, degustación en vivo, taller exprés…" required></textarea></label>
+          <label class="mfield--wide pu-check"><input type="checkbox" name="rack" value="Sí" /><span>Quiero usar el rack y los 2 maniquíes <span class="muted">(opcional)</span></span></label>
         </div>
         <div><button type="submit" class="btn">Enviar solicitud</button></div>
       </form>
@@ -194,6 +197,7 @@ import Base from '../layouts/Base.astro';
             `Marca: ${g('marca')}`,
             `Giro: ${g('giro')}`,
             `Mes de interés: ${g('mes')}`,
+            `Rack + 2 maniquíes: ${g('rack') || 'No'}`,
           ].filter(Boolean).join('\n'),
           Estatus: 'Nuevo',
         });
@@ -213,6 +217,8 @@ import Base from '../layouts/Base.astro';
 
   <style is:global>
     .monthpick { gap: 0; }
+    .pu-check { display: flex; align-items: center; gap: .7rem; font-size: .95rem; color: var(--ink); cursor: pointer; }
+    .pu-check input { width: 18px; height: 18px; flex: none; margin: 0; accent-color: var(--ink); cursor: pointer; }
     .monthpick__legend { display: flex; gap: 1.4rem; font-size: .78rem; color: var(--ink-45); margin: .6rem 0 .2rem; }
     .lg { display: inline-flex; align-items: center; gap: .5em; }
     .lg::before { content: ''; width: 12px; height: 12px; border-radius: 50%; }
