@@ -1,6 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
 import SolicitudTalento from '../components/SolicitudTalento.astro';
+// PENDIENTE: que la marca elija el mes/semana disponible, como en /pop-up
+// (selector con la ocupación real de Airtable).
 ---
 <Base title="Invitado Especial — Galería 9" description="Exhibe en el corazón de Galería 9 y expande tu visibilidad durante 6 días.">
   <SolicitudTalento
@@ -8,5 +10,12 @@ import SolicitudTalento from '../components/SolicitudTalento.astro';
     eyebrow="Market · Invitado Especial"
     titulo="Exhibe en el corazón de Galería 9."
     lead="Seis días para mostrar tu talento en el centro de la casa y expandir tu visibilidad con una nueva comunidad."
+    incluye={[
+      '5 contenedores de 30 × 30 cm para exhibir',
+      'Posibilidad de venta',
+      'Atrae nueva comunidad y la dirige a tu domicilio, catálogo o página',
+      'Colaboración digital con Galería 9',
+      'Servicio de pauta incluido desde Galería 9',
+    ]}
   />
 </Base>
