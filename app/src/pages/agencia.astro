@@ -1,29 +1,62 @@
 ---
-// 05 · Agencia (v2): servicio nuevo "Expresa tu talento + agencia". Formulario
-// de diagnóstico breve (distinto al de Punto Presencia) → Leads, Interes = Agencia.
-// Es la tercera puerta del home (Expansión).
+// 05 · Agencia (v3): servicio "Expresa tu talento + agencia". Encuesta de UNA
+// opción entre los 4 servicios de "¿cómo ser parte de Galería 9?" (PDF del
+// cliente) + datos de contacto → Leads, Interes = Agencia, Prioridades = la
+// tarjeta elegida. Es la tercera puerta del home (Expansión).
 import Base from '../layouts/Base.astro';
 
-// Encuesta (website design.pdf): hasta 3 prioridades → campo Prioridades de Leads.
-const prioridades = [
-  'Alineación: personalidad con mi talento', 'Estructura para crecer', 'Contenido digital para mis redes',
-  'Nuevas estrategias físicas (comunidad)', 'Nuevas estrategias digitales', 'Visibilidad y comunidad',
-  'Colaboraciones y alianzas', 'Estrategias de venta', 'Sesión de fotos', 'Grabación de video',
+const servicios = [
+  {
+    v: 'Visibilidad de tu Talento', k: 'Identidad visual',
+    items: ['exploración de memorias del inconsciente', 'definición de paletas de colores', 'selección de tipografías', 'renders y visualización de tu producto', 'propuesta de identidad visual para tu talento'],
+    frase: 'haz visible lo que te hace único.', pie: 'duración: 1 semana',
+  },
+  {
+    v: 'Estructura tu Expansión', k: 'Dirección, estrategia y estructura',
+    items: ['4 de memorias del inconsciente', 'identificación de talentos, fortalezas y potencial', 'definición de visión y objetivos de expansión', 'identificación de oportunidades de crecimiento', 'diseño de estrategias y próximos pasos', 'mapa de expansión digital y físico', 'ruta de acción personalizada para tu negocio'],
+    frase: 'un mapa para desarrollar tu negocio', pie: 'proyecto de 2 semanas',
+  },
+  {
+    v: 'Campaña Digital', checks: ['una visión', 'un análisis', 'visibilidad'], pie: '1 META',
+  },
+  {
+    v: 'Experiencia Galería 9', intro: 'un diseño a tu medida:',
+    items: ['celebración personal', 'colaboraciones', 'tu producto', 'tus clientes', 'tu empresa'],
+    frase: 'tu talento es una experiencia',
+  },
 ];
 ---
-<Base title="Expresa tu talento + agencia — Galería 9" description="Un diagnóstico breve para conocer tu marca y cómo acompañarla.">
+<Base title="Expresa tu talento + agencia — Galería 9" description="Elige lo que buscas para tu marca: identidad visual, estructura de expansión, campaña digital o una experiencia en Galería 9.">
   <section class="section">
     <div class="wrap">
-      <div class="ag__top">
-        <header class="mhead reveal">
-          <span class="eyebrow">Expansión · Comunicación y estrategias</span>
-          <h1 class="h2" style="margin-top:1rem">Expresa tu talento<br/>+ agencia.</h1>
-          <p class="lead">Un diagnóstico breve para conocer tu marca. Déjanos tus datos y te contactamos para platicar cómo acompañarte.</p>
-        </header>
-      </div>
+      <header class="mhead reveal">
+        <span class="eyebrow">Expansión · Comunicación y estrategias</span>
+        <h1 class="h2" style="margin-top:1rem">Expresa tu talento<br/>+ agencia.</h1>
+      </header>
 
-      <form id="f" class="mform ag__form reveal" novalidate>
-        <div class="mform-two">
+      <form id="f" class="mform ag__form" novalidate>
+        <fieldset class="opt-group ag__busca reveal">
+          <legend class="ag__q">¿Qué estás buscando?</legend>
+          <div class="ag__cards">
+            {servicios.map((s) => (
+              <label class="svc">
+                <input type="radio" name="busca" value={s.v} />
+                <span class="svc__check" aria-hidden="true"></span>
+                {s.k && <span class="svc__k">{s.k}</span>}
+                <span class={`svc__t${s.k ? '' : ' svc__t--solo'}`}>{s.v}</span>
+                {s.intro && <span class="svc__intro">{s.intro}</span>}
+                {s.items && <ul class="svc__list">{s.items.map((i) => <li>{i}</li>)}</ul>}
+                {s.checks && <ul class="svc__checks">{s.checks.map((i) => <li>{i}</li>)}</ul>}
+                <span class="svc__pie">
+                  {s.frase && <span class="svc__frase">{s.frase}</span>}
+                  {s.pie && <span class="svc__tag">{s.pie}</span>}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div class="mform-two ag__datos reveal">
           <label class="mfield"><span>Nombre</span><input type="text" name="nombre" placeholder="Tu nombre" required /></label>
           <label class="mfield"><span>Celular / WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
           <label class="mfield mfield--wide"><span>Correo electrónico</span><input type="email" name="correo" placeholder="tu@correo.com" required /></label>
@@ -31,21 +64,7 @@ const prioridades = [
           <label class="mfield mfield--wide"><span>Link de Instagram</span><input type="text" name="instagram" placeholder="instagram.com/tumarca" required /></label>
         </div>
 
-        <fieldset class="opt-group prio" id="prio">
-          <legend><strong>¿Qué estás buscando?</strong> Selecciona tus 3 prioridades principales.</legend>
-          <div class="prio__list">
-            {prioridades.map((p) => (
-              <label class="prio__opt"><input type="checkbox" name="prioridad" value={p} /><span>{p}</span></label>
-            ))}
-            <label class="prio__opt prio__opt--otro">
-              <input type="checkbox" name="prioridad" value="Otro" id="prioOtro" /><span>Otro</span>
-              <input type="text" name="prio_otro" id="prioOtroTxt" placeholder="¿Cuál?" maxlength="80" disabled />
-            </label>
-          </div>
-          <p class="prio__count" id="prioCount" aria-live="polite">0 de 3</p>
-        </fieldset>
-
-        <div class="ag__send"><button type="submit" class="btn">Enviar</button></div>
+        <div><button type="submit" class="btn">Enviar</button></div>
       </form>
 
       <div class="mdone" id="done" hidden>
@@ -62,65 +81,63 @@ const prioridades = [
   <script>
     import { initLeadForm, lineas, grupoObligatorio } from '../scripts/leadForm.js';
     const form = document.getElementById('f');
-    const boxes = [...form.querySelectorAll('input[name="prioridad"]')];
-    const otro = document.getElementById('prioOtro');
-    const otroTxt = document.getElementById('prioOtroTxt');
-    const count = document.getElementById('prioCount');
-    // Máximo 3: al llegar a 3 se bloquean las demás
-    const sync = () => {
-      const n = boxes.filter((b) => b.checked).length;
-      boxes.forEach((b) => { b.disabled = !b.checked && n >= 3; b.closest('.prio__opt').classList.toggle('is-off', b.disabled); });
-      otroTxt.disabled = !otro.checked;
-      otroTxt.required = otro.checked;
-      count.textContent = `${n} de 3`;
-    };
-    boxes.forEach((b) => b.addEventListener('change', () => { sync(); if (b === otro && otro.checked) otroTxt.focus(); }));
-    sync();
-    const alMenosUna = grupoObligatorio(form, 'prioridad');
+    const elegida = grupoObligatorio(form, 'busca');
 
     initLeadForm({
-      validate: () => alMenosUna(),
-      build: (g, fd) => {
-        const prio = fd.getAll('prioridad').map(String);
-        return {
-          interes: 'Agencia',
-          detalle: lineas([
-            ['Giro / talento', g('giro')],
-            ['Instagram', g('instagram')],
-            ['Prioridades', prio.map((p) => (p === 'Otro' && g('prio_otro') ? `Otro: ${g('prio_otro')}` : p)).join(' · ')],
-          ]),
-          extra: { Prioridades: prio },
-        };
-      },
+      validate: () => elegida(),
+      build: (g) => ({
+        interes: 'Agencia',
+        detalle: lineas([
+          ['Busca', g('busca')],
+          ['Giro / talento', g('giro')],
+          ['Instagram', g('instagram')],
+        ]),
+        extra: { Prioridades: [g('busca')] },
+      }),
     });
   </script>
 </Base>
 
 <style>
-  .ag__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
-  .prio { margin-top: .6rem; }
-  .prio legend { font-size: 1rem; color: var(--ink); margin-bottom: 1rem; line-height: 1.5; }
-  .prio legend strong { font-weight: 500; display: block; font-size: 1.15rem; }
-  .prio__list { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem 1.6rem; }
-  .prio__opt { display: flex; align-items: center; gap: .65rem; font-size: .95rem; color: var(--ink); cursor: pointer; line-height: 1.3; }
-  .prio__opt input[type=checkbox] { width: 18px; height: 18px; flex: none; margin: 0; accent-color: var(--ink); cursor: pointer; }
-  .prio__opt.is-off { color: var(--ink-45); cursor: default; }
-  .prio__opt.is-off input { cursor: default; }
-  .prio__opt--otro { grid-column: 1 / -1; }
-  .prio__opt--otro input[type=text] {
-    flex: 1; max-width: 320px; font: inherit; font-size: .95rem; color: var(--ink); background: transparent;
-    border: 0; border-bottom: 1px solid var(--ink-12); padding: .25em .1em;
+  .ag__form { max-width: none; gap: clamp(2rem, 4vw, 2.8rem); }
+  .ag__datos { max-width: 640px; }
+  .ag__q { font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 300; letter-spacing: -.01em; color: var(--ink); margin-bottom: 1.4rem; }
+
+  /* Tarjetas del PDF "¿cómo ser parte de Galería 9?": arena, título bold, viñetas finas,
+     frase en pastilla clara y duración en pastilla oscura. Se elige UNA. */
+  .ag__cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(.9rem, 1.6vw, 1.3rem); }
+  .svc {
+    position: relative; display: flex; flex-direction: column; gap: .7rem;
+    min-height: 460px; padding: 2.4rem 1.4rem 1.5rem;
+    background: var(--gold); color: var(--ink); border-radius: 18px; cursor: pointer;
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
   }
-  .prio__opt--otro input[type=text]:focus { outline: none; border-color: var(--ink); }
-  .prio__opt--otro input[type=text]:disabled { opacity: .45; }
-  .prio__count { margin: .9rem 0 0; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-ink); }
-  .prio.invalid legend { color: #b4523f; }
-  @media (max-width: 640px) { .prio__list { grid-template-columns: 1fr; } }
-  /* Escritorio: campos más angostos a la izquierda, prioridades a la derecha */
-  @media (min-width: 900px) {
-    .ag__form { max-width: none; grid-template-columns: minmax(0, 520px) minmax(0, 1fr); column-gap: clamp(2.5rem, 6vw, 6rem); align-items: start; }
-    .ag__form .prio { margin-top: 0; grid-column: 2; grid-row: 1 / span 2; }
-    .ag__form .prio__list { grid-template-columns: 1fr; gap: .6rem; }
-    .ag__send { grid-column: 1; }
+  .svc:hover { transform: translateY(-4px); }
+  .svc input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .svc:has(input:checked) { box-shadow: 0 0 0 3px var(--ink); transform: translateY(-4px); }
+  .svc:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 4px; }
+  .svc__check {
+    position: absolute; top: 1rem; left: 1rem; width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid rgba(43, 43, 42, .45); background: rgba(255, 255, 255, .35);
+    display: grid; place-items: center; transition: background .2s, border-color .2s;
   }
+  .svc:has(input:checked) .svc__check { background: var(--ink); border-color: var(--ink); }
+  .svc:has(input:checked) .svc__check::after { content: ''; width: 9px; height: 5px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
+  .opt-group.invalid .svc { box-shadow: 0 0 0 2px #b4523f; }
+
+  .svc__k { align-self: flex-end; text-align: right; font-size: .66rem; letter-spacing: .02em; text-transform: uppercase; max-width: 75%; line-height: 1.25; }
+  .svc__t { font-size: clamp(1.25rem, 1.7vw, 1.5rem); font-weight: 700; line-height: 1.05; letter-spacing: -.035em; margin-top: .4rem; }
+  .svc__t--solo { margin-top: 1.6rem; }
+  .svc__intro { font-size: .92rem; font-weight: 300; letter-spacing: -.02em; }
+  .svc__list { margin: 0; padding-left: 1.05rem; display: grid; gap: .35rem; }
+  .svc__list li { font-size: .88rem; line-height: 1.2; font-weight: 300; letter-spacing: -.02em; }
+  .svc__checks { list-style: none; margin: .2rem 0 0; padding: 0; display: grid; gap: .6rem; }
+  .svc__checks li { display: flex; align-items: center; gap: .6rem; font-size: 1.15rem; font-weight: 300; letter-spacing: -.03em; }
+  .svc__checks li::before { content: '✓'; flex: none; display: grid; place-items: center; width: 20px; height: 20px; border: 2px solid #fff; border-radius: 4px; color: #fff; font-size: .8rem; font-weight: 700; }
+  .svc__pie { margin-top: auto; display: flex; flex-direction: column; align-items: flex-start; gap: .45rem; padding-top: 1rem; }
+  .svc__frase { background: #e6e1da; border-radius: 8px; padding: .3rem .6rem; font-size: .86rem; letter-spacing: -.02em; line-height: 1.2; }
+  .svc__tag { background: var(--ink); color: #fff; border-radius: 8px; padding: .3rem .6rem; font-size: .86rem; letter-spacing: -.02em; }
+
+  @media (max-width: 1100px) { .ag__cards { grid-template-columns: repeat(2, 1fr); } .svc { min-height: 400px; } }
+  @media (max-width: 600px) { .ag__cards { grid-template-columns: 1fr; } .svc { min-height: 0; } }
 </style>
