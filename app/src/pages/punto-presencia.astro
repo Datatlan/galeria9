@@ -1,22 +1,33 @@
 ---
-// 02 · Punto Presencia (v2): el cliente elige plan (Visibilidad / Expansión)
-// y cae en Leads. En la confirmación puede agendar su visita (Cal.com) —
-// agregado nuestro al brief del cliente.
+// 02 · Punto Presencia (v3): un solo plan, Visibilidad (Expansión se retiró).
+// Cae en Leads. En la confirmación puede agendar su visita (Cal.com).
 import Base from '../layouts/Base.astro';
 
-const planes = [
-  { v: 'Visibilidad', sub: 'Expande tu visibilidad', d: 'Dale a tu marca un punto físico y un punto de entrega. Crea tus eventos, participa en un open house, obtén visibilidad en las redes de Galería 9, valida tu producto y empieza a crear comunidad.' },
-  { v: 'Expansión', sub: 'Tu marca, con apoyo creativo', d: 'Incluye los beneficios de Visibilidad y suma tu propia agencia de creación de contenido: contenido digital para tus redes e Instagram personalizado especialmente para tu marca.' },
+const incluye = [
+  { t: 'Punto físico', d: 'un punto de entrega de tu producto.' },
+  { t: 'Regalo Open House', d: 'utiliza la terraza para crear tu primera activación de comunidad.' },
+  { t: 'Apoyo digital creativo', d: 'te incluye el diseño de 4 historias.' },
+  { t: 'Visibilidad en las redes de Galería 9', d: 'contenido en colaboración con distintas marcas.' },
+  { t: 'Nueva comunidad conoce tu producto', d: 'prueba y observa cómo reaccionan ante tu propuesta.' },
+  { t: 'Venta directa', d: 'todo el dinero cae a tu cuenta.' },
+  { t: 'Atrae nuevos seguidores y contactos', d: 'sistema de QR de información en tu exhibición.' },
 ];
 ---
-<Base title="Punto Presencia — Galería 9" description="Tu marca encuentra un espacio físico en Galería 9. Elige tu plan: Visibilidad o Expansión.">
+<Base title="Punto Presencia — Galería 9" description="Tu marca encuentra visibilidad y un espacio físico en Galería 9 con una membresía de 6 meses.">
   <section class="section">
     <div class="wrap">
       <header class="mhead reveal">
         <span class="eyebrow">Market · Punto Presencia</span>
         <h1 class="h2" style="margin-top:1rem">Punto Presencia.</h1>
-        <p class="lead">Tu marca encuentra un espacio físico. Membresía de 6 meses para compartir, validar y expandir la comunidad de tu marca.</p>
+        <p class="lead">Tu marca encuentra visibilidad y un espacio físico en Galería 9. Membresía de 6 meses para compartir, validar y expandir la comunidad de tu marca.</p>
+        <p class="pp__precio">Plan Visibilidad · $2,999 MXN mensual</p>
       </header>
+
+      <ul class="pp__incluye reveal">
+        {incluye.map((i) => (
+          <li><strong>{i.t}:</strong> {i.d}</li>
+        ))}
+      </ul>
 
       <form id="f" class="mform reveal" novalidate>
         <div class="mform-two">
@@ -24,21 +35,6 @@ const planes = [
           <label class="mfield"><span>Celular / WhatsApp</span><input type="tel" name="telefono" placeholder="33 0000 0000" required /></label>
           <label class="mfield"><span>Correo electrónico</span><input type="email" name="correo" placeholder="tu@correo.com" required /></label>
           <label class="mfield"><span>Instagram de la marca</span><input type="text" name="instagram" placeholder="@tumarca" required /></label>
-
-          <fieldset class="mfield mfield--wide opt-group">
-            <legend>¿Qué plan te interesa?</legend>
-            <div class="opt-cards">
-              {planes.map((p) => (
-                <label class="opt-card">
-                  <input type="radio" name="plan" value={p.v} />
-                  <span class="opt-card__check" aria-hidden="true"></span>
-                  <span class="opt-card__t">{p.v}</span>
-                  <span class="opt-card__sub">{p.sub}</span>
-                  <span class="opt-card__d">{p.d}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
         </div>
         <div><button type="submit" class="btn">Enviar solicitud</button></div>
       </form>
@@ -57,17 +53,33 @@ const planes = [
 
   <script>
     import '../scripts/calPopup.js';
-    import { initLeadForm, grupoObligatorio, lineas } from '../scripts/leadForm.js';
-    const planOk = grupoObligatorio(document.getElementById('f'), 'plan');
+    import { initLeadForm, lineas } from '../scripts/leadForm.js';
     initLeadForm({
-      validate: () => planOk(),
       build: (g) => ({
         interes: 'Punto Presencia',
         detalle: lineas([
-          ['Plan', g('plan')],
+          ['Plan', 'Visibilidad'],
           ['Instagram', g('instagram')],
         ]),
       }),
     });
   </script>
 </Base>
+
+<style>
+  .pp__precio { margin: 1.2rem 0 0; font-size: 1rem; font-weight: 600; color: var(--gold-ink); }
+  .pp__incluye {
+    list-style: none; padding: 0; margin: 0 0 clamp(2rem, 4vw, 3rem);
+    display: grid; grid-template-columns: 1fr 1fr; gap: .7rem 2.4rem; max-width: 860px;
+  }
+  .pp__incluye li {
+    position: relative; padding-left: 1.4rem;
+    font-size: .95rem; line-height: 1.45; color: var(--ink-70);
+  }
+  .pp__incluye li::before {
+    content: ''; position: absolute; left: 0; top: .55em;
+    width: 7px; height: 7px; border-radius: 50%; background: var(--gold);
+  }
+  .pp__incluye strong { font-weight: 600; color: var(--ink); }
+  @media (max-width: 700px) { .pp__incluye { grid-template-columns: 1fr; } }
+</style>
