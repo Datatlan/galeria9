@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Conexión (/conexion; antes /estrategias): seis estrategias en tarjetas con foto
+// (public/conexion/, del pack del cliente) y texto en el color de la pastilla.
+// El título visible sigue siendo "Tu talento". Cada una lleva a su página.
+const C = { arena: '#e4dfd8', oro: '#dad1bd', gris: '#d3d0ce' };
+const estrategias = [
+  { t: 'Crea tu experiencia', img: 'crea-tu-experiencia', d: 'espacios, activaciones y celebraciones hechas a tu medida. Ideal para productos, servicios, marca personal o eventos privados.', bg: C.arena, href: '/cotiza' },
+  { t: 'Punto Presencia', img: 'punto-presencia', icono: '#c3b495', d: 'tu marca encuentra visibilidad y un espacio físico en Galería 9 con una membresía por 6 meses', precio: '$2,999 MXN mensual', bg: C.oro, href: '/punto-presencia' },
+  { t: 'Pop Up', img: 'pop-up', d: 'activación de 1 semana · físico y digital · incluye brindis de cierre', precio: '$4,999 MXN', bg: C.gris, href: '/pop-up' },
+  { t: 'Tu talento es arte', img: 'tu-talento-es-arte', d: 'únete con los mismos de tu giro durante 1 semana · exhibe tu talento como arte', precio: '$150 MXN por día', bg: C.gris, href: '/tu-talento-es-arte' },
+  { t: 'Tester Day', img: 'tester-day', d: 'deja que prueben tu producto en comunidad', precio: '$499 espacio de exhibición', bg: C.arena, href: '/tester-day' },
+  { t: 'Invitado especial', img: 'invitado-especial', d: 'sé protagonista en Galería 9 por una semana', precio: '$3,500 MXN', bg: C.oro, href: '/invitado-especial' },
+];
+---
+<Base title="Tu talento — Galería 9" description="Crea tu experiencia, Punto Presencia, Pop Up, Tu talento es arte, Tester Day e Invitado especial: estrategias de visibilidad para tu marca en Galería 9.">
+  <section class="tal">
+    <div class="wrap">
+      <div class="tal__head">
+        <h1 class="tal__title reveal">Tu talento</h1>
+      </div>
+
+      <div class="tal__grid">
+        {estrategias.map((e, i) => (
+          <a class="card reveal" href={e.href} style={`--bg:${e.bg}; transition-delay:${(i % 3) * 70}ms`}>
+            <figure class={`card__img${e.icono ? ' card__img--icono' : ''}`} style={e.icono ? `background:${e.icono}` : undefined}><img src={`/conexion/${e.img}.jpg`} alt="" width="720" height="900" loading="lazy" /></figure>
+            <div class="card__body">
+              <h2 class="card__t">{e.t}</h2>
+              <p class="card__d">{e.d}</p>
+              {e.precio && <p class="card__p">{e.precio}</p>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+</Base>
+
+<style>
+  .tal { padding-block: clamp(3rem, 7vw, 5.5rem) clamp(3rem, 7vw, 5rem); }
+  .tal__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
+  .tal__title { font-size: clamp(2.6rem, 6.2vw, 5rem); font-weight: 100; line-height: 1; letter-spacing: -.02em; text-transform: uppercase; margin-top: clamp(1rem, 3vw, 2.4rem); }
+
+  .tal__grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2vw, 1.6rem);
+    margin: clamp(2.2rem, 5vw, 4rem) auto 0; max-width: 1000px;
+  }
+  .card {
+    display: flex; flex-direction: column; overflow: hidden;
+    border-radius: clamp(20px, 2.4vw, 28px); background: var(--bg); color: #000;
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+  }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 22px 38px -26px rgba(43,43,42,.55); }
+  .card__img { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; }
+  .card__img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s var(--ease); }
+  .card:hover .card__img img { transform: scale(1.04); }
+  /* Ícono sobre fondo liso (pin de Punto Presencia): se ve completo, sin recorte */
+  .card__img--icono img { object-fit: contain; }
+  .card__body { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1.3rem 1.4rem 1.5rem; }
+  .card__t { font-size: clamp(1.05rem, 1.6vw, 1.25rem); font-weight: 500; line-height: 1.1; letter-spacing: -.02em; text-transform: uppercase; }
+  .card__d { margin: .45rem 0 0; font-size: clamp(.84rem, 1.1vw, .93rem); line-height: 1.3; letter-spacing: -.01em; max-width: 32ch; }
+  .card__p { margin: auto 0 0; padding-top: .7rem; font-size: clamp(.84rem, 1.1vw, .95rem); font-weight: 600; letter-spacing: -.01em; }
+
+  @media (max-width: 900px) { .tal__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .tal__grid { grid-template-columns: 1fr; } }
+</style>
