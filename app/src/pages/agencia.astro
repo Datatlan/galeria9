@@ -1,30 +1,36 @@
 ---
-// 05 · Agencia (v3): servicio "Expresa tu talento + agencia". Encuesta de UNA
+// 05 · Agencia (v4): servicio "Expresa tu talento + agencia". Encuesta de UNA
 // opción entre los 4 servicios de "¿cómo ser parte de Galería 9?" (PDF del
 // cliente) + datos de contacto → Leads, Interes = Agencia, Prioridades = la
 // tarjeta elegida. Es la tercera puerta del home (Expansión).
+// Tarjetas con el estilo del sitio, alto según su contenido; la 3ª columna apila
+// Campaña Digital sobre Experiencia Galería 9.
 import Base from '../layouts/Base.astro';
 
+const C = { arena: '#e4dfd8', oro: '#dad1bd', gris: '#d3d0ce' };
 const servicios = [
   {
-    v: 'Visibilidad de tu Talento', k: 'Identidad visual',
+    v: 'Visibilidad de tu Talento', k: 'Identidad visual', bg: C.arena,
     items: ['exploración de memorias del inconsciente', 'definición de paletas de colores', 'selección de tipografías', 'renders y visualización de tu producto', 'propuesta de identidad visual para tu talento'],
-    frase: 'haz visible lo que te hace único.', pie: 'duración: 1 semana',
+    frase: 'haz visible lo que te hace único', pie: 'duración: 1 semana',
   },
   {
-    v: 'Estructura tu Expansión', k: 'Dirección, estrategia y estructura',
+    v: 'Estructura tu Expansión', k: 'Dirección, estrategia y estructura', bg: C.oro,
     items: ['4 de memorias del inconsciente', 'identificación de talentos, fortalezas y potencial', 'definición de visión y objetivos de expansión', 'identificación de oportunidades de crecimiento', 'diseño de estrategias y próximos pasos', 'mapa de expansión digital y físico', 'ruta de acción personalizada para tu negocio'],
     frase: 'un mapa para desarrollar tu negocio', pie: 'proyecto de 2 semanas',
   },
   {
-    v: 'Campaña Digital', k: 'Marketing dirigido', centro: true, checks: ['una visión', 'un análisis', 'visibilidad'], pie: '1 META',
+    v: 'Campaña Digital', k: 'Marketing dirigido', bg: C.gris,
+    items: ['una visión', 'un análisis', 'visibilidad'], pie: '1 meta',
   },
   {
-    v: 'Experiencia Galería 9', k: 'Creación de comunidad', centro: true, intro: 'un diseño a tu medida:',
+    v: 'Experiencia Galería 9', k: 'Creación de comunidad', bg: C.arena,
     items: ['celebración personal', 'colaboraciones', 'tu producto', 'tus clientes', 'tu empresa'],
     frase: 'tu talento es una experiencia',
   },
 ];
+// Columnas: 1 · 2 · (3 sobre 4)
+const columnas = [[servicios[0]], [servicios[1]], [servicios[2], servicios[3]]];
 ---
 <Base title="Expresa tu talento + agencia — Galería 9" description="Elige lo que buscas para tu marca: identidad visual, estructura de expansión, campaña digital o una experiencia en Galería 9.">
   <section class="section">
@@ -38,27 +44,30 @@ const servicios = [
         <fieldset class="opt-group ag__busca reveal">
           <legend class="ag__q">¿Qué estás buscando?</legend>
           <div class="ag__cards">
-            {servicios.map((s) => (
-              <label class={`svc ${s.centro ? 'svc--centro' : 'svc--lista'}`}>
-                <input type="radio" name="busca" value={s.v} />
-                <span class="svc__in">
-                  <span class="svc__check" aria-hidden="true"></span>
-                  {s.k && <span class="svc__k">{s.k}</span>}
-                  <span class="svc__t">{s.v}</span>
-                  {s.intro && <span class="svc__intro">{s.intro}</span>}
-                  {s.items && <ul class={`svc__list${s.items.length > 5 ? ' svc__list--largo' : ''}`}>{s.items.map((i) => <li>{i}</li>)}</ul>}
-                  {s.checks && (
-                    <ul class="svc__checks">
-                      {s.checks.map((i) => (
-                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="16" height="16" rx="2" /><path d="M6 13l4 4 11-12" /></svg>{i}</li>
+            {columnas.map((col, ci) => (
+              <div class={`ag__col${col.length > 1 ? ' ag__col--stack' : ''}`}>
+                {col.map((s) => (
+                  <label class="svc" style={`--bg:${s.bg}`}>
+                    <input type="radio" name="busca" value={s.v} />
+                    <span class="svc__top">
+                      <span class="svc__k">{s.k}</span>
+                      <span class="svc__check" aria-hidden="true"></span>
+                    </span>
+                    <span class="svc__t">{s.v}</span>
+                    <ul class="svc__list">
+                      {s.items.map((i) => (
+                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" /><path d="M7.8 12.3l2.8 2.8 5.6-6" /></svg>{i}</li>
                       ))}
                     </ul>
-                  )}
-                  {s.frase && <span class="svc__frase">{s.frase}</span>}
-                  {s.pie && <span class={`svc__tag${s.checks ? ' svc__tag--meta' : ''}`}>{s.pie}</span>}
-                  <img class="svc__logo" src="/logo.png" alt="" width="499" height="948" loading="lazy" />
-                </span>
-              </label>
+                    {(s.frase || s.pie) && (
+                      <span class="svc__pie">
+                        {s.frase && <span class="svc__frase">{s.frase}</span>}
+                        {s.pie && <span class="svc__tag">{s.pie}</span>}
+                      </span>
+                    )}
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </fieldset>
@@ -110,63 +119,47 @@ const servicios = [
   .ag__datos { max-width: 640px; }
   .ag__q { font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 300; letter-spacing: -.01em; color: var(--ink); margin-bottom: 1.4rem; }
 
-  /* Tarjetas = las páginas del PDF "¿cómo ser parte de Galería 9?" (819×1456).
-     La tarjeta es un contenedor: todo se mide en cqw (1cqw = 8.19 px del PDF), así
-     escala como una pieza de diseño y no se reacomoda como contenido web. Se elige UNA. */
-  .ag__cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(.9rem, 1.6vw, 1.3rem); }
+  /* Tarjetas con el estilo del sitio (colores de las pastillas, esquinas redondas).
+     Cada una mide lo que pide su contenido. Se elige UNA. */
+  .ag__cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.9rem, 1.6vw, 1.3rem); align-items: start; max-width: 1080px; }
+  .ag__col { display: grid; gap: clamp(.9rem, 1.6vw, 1.3rem); }
   .svc {
-    position: relative; display: block; container-type: inline-size; aspect-ratio: 819 / 1456;
-    background: #c4b496; color: #2b2b2a; border-radius: 12px; overflow: hidden; cursor: pointer;
-    font-family: "Helvetica Neue", "Inter", Helvetica, Arial, sans-serif;
+    position: relative; display: flex; flex-direction: column; gap: .9rem;
+    padding: 1.5rem 1.5rem 1.6rem; background: var(--bg); color: var(--ink);
+    border-radius: clamp(20px, 2.4vw, 28px); cursor: pointer;
     transition: transform .3s var(--ease), box-shadow .3s var(--ease);
   }
-  .svc:hover { transform: translateY(-4px); }
+  .svc:hover { transform: translateY(-4px); box-shadow: 0 20px 34px -26px rgba(43, 43, 42, .5); }
   .svc input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-  .svc:has(input:checked) { box-shadow: 0 0 0 3px var(--ink); transform: translateY(-4px); }
-  .svc:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 4px; }
+  .svc:has(input:checked) { box-shadow: 0 0 0 2px var(--ink); }
+  .svc:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 3px; }
   .opt-group.invalid .svc { box-shadow: 0 0 0 2px #b4523f; }
 
-  .svc__in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 24cqw 10cqw 0 11cqw; }
+  .svc__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  .svc__k { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); line-height: 1.4; }
   .svc__check {
-    position: absolute; top: 5cqw; left: 5cqw; width: max(18px, 5.5cqw); height: max(18px, 5.5cqw); border-radius: 50%;
-    border: 1.5px solid rgba(43, 43, 42, .5); background: rgba(255, 255, 255, .3);
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid var(--ink-45); background: rgba(255, 255, 255, .5);
     display: grid; place-items: center; transition: background .2s, border-color .2s;
   }
   .svc:has(input:checked) .svc__check { background: var(--ink); border-color: var(--ink); }
-  .svc:has(input:checked) .svc__check::after { content: ''; width: 36%; height: 20%; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(6%, -12%); }
+  .svc:has(input:checked) .svc__check::after { content: ''; width: 8px; height: 4px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
 
-  /* Etiqueta, título, viñetas */
-  .svc__k { align-self: flex-end; text-align: right; font-size: 3.3cqw; line-height: 1; letter-spacing: -.07em; text-transform: uppercase; }
-  .svc__t { margin: 10cqw 0 0 3cqw; font-size: 6.8cqw; font-weight: 700; line-height: 1; letter-spacing: -.06em; white-space: nowrap; }
-  .svc__list { list-style: none; margin: 8cqw 8cqw 0 9cqw; padding: 0; display: flex; flex-direction: column; gap: 4.5cqw; }
-  .svc__list li { position: relative; padding-left: 3.4cqw; font-size: 5.4cqw; font-weight: 300; line-height: .82; letter-spacing: -.06em; }
-  .svc__list li::before { content: ''; position: absolute; left: 0; top: .32em; width: 1.1cqw; height: 1.1cqw; border-radius: 50%; background: currentColor; }
+  .svc__t { font-size: clamp(1.3rem, 1.8vw, 1.55rem); font-weight: 500; line-height: 1.1; letter-spacing: -.02em; }
+  .svc__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+  .svc__list li { display: flex; align-items: flex-start; gap: .6rem; font-size: .93rem; line-height: 1.35; color: var(--ink-70); }
+  .svc__list svg { flex: none; width: 17px; height: 17px; margin-top: .12em; fill: none; stroke: var(--gold-ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* Pastillas: frase clara + duración oscura */
-  .svc__frase { align-self: flex-start; white-space: nowrap; margin-top: 6.3cqw; padding: .12em .42em .16em; background: #e5e0da; border-radius: 1.6cqw; font-size: 5.4cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
-  .svc__tag { align-self: flex-start; margin-top: 2cqw; padding: .14em .42em .18em; background: #2b2b2a; color: #fff; border-radius: 1.4cqw; font-size: 4.9cqw; font-weight: 300; line-height: 1; letter-spacing: -.06em; }
-  .svc__logo { position: absolute; right: 15cqw; bottom: 9cqw; width: 14cqw; height: auto; }
+  .svc__pie { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .3rem; }
+  .svc__frase { font-size: .8rem; background: rgba(255, 255, 255, .6); border-radius: 100px; padding: .45em .95em; }
+  .svc__tag { font-size: .8rem; background: var(--ink); color: var(--paper); border-radius: 100px; padding: .45em .95em; }
 
-  /* Lista larga (Estructura tu Expansión): letra un poco menor. Etiqueta, título y viñetas
-     quedan a la misma altura en todas; las centradas arrancan donde iría el título. */
-  .svc__in:has(.svc__list--largo) .svc__t { margin-left: 2.7cqw; }
-  .svc__list--largo { margin: 8cqw 6cqw 0 4.9cqw; gap: 3.9cqw; }
-  .svc__list--largo li { font-size: 4.9cqw; }
-  .svc__in:has(.svc__list--largo) .svc__frase { margin-left: 2.7cqw; }
-
-  /* Tarjetas centradas (Campaña Digital, Experiencia Galería 9) */
-  .svc--centro .svc__in { padding: 24cqw 10cqw 0; justify-content: flex-start; align-items: center; text-align: center; }
-  .svc--centro .svc__k { text-align: right; }
-  .svc--centro .svc__t { margin: 10cqw 0 0; }
-  .svc--centro .svc__frase { align-self: center; margin-top: 6cqw; }
-  .svc__intro { align-self: flex-start; margin: 4cqw 0 .6cqw 1.5cqw; font-size: 4.9cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
-  .svc--centro .svc__list { align-self: center; margin: 0 0 0 4cqw; gap: 2cqw; text-align: left; }
-  .svc--centro .svc__list li { font-size: 4.9cqw; font-weight: 400; }
-  .svc__checks { list-style: none; margin: 6cqw 0 0; padding: 0; display: flex; flex-direction: column; gap: 2.5cqw; text-align: left; }
-  .svc__checks li { display: flex; align-items: center; gap: 2.4cqw; font-size: 7.3cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
-  .svc__checks svg { flex: none; width: 8.6cqw; height: 8.6cqw; fill: none; stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-  .svc__tag--meta { align-self: center; margin-top: 8cqw; padding: .1em .45em .14em; border-radius: 2.2cqw; font-size: 8.4cqw; font-weight: 100; letter-spacing: -.05em; }
-
-  @media (max-width: 1100px) { .ag__cards { grid-template-columns: repeat(2, 1fr); max-width: 720px; } }
-  @media (max-width: 600px) { .ag__cards { grid-template-columns: 1fr; max-width: 360px; margin-inline: auto; } }
+  /* Tablet: 1 y 2 lado a lado, la columna apilada abajo con sus dos tarjetas en fila */
+  @media (max-width: 960px) {
+    .ag__cards { grid-template-columns: repeat(2, 1fr); }
+    .ag__col--stack { grid-column: 1 / -1; grid-template-columns: repeat(2, 1fr); align-items: start; }
+  }
+  @media (max-width: 600px) {
+    .ag__cards, .ag__col--stack { grid-template-columns: 1fr; }
+  }
 </style>
