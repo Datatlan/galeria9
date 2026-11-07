@@ -154,6 +154,16 @@ const columnas = [[servicios[0]], [servicios[1]], [servicios[2], servicios[3]]];
   .svc__frase { font-size: .8rem; background: rgba(255, 255, 255, .6); border-radius: 100px; padding: .45em .95em; }
   .svc__tag { font-size: .8rem; background: var(--ink); color: var(--paper); border-radius: 100px; padding: .45em .95em; }
 
+  /* Escritorio: las 3 columnas igual de altas (manda Estructura). Visibilidad se estira
+     y Campaña + Experiencia se reparten la altura; las pastillas bajan al fondo. */
+  @media (min-width: 961px) {
+    .ag__cards { align-items: stretch; }
+    .ag__col { display: flex; flex-direction: column; }
+    .ag__col .svc { flex: 1; }
+    .svc__pie { margin-top: auto; padding-top: .6rem; }
+    .svc__list { gap: .65rem; }
+  }
+
   /* Tablet: 1 y 2 lado a lado, la columna apilada abajo con sus dos tarjetas en fila */
   @media (max-width: 960px) {
     .ag__cards { grid-template-columns: repeat(2, 1fr); }
