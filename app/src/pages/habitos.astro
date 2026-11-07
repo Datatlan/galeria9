@@ -6,6 +6,14 @@ import Cabinas from '../components/Cabinas.astro';
 // Se leen como una suma: sincronía + mente + … + invierte en ti = Líder en Expansión.
 const nombres = ['sincronía', 'mente', 'respiración', 'sonido', 'cuerpo', 'movimiento', 'nutrición', 'belleza', 'invierte en ti'];
 const iconos = nombres.map((n, i) => ({ n, src: `/habitos/h${i + 1}.png` }));
+// Planes de hábitos (paquetes de los servicios residentes). Mientras no haya cobro en
+// línea (Stripe), el botón abre WhatsApp de Galería 9 con el plan en el mensaje.
+const WA = '523318030563';
+const planes = [
+  { n: 'Express', precio: '$3,999 MXN', citas: '3 citas · 60 min cada una', items: [['inconsciente', 1], ['mente', 2], ['respiración y sonido', 3], ['masaje relajante', 5]] },
+  { n: 'Reset', precio: '$2,999 MXN', citas: '2 citas · 60 min cada una', items: [['inconsciente', 1], ['mente', 2], ['respiración y sonido', 3]] },
+];
+const waPlan = (p) => `https://wa.me/${WA}?text=${encodeURIComponent(`Hola, me interesa el plan ${p.n} de Nuevos hábitos (${p.precio}).`)}`;
 // Alta a la comunidad: mismo endpoint del newsletter (Worker galeria9-mkt → Kit + Airtable)
 const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
 ---
@@ -35,6 +43,34 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
   </section>
 
   <Cabinas compact />
+
+  <section class="planes">
+    <div class="wrap">
+      <div class="planes__head reveal">
+        <span class="eyebrow">Planes de hábitos</span>
+        <p class="muted">Combina los servicios residentes en un plan a tu ritmo.</p>
+      </div>
+      <div class="planes__grid">
+        {planes.map((p, i) => (
+          <article class="plan reveal" style={`transition-delay:${i * 90}ms`}>
+            <header class="plan__head">
+              <h2 class="plan__n">{p.n}</h2>
+              <span class="plan__precio">{p.precio}</span>
+            </header>
+            <ul class="plan__items">
+              {p.items.map(([t, ic]) => (
+                <li><img src={`/habitos/h${ic}.png`} alt="" width="120" height="120" loading="lazy" /><span>{t}</span></li>
+              ))}
+            </ul>
+            <footer class="plan__pie">
+              <span class="plan__citas">{p.citas}</span>
+              <a class="btn plan__btn" href={waPlan(p)} target="_blank" rel="noopener">Lo quiero</a>
+            </footer>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 
   <section class="hab hab--form">
     <div class="wrap hab__inner">
@@ -120,6 +156,22 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
     .hab__total { grid-column: 1 / -1; justify-self: center; align-items: center; margin-top: .6rem; }
     .hab__op--eq { height: auto; }
   }
+
+  /* Planes de hábitos: tarjetas hueso con ícono por servicio, precio arriba a la derecha */
+  .planes { padding-block: 0 clamp(3rem, 6vw, 4.5rem); }
+  .planes__head { display: flex; align-items: baseline; gap: .6rem 1.6rem; flex-wrap: wrap; margin-bottom: 1.8rem; }
+  .planes__head p { margin: 0; font-size: .95rem; }
+  .planes__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1rem, 2vw, 1.6rem); max-width: 900px; align-items: stretch; }
+  .plan { display: flex; flex-direction: column; gap: 1.4rem; padding: clamp(1.6rem, 3vw, 2.4rem); background: #e3dfd9; border-radius: clamp(20px, 2.4vw, 28px); }
+  .plan__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  .plan__n { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: -.04em; line-height: 1; }
+  .plan__precio { font-size: clamp(1.05rem, 1.6vw, 1.3rem); font-weight: 300; letter-spacing: -.02em; white-space: nowrap; }
+  .plan__items { list-style: none; margin: 0; padding: 0; display: grid; gap: .8rem; }
+  .plan__items li { display: flex; align-items: center; gap: 1rem; font-size: clamp(1rem, 1.4vw, 1.15rem); letter-spacing: -.02em; }
+  .plan__items img { width: 48px; height: auto; flex: none; }
+  .plan__pie { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: auto; padding-top: .4rem; }
+  .plan__citas { font-size: .95rem; color: var(--ink-70); }
+  @media (max-width: 700px) { .planes__grid { grid-template-columns: 1fr; } }
 
   .hab__intro { margin-top: clamp(1.8rem, 3vw, 2.6rem); font-size: clamp(1.1rem, 1.7vw, 1.45rem); font-weight: 400; line-height: 1.55; color: var(--ink); }
   .hab__intro span { white-space: nowrap; }
