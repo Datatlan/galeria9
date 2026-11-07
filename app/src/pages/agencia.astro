@@ -39,17 +39,24 @@ const servicios = [
           <legend class="ag__q">¿Qué estás buscando?</legend>
           <div class="ag__cards">
             {servicios.map((s) => (
-              <label class="svc">
+              <label class={`svc ${s.k ? 'svc--lista' : 'svc--centro'}`}>
                 <input type="radio" name="busca" value={s.v} />
-                <span class="svc__check" aria-hidden="true"></span>
-                {s.k && <span class="svc__k">{s.k}</span>}
-                <span class={`svc__t${s.k ? '' : ' svc__t--solo'}`}>{s.v}</span>
-                {s.intro && <span class="svc__intro">{s.intro}</span>}
-                {s.items && <ul class="svc__list">{s.items.map((i) => <li>{i}</li>)}</ul>}
-                {s.checks && <ul class="svc__checks">{s.checks.map((i) => <li>{i}</li>)}</ul>}
-                <span class="svc__pie">
+                <span class="svc__in">
+                  <span class="svc__check" aria-hidden="true"></span>
+                  {s.k && <span class="svc__k">{s.k}</span>}
+                  <span class="svc__t">{s.v}</span>
+                  {s.intro && <span class="svc__intro">{s.intro}</span>}
+                  {s.items && <ul class={`svc__list${s.items.length > 5 ? ' svc__list--largo' : ''}`}>{s.items.map((i) => <li>{i}</li>)}</ul>}
+                  {s.checks && (
+                    <ul class="svc__checks">
+                      {s.checks.map((i) => (
+                        <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="16" height="16" rx="2" /><path d="M6 13l4 4 11-12" /></svg>{i}</li>
+                      ))}
+                    </ul>
+                  )}
                   {s.frase && <span class="svc__frase">{s.frase}</span>}
-                  {s.pie && <span class="svc__tag">{s.pie}</span>}
+                  {s.pie && <span class={`svc__tag${s.checks ? ' svc__tag--meta' : ''}`}>{s.pie}</span>}
+                  <img class="svc__logo" src="/logo.png" alt="" width="499" height="948" loading="lazy" />
                 </span>
               </label>
             ))}
@@ -103,41 +110,63 @@ const servicios = [
   .ag__datos { max-width: 640px; }
   .ag__q { font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 300; letter-spacing: -.01em; color: var(--ink); margin-bottom: 1.4rem; }
 
-  /* Tarjetas del PDF "¿cómo ser parte de Galería 9?": arena, título bold, viñetas finas,
-     frase en pastilla clara y duración en pastilla oscura. Se elige UNA. */
+  /* Tarjetas = las páginas del PDF "¿cómo ser parte de Galería 9?" (819×1456).
+     La tarjeta es un contenedor: todo se mide en cqw (1cqw = 8.19 px del PDF), así
+     escala como una pieza de diseño y no se reacomoda como contenido web. Se elige UNA. */
   .ag__cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(.9rem, 1.6vw, 1.3rem); }
   .svc {
-    position: relative; display: flex; flex-direction: column; gap: .7rem;
-    min-height: 460px; padding: 2.4rem 1.4rem 1.5rem;
-    background: var(--gold); color: var(--ink); border-radius: 18px; cursor: pointer;
+    position: relative; display: block; container-type: inline-size; aspect-ratio: 819 / 1456;
+    background: #c4b496; color: #2b2b2a; border-radius: 12px; overflow: hidden; cursor: pointer;
+    font-family: "Helvetica Neue", "Inter", Helvetica, Arial, sans-serif;
     transition: transform .3s var(--ease), box-shadow .3s var(--ease);
   }
   .svc:hover { transform: translateY(-4px); }
   .svc input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
   .svc:has(input:checked) { box-shadow: 0 0 0 3px var(--ink); transform: translateY(-4px); }
   .svc:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 4px; }
+  .opt-group.invalid .svc { box-shadow: 0 0 0 2px #b4523f; }
+
+  .svc__in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 28cqw 10cqw 0 11cqw; }
   .svc__check {
-    position: absolute; top: 1rem; left: 1rem; width: 22px; height: 22px; border-radius: 50%;
-    border: 1.5px solid rgba(43, 43, 42, .45); background: rgba(255, 255, 255, .35);
+    position: absolute; top: 5cqw; left: 5cqw; width: max(18px, 5.5cqw); height: max(18px, 5.5cqw); border-radius: 50%;
+    border: 1.5px solid rgba(43, 43, 42, .5); background: rgba(255, 255, 255, .3);
     display: grid; place-items: center; transition: background .2s, border-color .2s;
   }
   .svc:has(input:checked) .svc__check { background: var(--ink); border-color: var(--ink); }
-  .svc:has(input:checked) .svc__check::after { content: ''; width: 9px; height: 5px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
-  .opt-group.invalid .svc { box-shadow: 0 0 0 2px #b4523f; }
+  .svc:has(input:checked) .svc__check::after { content: ''; width: 36%; height: 20%; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(6%, -12%); }
 
-  .svc__k { align-self: flex-end; text-align: right; font-size: .66rem; letter-spacing: .02em; text-transform: uppercase; max-width: 75%; line-height: 1.25; }
-  .svc__t { font-size: clamp(1.25rem, 1.7vw, 1.5rem); font-weight: 700; line-height: 1.05; letter-spacing: -.035em; margin-top: .4rem; }
-  .svc__t--solo { margin-top: 1.6rem; }
-  .svc__intro { font-size: .92rem; font-weight: 300; letter-spacing: -.02em; }
-  .svc__list { margin: 0; padding-left: 1.05rem; display: grid; gap: .35rem; }
-  .svc__list li { font-size: .88rem; line-height: 1.2; font-weight: 300; letter-spacing: -.02em; }
-  .svc__checks { list-style: none; margin: .2rem 0 0; padding: 0; display: grid; gap: .6rem; }
-  .svc__checks li { display: flex; align-items: center; gap: .6rem; font-size: 1.15rem; font-weight: 300; letter-spacing: -.03em; }
-  .svc__checks li::before { content: '✓'; flex: none; display: grid; place-items: center; width: 20px; height: 20px; border: 2px solid #fff; border-radius: 4px; color: #fff; font-size: .8rem; font-weight: 700; }
-  .svc__pie { margin-top: auto; display: flex; flex-direction: column; align-items: flex-start; gap: .45rem; padding-top: 1rem; }
-  .svc__frase { background: #e6e1da; border-radius: 8px; padding: .3rem .6rem; font-size: .86rem; letter-spacing: -.02em; line-height: 1.2; }
-  .svc__tag { background: var(--ink); color: #fff; border-radius: 8px; padding: .3rem .6rem; font-size: .86rem; letter-spacing: -.02em; }
+  /* Etiqueta, título, viñetas */
+  .svc__k { align-self: flex-end; text-align: right; font-size: 3.3cqw; line-height: 1; letter-spacing: -.07em; text-transform: uppercase; }
+  .svc__t { margin: 10cqw 0 0 3cqw; font-size: 6.8cqw; font-weight: 700; line-height: 1; letter-spacing: -.06em; white-space: nowrap; }
+  .svc__list { list-style: none; margin: 8.5cqw 8cqw 0 9cqw; padding: 0; display: flex; flex-direction: column; gap: 4.5cqw; }
+  .svc__list li { position: relative; padding-left: 3.4cqw; font-size: 5.4cqw; font-weight: 300; line-height: .82; letter-spacing: -.06em; }
+  .svc__list li::before { content: ''; position: absolute; left: 0; top: .32em; width: 1.1cqw; height: 1.1cqw; border-radius: 50%; background: currentColor; }
 
-  @media (max-width: 1100px) { .ag__cards { grid-template-columns: repeat(2, 1fr); } .svc { min-height: 400px; } }
-  @media (max-width: 600px) { .ag__cards { grid-template-columns: 1fr; } .svc { min-height: 0; } }
+  /* Pastillas: frase clara + duración oscura */
+  .svc__frase { align-self: flex-start; white-space: nowrap; margin-top: 6.3cqw; padding: .12em .42em .16em; background: #e5e0da; border-radius: 1.6cqw; font-size: 5.4cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
+  .svc__tag { align-self: flex-start; margin-top: 2cqw; padding: .14em .42em .18em; background: #2b2b2a; color: #fff; border-radius: 1.4cqw; font-size: 4.9cqw; font-weight: 300; line-height: 1; letter-spacing: -.06em; }
+  .svc__logo { position: absolute; right: 15cqw; bottom: 11cqw; width: 14cqw; height: auto; }
+
+  /* Lista larga (Estructura tu Expansión): arranca más arriba y letra un poco menor */
+  .svc__in:has(.svc__list--largo) { padding-top: 22cqw; }
+  .svc__in:has(.svc__list--largo) .svc__t { margin-left: 2.7cqw; }
+  .svc__list--largo { margin: 6.7cqw 6cqw 0 4.9cqw; gap: 3.9cqw; }
+  .svc__list--largo li { font-size: 4.9cqw; }
+  .svc__in:has(.svc__list--largo) .svc__frase { margin-left: 2.7cqw; }
+
+  /* Tarjetas centradas (Campaña Digital, Experiencia Galería 9) */
+  .svc--centro .svc__in { padding: 18cqw 10cqw 0; justify-content: center; align-items: center; text-align: center; }
+  .svc--centro .svc__t { margin: 0; }
+  .svc--centro .svc__logo { position: static; margin-top: 9cqw; }
+  .svc--centro .svc__frase { align-self: center; margin-top: 6cqw; }
+  .svc__intro { align-self: flex-start; margin: 4cqw 0 .6cqw 1.5cqw; font-size: 4.9cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
+  .svc--centro .svc__list { align-self: center; margin: 0 0 0 4cqw; gap: 2cqw; text-align: left; }
+  .svc--centro .svc__list li { font-size: 4.9cqw; font-weight: 400; }
+  .svc__checks { list-style: none; margin: 6cqw 0 0; padding: 0; display: flex; flex-direction: column; gap: 2.5cqw; text-align: left; }
+  .svc__checks li { display: flex; align-items: center; gap: 2.4cqw; font-size: 7.3cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
+  .svc__checks svg { flex: none; width: 8.6cqw; height: 8.6cqw; fill: none; stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .svc__tag--meta { align-self: center; margin-top: 8cqw; padding: .1em .45em .14em; border-radius: 2.2cqw; font-size: 8.4cqw; font-weight: 100; letter-spacing: -.05em; }
+
+  @media (max-width: 1100px) { .ag__cards { grid-template-columns: repeat(2, 1fr); max-width: 720px; } }
+  @media (max-width: 600px) { .ag__cards { grid-template-columns: 1fr; max-width: 360px; margin-inline: auto; } }
 </style>

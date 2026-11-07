@@ -7,7 +7,7 @@ import Base from '../layouts/Base.astro';
 const C = { arena: '#e4dfd8', oro: '#dad1bd', gris: '#d3d0ce' };
 const estrategias = [
   { t: 'Crea tu experiencia', img: 'crea-tu-experiencia', d: 'espacios, activaciones y celebraciones hechas a tu medida. Ideal para productos, servicios, marca personal o eventos privados.', bg: C.arena, href: '/cotiza' },
-  { t: 'Punto Presencia', img: 'punto-presencia', icono: '#c3b495', d: 'tu marca encuentra visibilidad y un espacio físico en Galería 9 con una membresía por 6 meses', precio: '$2,999 MXN mensual', bg: C.oro, href: '/punto-presencia' },
+  { t: 'Punto Presencia', img: 'punto-presencia.svg', d: 'tu marca encuentra visibilidad y un espacio físico en Galería 9 con una membresía por 6 meses', precio: '$2,999 MXN mensual', bg: C.oro, href: '/punto-presencia' },
   { t: 'Pop Up', img: 'pop-up', d: 'activación de 1 semana · físico y digital · incluye brindis de cierre', precio: '$4,999 MXN', bg: C.gris, href: '/pop-up' },
   { t: 'Tu talento es arte', img: 'tu-talento-es-arte', d: 'únete con los mismos de tu giro durante 1 semana · exhibe tu talento como arte', precio: '$150 MXN por día', bg: C.gris, href: '/tu-talento-es-arte' },
   { t: 'Tester Day', img: 'tester-day', d: 'deja que prueben tu producto en comunidad', precio: '$499 espacio de exhibición', bg: C.arena, href: '/tester-day' },
@@ -24,7 +24,7 @@ const estrategias = [
       <div class="tal__grid">
         {estrategias.map((e, i) => (
           <a class="card reveal" href={e.href} style={`--bg:${e.bg}; transition-delay:${(i % 3) * 70}ms`}>
-            <figure class={`card__img${e.icono ? ' card__img--icono' : ''}`} style={e.icono ? `background:${e.icono}` : undefined}><img src={`/conexion/${e.img}.jpg`} alt="" width="720" height="900" loading="lazy" /></figure>
+            <figure class="card__img"><img src={`/conexion/${e.img.includes('.') ? e.img : `${e.img}.jpg`}`} alt="" width="720" height="900" loading="lazy" /></figure>
             <div class="card__body">
               <h2 class="card__t">{e.t}</h2>
               <p class="card__d">{e.d}</p>
@@ -55,10 +55,7 @@ const estrategias = [
   .card:hover { transform: translateY(-5px); box-shadow: 0 22px 38px -26px rgba(43,43,42,.55); }
   .card__img { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; }
   .card__img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s var(--ease); }
-  .card:hover .card__img img { transform: scale(1.04); }
-  /* Ícono sobre fondo liso (pin de Punto Presencia): se ve completo, sin recorte */
-  .card__img--icono img { object-fit: contain; }
-  .card__body { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1.3rem 1.4rem 1.5rem; }
+  .card:hover .card__img img { transform: scale(1.04); }  .card__body { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1.3rem 1.4rem 1.5rem; }
   .card__t { font-size: clamp(1.05rem, 1.6vw, 1.25rem); font-weight: 500; line-height: 1.1; letter-spacing: -.02em; text-transform: uppercase; }
   .card__d { margin: .45rem 0 0; font-size: clamp(.84rem, 1.1vw, .93rem); line-height: 1.3; letter-spacing: -.01em; max-width: 32ch; }
   .card__p { margin: auto 0 0; padding-top: .7rem; font-size: clamp(.84rem, 1.1vw, .95rem); font-weight: 600; letter-spacing: -.01em; }
