@@ -56,7 +56,7 @@ const ONB = {
 };
 
 // Registros de eventos públicos ("Me interesa") — la página /boleto lee uno.
-const INTERESADOS = 'tblC7MvgHXjObbtjM'; // Evento_Interesados
+const INTERESADOS = 'tblC7MvgHXjObbtjM'; // Evento_Asistentes (antes Evento_Interesados)
 
 // Leads del Agente de marca (form /agente): el form crea el registro por la
 // escritura genérica y luego sube logo / archivo de información aquí.
@@ -127,7 +127,7 @@ export default {
         return passthrough(air);
       }
 
-      // Boleto de UN registro de Evento_Interesados (página /boleto?c=<recId>).
+      // Boleto de UN registro de Evento_Asistentes (página /boleto?c=<recId>).
       // El record ID es el código del boleto (aleatorio, no adivinable). Solo
       // devuelve datos si el registro está Confirmado o Asistió; nunca correo
       // ni teléfono.
