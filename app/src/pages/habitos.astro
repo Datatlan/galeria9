@@ -2,19 +2,33 @@
 import Base from '../layouts/Base.astro';
 import Cabinas from '../components/Cabinas.astro';
 
-// Íconos de "website design.pdf" (renderizados del PDF: public/habitos/h1–h9.png)
-const iconos = Array.from({ length: 9 }, (_, i) => `/habitos/h${i + 1}.png`);
+// Íconos de "website design.pdf" (renderizados del PDF: public/habitos/h1–h9.png).
+// Se leen como una suma: sincronía + mente + … + invierte en ti = Líder en Expansión.
+const nombres = ['sincronía', 'mente', 'respiración', 'sonido', 'cuerpo', 'movimiento', 'nutrición', 'belleza', 'invierte en ti'];
+const iconos = nombres.map((n, i) => ({ n, src: `/habitos/h${i + 1}.png` }));
 // Alta a la comunidad: mismo endpoint del newsletter (Worker galeria9-mkt → Kit + Airtable)
 const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
 ---
-<Base title="Nuevos hábitos — Galería 9" description="Consciencia y transformación en Galería 9: únete a la comunidad y conoce a las marcas residentes de bienestar.">
+<Base title="Nuevos hábitos — Galería 9" description="Consciencia y transformación en Galería 9: únete a la comunidad y conoce los servicios residentes de bienestar.">
   <section class="hab">
     <div class="wrap hab__inner">
       <div class="hab__main">
         <h1 class="hab__title reveal">Nuevos hábitos</h1>
 
-        <div class="hab__icons reveal" aria-hidden="true">
-          {iconos.map((src) => <img src={src} alt="" width="120" height="120" />)}
+        <div class="hab__icons reveal" role="img" aria-label={`${nombres.join(' + ')} = Líder en Expansión`}>
+          {iconos.map((ic, i) => (
+            <>
+              {i > 0 && <span class="hab__op" style={`--i:${i}`} aria-hidden="true">+</span>}
+              <span class="hab__term" style={`--i:${i}`} aria-hidden="true">
+                <img src={ic.src} alt="" width="120" height="120" />
+                <span class="hab__name">{ic.n}</span>
+              </span>
+            </>
+          ))}
+          <span class="hab__total" aria-hidden="true">
+            <span class="hab__op hab__op--eq" style="--i:9">=</span>
+            <span class="hab__res">Líder en Expansión</span>
+          </span>
         </div>
       </div>
     </div>
@@ -75,10 +89,36 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
   .hab__inner { display: grid; grid-template-columns: 1fr; }
   .hab__title { font-size: clamp(2.6rem, 6.2vw, 5rem); font-weight: 100; line-height: 1; letter-spacing: -.02em; text-transform: uppercase; }
 
-  /* Íconos: al pasar el mouse cada uno sube; recorrer la fila hace "olita" */
-  .hab__icons { display: flex; flex-wrap: wrap; gap: clamp(.7rem, 1.6vw, 1.3rem); margin-top: clamp(1.4rem, 2.6vw, 2.2rem); }
+  /* Fórmula: ícono + nombre, sumados, = Líder en Expansión. Al entrar en pantalla los
+     términos aparecen uno por uno y el resultado al final. Hover: cada ícono sube ("olita"). */
+  .hab__icons { display: flex; flex-wrap: wrap; align-items: flex-start; gap: clamp(.9rem, 1.5vw, 1.2rem) clamp(.3rem, .5vw, .4rem); margin-top: clamp(1.4rem, 2.6vw, 2.2rem); }
+  .hab__term { display: flex; flex-direction: column; align-items: center; gap: .45rem; width: clamp(58px, 4.8vw, 64px); }
+  .hab__total { display: flex; align-items: flex-start; white-space: nowrap; }
   .hab__icons img { width: clamp(46px, 4.6vw, 60px); height: auto; transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); }
-  .hab__icons img:hover { transform: translateY(-10px); transition-duration: .2s; }
+  .hab__term:hover img { transform: translateY(-10px); transition-duration: .2s; }
+  .hab__name { font-size: .72rem; letter-spacing: .02em; line-height: 1.15; text-align: center; color: var(--ink-70); }
+  .hab__op { align-self: flex-start; height: clamp(46px, 4.6vw, 60px); display: grid; place-items: center; font-size: 1.1rem; font-weight: 200; color: var(--gold-ink); }
+  .hab__op--eq { margin-inline: .3rem; font-size: 1.5rem; }
+  .hab__res {
+    align-self: flex-start; display: inline-flex; align-items: center; height: clamp(46px, 4.6vw, 60px);
+    padding: 0 1.1em; border-radius: 100px; background: var(--ink); color: var(--paper);
+    font-size: clamp(.9rem, 1.15vw, 1rem); font-weight: 400; letter-spacing: .01em; white-space: nowrap;
+  }
+  .hab__term, .hab__op, .hab__res { opacity: 0; transform: translateY(8px); }
+  .hab__icons.in .hab__term, .hab__icons.in .hab__op { animation: hab-sum .5s var(--ease) forwards; animation-delay: calc(var(--i) * 110ms); }
+  .hab__icons.in .hab__res { animation: hab-res .7s var(--ease) forwards; animation-delay: calc(10 * 110ms + 150ms); }
+  @keyframes hab-sum { to { opacity: 1; transform: none; } }
+  @keyframes hab-res { 0% { opacity: 0; transform: scale(.85); } 70% { opacity: 1; transform: scale(1.04); } 100% { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .hab__term, .hab__op, .hab__res { opacity: 1; transform: none; animation: none !important; } }
+
+  /* Celular: 3 × 3 sin signos de +; el resultado en su propia línea */
+  @media (max-width: 640px) {
+    .hab__icons { display: grid; grid-template-columns: repeat(3, 1fr); justify-items: center; gap: 1.2rem .6rem; }
+    .hab__term { width: auto; }
+    .hab__op { display: none; }
+    .hab__total { grid-column: 1 / -1; justify-self: center; align-items: center; margin-top: .4rem; }
+    .hab__op--eq { display: grid; height: auto; }
+  }
 
   .hab__intro { margin-top: clamp(1.8rem, 3vw, 2.6rem); font-size: clamp(1.1rem, 1.7vw, 1.45rem); font-weight: 400; line-height: 1.55; color: var(--ink); }
   .hab__intro span { white-space: nowrap; }
