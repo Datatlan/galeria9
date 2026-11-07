@@ -126,7 +126,7 @@ const servicios = [
   .svc:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 4px; }
   .opt-group.invalid .svc { box-shadow: 0 0 0 2px #b4523f; }
 
-  .svc__in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 28cqw 10cqw 0 11cqw; }
+  .svc__in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 24cqw 10cqw 0 11cqw; }
   .svc__check {
     position: absolute; top: 5cqw; left: 5cqw; width: max(18px, 5.5cqw); height: max(18px, 5.5cqw); border-radius: 50%;
     border: 1.5px solid rgba(43, 43, 42, .5); background: rgba(255, 255, 255, .3);
@@ -138,26 +138,25 @@ const servicios = [
   /* Etiqueta, título, viñetas */
   .svc__k { align-self: flex-end; text-align: right; font-size: 3.3cqw; line-height: 1; letter-spacing: -.07em; text-transform: uppercase; }
   .svc__t { margin: 10cqw 0 0 3cqw; font-size: 6.8cqw; font-weight: 700; line-height: 1; letter-spacing: -.06em; white-space: nowrap; }
-  .svc__list { list-style: none; margin: 8.5cqw 8cqw 0 9cqw; padding: 0; display: flex; flex-direction: column; gap: 4.5cqw; }
+  .svc__list { list-style: none; margin: 8cqw 8cqw 0 9cqw; padding: 0; display: flex; flex-direction: column; gap: 4.5cqw; }
   .svc__list li { position: relative; padding-left: 3.4cqw; font-size: 5.4cqw; font-weight: 300; line-height: .82; letter-spacing: -.06em; }
   .svc__list li::before { content: ''; position: absolute; left: 0; top: .32em; width: 1.1cqw; height: 1.1cqw; border-radius: 50%; background: currentColor; }
 
   /* Pastillas: frase clara + duración oscura */
   .svc__frase { align-self: flex-start; white-space: nowrap; margin-top: 6.3cqw; padding: .12em .42em .16em; background: #e5e0da; border-radius: 1.6cqw; font-size: 5.4cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
   .svc__tag { align-self: flex-start; margin-top: 2cqw; padding: .14em .42em .18em; background: #2b2b2a; color: #fff; border-radius: 1.4cqw; font-size: 4.9cqw; font-weight: 300; line-height: 1; letter-spacing: -.06em; }
-  .svc__logo { position: absolute; right: 15cqw; bottom: 11cqw; width: 14cqw; height: auto; }
+  .svc__logo { position: absolute; right: 15cqw; bottom: 9cqw; width: 14cqw; height: auto; }
 
-  /* Lista larga (Estructura tu Expansión): arranca más arriba y letra un poco menor */
-  .svc__in:has(.svc__list--largo) { padding-top: 22cqw; }
+  /* Lista larga (Estructura tu Expansión): letra un poco menor. Etiqueta, título y viñetas
+     quedan a la misma altura en todas; las centradas arrancan donde iría el título. */
   .svc__in:has(.svc__list--largo) .svc__t { margin-left: 2.7cqw; }
-  .svc__list--largo { margin: 6.7cqw 6cqw 0 4.9cqw; gap: 3.9cqw; }
+  .svc__list--largo { margin: 8cqw 6cqw 0 4.9cqw; gap: 3.9cqw; }
   .svc__list--largo li { font-size: 4.9cqw; }
   .svc__in:has(.svc__list--largo) .svc__frase { margin-left: 2.7cqw; }
 
   /* Tarjetas centradas (Campaña Digital, Experiencia Galería 9) */
-  .svc--centro .svc__in { padding: 18cqw 10cqw 0; justify-content: center; align-items: center; text-align: center; }
+  .svc--centro .svc__in { padding: 37.3cqw 10cqw 0; justify-content: flex-start; align-items: center; text-align: center; }
   .svc--centro .svc__t { margin: 0; }
-  .svc--centro .svc__logo { position: static; margin-top: 9cqw; }
   .svc--centro .svc__frase { align-self: center; margin-top: 6cqw; }
   .svc__intro { align-self: flex-start; margin: 4cqw 0 .6cqw 1.5cqw; font-size: 4.9cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
   .svc--centro .svc__list { align-self: center; margin: 0 0 0 4cqw; gap: 2cqw; text-align: left; }
