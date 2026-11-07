@@ -10,8 +10,8 @@ const iconos = nombres.map((n, i) => ({ n, src: `/habitos/h${i + 1}.png` }));
 // línea (Stripe), el botón abre WhatsApp de Galería 9 con el plan en el mensaje.
 const WA = '523318030563';
 const planes = [
-  { n: 'Express', precio: '$3,999 MXN', citas: '3 citas · 60 min cada una', items: [['inconsciente', 1], ['mente', 2], ['respiración y sonido', 3], ['masaje relajante', 5]] },
-  { n: 'Reset', precio: '$2,999 MXN', citas: '2 citas · 60 min cada una', items: [['inconsciente', 1], ['mente', 2], ['respiración y sonido', 3]] },
+  { n: 'Express', precio: '$2,999 MXN', citas: '2 citas · 60 min cada una', items: [['inconsciente', 1], ['mente', 2], ['respiración y sonido', 3]] },
+  { n: 'Reset', precio: '$3,999 MXN', citas: '3 citas · 60 min cada una', items: [['inconsciente', 1], ['mente', 2], ['respiración y sonido', 3], ['masaje relajante', 5]] },
 ];
 const waPlan = (p) => `https://wa.me/${WA}?text=${encodeURIComponent(`Hola, me interesa el plan ${p.n} de Nuevos hábitos (${p.precio}).`)}`;
 // Alta a la comunidad: mismo endpoint del newsletter (Worker galeria9-mkt → Kit + Airtable)
