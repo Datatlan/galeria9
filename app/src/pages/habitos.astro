@@ -13,6 +13,8 @@ const planes = [
   { n: 'Express', precio: '$2,999 MXN', citas: '2 citas · 60 min cada una', items: [['inconsciente', 1], ['mente', 2], ['respiración y sonido', 3]] },
   { n: 'Reset', precio: '$3,999 MXN', citas: '3 citas · 60 min cada una', items: [['inconsciente', 1], ['mente', 2], ['respiración y sonido', 3], ['masaje relajante', 5]] },
 ];
+// Opciones del form de comunidad (mismos nombres que las tarjetas de Servicios residentes)
+const servicios = ['Investigación del Inconsciente', 'Entrena tu Palabra', 'Sesiones de Respiración', 'Experiencia de Sonido', 'El arte de Volver a ti', 'Diseña tu Mirada'];
 const waPlan = (p) => `https://wa.me/${WA}?text=${encodeURIComponent(`Hola, me interesa el plan ${p.n} de Nuevos hábitos (${p.precio}).`)}`;
 // Alta a la comunidad: mismo endpoint del newsletter (Worker galeria9-mkt → Kit + Airtable)
 const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
@@ -81,6 +83,17 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
           <label class="hab__field"><span>Nombre completo</span><input name="nombre" autocomplete="name" required maxlength="60" /></label>
           <label class="hab__field"><span>Celular</span><input name="celular" type="tel" autocomplete="tel" inputmode="tel" required maxlength="20" /></label>
           <label class="hab__field"><span>Correo</span><input name="email" type="email" autocomplete="email" required maxlength="200" /></label>
+          <label class="hab__field"><span>¿Qué te interesa? <i>(opcional)</i></span>
+            <select name="interes">
+              <option value="">Solo quiero ser parte de la comunidad</option>
+              <optgroup label="Servicios residentes">
+                {servicios.map((s) => <option value={`Servicio: ${s}`}>{s}</option>)}
+              </optgroup>
+              <optgroup label="Planes de hábitos">
+                {planes.map((p) => <option value={`Plan ${p.n} (${p.precio})`}>Plan {p.n} · {p.precio}</option>)}
+              </optgroup>
+            </select>
+          </label>
           <input class="hab__hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
           <button class="hab__btn" type="submit">Digo <em>sí</em> a mi expansión</button>
           <p class="hab__msg" id="habMsg" role="status" aria-live="polite"></p>
@@ -91,6 +104,7 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
 </Base>
 
 <script>
+  import { T, crear } from '../config.js';
   const form = document.getElementById('habForm') as HTMLFormElement | null;
   const msg = document.getElementById('habMsg')!;
   form?.addEventListener('submit', async (e) => {
@@ -103,14 +117,24 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
     if (celular.replace(/\D/g, '').length < 10) { msg.textContent = 'Revisa tu celular (10 dígitos).'; msg.classList.add('is-err'); return; }
     const btn = form.querySelector('button')!;
     btn.disabled = true; msg.textContent = 'Enviando…';
+    // Siempre entra a la comunidad (newsletter). Si eligió un servicio o plan, además se
+    // crea un Lead (Interes = Nuevos hábitos) para que Galería 9 le dé seguimiento.
+    const interes = (d.interes || '').trim();
+    if (d.website) return; // honeypot: bot
+    const alta = fetch(form.dataset.url!, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, celular, email, origen: 'nuevos-habitos', website: d.website }),
+    }).then((r) => { if (!r.ok) throw new Error(String(r.status)); });
+    const lead = interes
+      ? crear(T.leads, { Nombre: nombre, WhatsApp: celular, Correo: email, Interes: 'Nuevos hábitos', Detalle: `Le interesa: ${interes}`, Estatus: 'Nuevo' })
+      : Promise.resolve();
     try {
-      const res = await fetch(form.dataset.url!, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, celular, email, origen: 'nuevos-habitos', website: d.website }),
-      });
-      if (!res.ok) throw new Error(String(res.status));
+      const [a, l] = await Promise.allSettled([alta, lead]);
+      if (a.status === 'rejected' && (!interes || l.status === 'rejected')) throw new Error('envío');
       form.classList.add('is-done');
-      msg.textContent = '¡Listo! Ya eres parte de la comunidad. Revisa tu correo.';
+      msg.textContent = interes
+        ? '¡Listo! Ya eres parte de la comunidad y te escribimos por WhatsApp sobre lo que te interesa.'
+        : '¡Listo! Ya eres parte de la comunidad. Revisa tu correo.';
     } catch {
       btn.disabled = false;
       msg.textContent = 'No se pudo enviar. Intenta de nuevo en un momento.'; msg.classList.add('is-err');
@@ -183,7 +207,15 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
     font: inherit; font-size: 1rem; color: var(--ink); background: var(--white);
     padding: .9em 1em; border: 1px solid var(--ink-12); border-radius: var(--radius);
   }
-  .hab__field input:focus { outline: none; border-color: var(--ink); }
+  .hab__field input:focus, .hab__field select:focus { outline: none; border-color: var(--ink); }
+  .hab__field span i { font-style: normal; color: var(--ink-45); }
+  .hab__field select {
+    font: inherit; font-size: 1rem; color: var(--ink); background: var(--white);
+    padding: .9em 2.6em .9em 1em; border: 1px solid var(--ink-12); border-radius: var(--radius); cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%232b2b2a' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
   .hab__hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
   .hab__btn {
     justify-self: start; margin-top: .6rem; font: inherit; font-size: clamp(1.05rem, 1.5vw, 1.3rem); font-weight: 400;
