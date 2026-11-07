@@ -17,10 +17,10 @@ const servicios = [
     frase: 'un mapa para desarrollar tu negocio', pie: 'proyecto de 2 semanas',
   },
   {
-    v: 'Campaña Digital', checks: ['una visión', 'un análisis', 'visibilidad'], pie: '1 META',
+    v: 'Campaña Digital', k: 'Marketing dirigido', centro: true, checks: ['una visión', 'un análisis', 'visibilidad'], pie: '1 META',
   },
   {
-    v: 'Experiencia Galería 9', intro: 'un diseño a tu medida:',
+    v: 'Experiencia Galería 9', k: 'Creación de comunidad', centro: true, intro: 'un diseño a tu medida:',
     items: ['celebración personal', 'colaboraciones', 'tu producto', 'tus clientes', 'tu empresa'],
     frase: 'tu talento es una experiencia',
   },
@@ -39,7 +39,7 @@ const servicios = [
           <legend class="ag__q">¿Qué estás buscando?</legend>
           <div class="ag__cards">
             {servicios.map((s) => (
-              <label class={`svc ${s.k ? 'svc--lista' : 'svc--centro'}`}>
+              <label class={`svc ${s.centro ? 'svc--centro' : 'svc--lista'}`}>
                 <input type="radio" name="busca" value={s.v} />
                 <span class="svc__in">
                   <span class="svc__check" aria-hidden="true"></span>
@@ -155,8 +155,9 @@ const servicios = [
   .svc__in:has(.svc__list--largo) .svc__frase { margin-left: 2.7cqw; }
 
   /* Tarjetas centradas (Campaña Digital, Experiencia Galería 9) */
-  .svc--centro .svc__in { padding: 37.3cqw 10cqw 0; justify-content: flex-start; align-items: center; text-align: center; }
-  .svc--centro .svc__t { margin: 0; }
+  .svc--centro .svc__in { padding: 24cqw 10cqw 0; justify-content: flex-start; align-items: center; text-align: center; }
+  .svc--centro .svc__k { text-align: right; }
+  .svc--centro .svc__t { margin: 10cqw 0 0; }
   .svc--centro .svc__frase { align-self: center; margin-top: 6cqw; }
   .svc__intro { align-self: flex-start; margin: 4cqw 0 .6cqw 1.5cqw; font-size: 4.9cqw; font-weight: 300; line-height: 1; letter-spacing: -.07em; }
   .svc--centro .svc__list { align-self: center; margin: 0 0 0 4cqw; gap: 2cqw; text-align: left; }
