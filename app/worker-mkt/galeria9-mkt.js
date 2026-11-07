@@ -63,7 +63,7 @@ const FIELDS = {
   Origen: 'origen',
 };
 const NUEVA_DIAS = 21; // una orden aprobada "es nueva" (recibe bienvenida) si se creó hace ≤ 21 días
-const ORIGINS = ['https://galeria9.pages.dev', 'https://staging.galeria9.pages.dev', 'http://localhost:4321', 'http://localhost:8797'];
+const ORIGINS = ['https://galeria9.pages.dev', 'https://staging.galeria9.pages.dev', 'http://localhost:4321', 'http://localhost:4329', 'http://localhost:8797'];
 const TZ = 'America/Mexico_City';
 const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
 
@@ -118,24 +118,32 @@ async function subscribe(request, env) {
   const celular = String(b.celular || '').replace(/[^\d+ ()-]/g, '').trim().slice(0, 20) || null; // form "Nuevos hábitos"
   const origen = String(b.origen || 'sitio').slice(0, 60);
 
-  const kit = kitClient(env);
-  const sub = await kit.upsert(email, nombre, { origen });
-  const yaTenia = (await kit.subscriberTags(sub.id)).some((t) => t.name === TAGS.newsletter);
-  if (!yaTenia) {
-    const tag = await kit.tag(TAGS.newsletter);
-    await kit.addTag(tag.id, email);
-    const seq = await kit.findSequence(SEQ.newsletter);
-    if (seq) await kit.addToSequence(seq.id, email);
+  // Kit es "mejor esfuerzo": si falla (sin llave, caído, límite), el alta igual queda en
+  // Airtable con En_Kit = false y el cron de sync la sube a Kit después (con su bienvenida).
+  let enKit = false, yaTenia = false;
+  try {
+    const kit = kitClient(env);
+    const sub = await kit.upsert(email, nombre, { origen });
+    yaTenia = (await kit.subscriberTags(sub.id)).some((t) => t.name === TAGS.newsletter);
+    if (!yaTenia) {
+      const tag = await kit.tag(TAGS.newsletter);
+      await kit.addTag(tag.id, email);
+      const seq = await kit.findSequence(SEQ.newsletter);
+      if (seq) await kit.addToSequence(seq.id, email);
+    }
+    enKit = true;
+  } catch (err) {
+    console.log('subscribe: Kit no disponible, queda para el sync →', String(err.message || err));
   }
-  // La lista vive en Airtable: registra el alta si ese correo no estaba
+  // La lista vive en Airtable (fuente de verdad): registra el alta si ese correo no estaba
   const existe = await airList(env, T.newsletter, { filterByFormula: `LOWER({Correo})='${email.replace(/'/g, "\\'")}'`, fields: ['Correo', 'Celular'] });
   if (!existe.length) {
     const prueba = !origin.startsWith('https://galeria9.pages.dev');
-    await airCreate(env, T.newsletter, { Correo: email, Nombre: nombre || undefined, Celular: celular || undefined, Estatus: 'Activo', Origen: 'Sitio', En_Kit: true, Notas: `Alta desde ${origen}`, ...(prueba ? { test_record: true } : {}) });
+    await airCreate(env, T.newsletter, { Correo: email, Nombre: nombre || undefined, Celular: celular || undefined, Estatus: 'Activo', Origen: 'Sitio', En_Kit: enKit, Notas: `Alta desde ${origen}`, ...(prueba ? { test_record: true } : {}) });
   } else if (celular && !existe[0].fields.Celular) {
     await airUpdate(env, T.newsletter, [{ id: existe[0].id, fields: { Celular: celular } }]); // ya estaba suscrito: completa su celular
   }
-  return json({ ok: true, nuevo: !yaTenia }, 200, cors);
+  return json({ ok: true, nuevo: !yaTenia, enKit }, 200, cors);
 }
 
 // ── Sincronización (cron y /sync): Punto Presencia + newsletter ─────────────
