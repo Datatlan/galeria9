@@ -18,7 +18,7 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
         <div class="hab__icons reveal" role="img" aria-label={`${nombres.join(' + ')} = Líder en Expansión`}>
           {iconos.map((ic, i) => (
             <>
-              {i > 0 && <span class="hab__op" style={`--i:${i}`} aria-hidden="true">+</span>}
+              {i > 0 && <span class={`hab__op${i % 3 === 0 ? ' hab__op--fila' : ''}`} style={`--i:${i}`} aria-hidden="true">+</span>}
               <span class="hab__term" style={`--i:${i}`} aria-hidden="true">
                 <img src={ic.src} alt="" width="120" height="120" />
                 <span class="hab__name">{ic.n}</span>
@@ -111,13 +111,14 @@ const SUBSCRIBE_URL = 'https://galeria9-mkt.datatlan.workers.dev/subscribe';
   @keyframes hab-res { 0% { opacity: 0; transform: scale(.85); } 70% { opacity: 1; transform: scale(1.04); } 100% { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .hab__term, .hab__op, .hab__res { opacity: 1; transform: none; animation: none !important; } }
 
-  /* Celular: 3 × 3 sin signos de +; el resultado en su propia línea */
+  /* Celular: 3 renglones de 3 con "+" entre íconos; entre renglones un "+" centrado
+     (los que van antes del 4º y del 7º término) y al final "= Líder en Expansión". */
   @media (max-width: 640px) {
-    .hab__icons { display: grid; grid-template-columns: repeat(3, 1fr); justify-items: center; gap: 1.2rem .6rem; }
+    .hab__icons { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; justify-items: center; gap: .5rem .4rem; }
     .hab__term { width: auto; }
-    .hab__op { display: none; }
-    .hab__total { grid-column: 1 / -1; justify-self: center; align-items: center; margin-top: .4rem; }
-    .hab__op--eq { display: grid; height: auto; }
+    .hab__op--fila { grid-column: 1 / -1; height: auto; line-height: 1; }
+    .hab__total { grid-column: 1 / -1; justify-self: center; align-items: center; margin-top: .6rem; }
+    .hab__op--eq { height: auto; }
   }
 
   .hab__intro { margin-top: clamp(1.8rem, 3vw, 2.6rem); font-size: clamp(1.1rem, 1.7vw, 1.45rem); font-weight: 400; line-height: 1.55; color: var(--ink); }
