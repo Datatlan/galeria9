@@ -32,7 +32,7 @@
  *   (aud=prueba manda solo a la etiqueta "Prueba interna")
  *
  * SECRETOS: KIT_API_KEY · AIRTABLE_TOKEN · ADMIN_KEY
- * VARIABLES: MODE = "live" · INCLUDE_TEST = "1" (demos) · SITE_URL (default galeria9.pages.dev)
+ * VARIABLES: MODE = "live" · INCLUDE_TEST = "1" (demos) · SITE_URL (default galeria9.com.mx)
  * CRON TRIGGERS: "*\/15 * * * *" (sincronización) y "0 16 * * *" (10:00 CDMX: Tester Day y agenda)
  *
  * DEPLOY: Cloudflare → Workers & Pages → galeria9-mkt → Edit code → pegar → Deploy.
@@ -63,7 +63,8 @@ const FIELDS = {
   Origen: 'origen',
 };
 const NUEVA_DIAS = 21; // una orden aprobada "es nueva" (recibe bienvenida) si se creó hace ≤ 21 días
-const ORIGINS = ['https://galeria9.pages.dev', 'https://staging.galeria9.pages.dev', 'http://localhost:4321', 'http://localhost:4329', 'http://localhost:8797'];
+const PROD = ['https://galeria9.com.mx', 'https://www.galeria9.com.mx', 'https://galeria9.pages.dev']; // altas reales (sin test_record)
+const ORIGINS = [...PROD, 'https://staging.galeria9.pages.dev', 'http://localhost:4321', 'http://localhost:4329', 'http://localhost:8797'];
 const TZ = 'America/Mexico_City';
 const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
 
@@ -138,7 +139,7 @@ async function subscribe(request, env) {
   // La lista vive en Airtable (fuente de verdad): registra el alta si ese correo no estaba
   const existe = await airList(env, T.newsletter, { filterByFormula: `LOWER({Correo})='${email.replace(/'/g, "\\'")}'`, fields: ['Correo', 'Celular'] });
   if (!existe.length) {
-    const prueba = !origin.startsWith('https://galeria9.pages.dev');
+    const prueba = !PROD.includes(origin);
     await airCreate(env, T.newsletter, { Correo: email, Nombre: nombre || undefined, Celular: celular || undefined, Estatus: 'Activo', Origen: 'Sitio', En_Kit: enKit, Notas: `Alta desde ${origen}`, ...(prueba ? { test_record: true } : {}) });
   } else if (celular && !existe[0].fields.Celular) {
     await airUpdate(env, T.newsletter, [{ id: existe[0].id, fields: { Celular: celular } }]); // ya estaba suscrito: completa su celular
@@ -625,7 +626,7 @@ async function porIds(env, table, ids, fields) {
 }
 
 // ── utilidades ──────────────────────────────────────────────────────────────
-const siteUrl = (env) => (env.SITE_URL || 'https://galeria9.pages.dev').replace(/\/$/, '');
+const siteUrl = (env) => (env.SITE_URL || 'https://galeria9.com.mx').replace(/\/$/, '');
 const workerUrl = (env) => (env.WORKER_URL || 'https://galeria9-mkt.datatlan.workers.dev').replace(/\/$/, '');
 const ymdMX = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 const hoyMX = () => ymdMX(new Date());
